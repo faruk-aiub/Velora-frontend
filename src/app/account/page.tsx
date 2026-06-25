@@ -12,6 +12,7 @@ import { wishlistService } from '@/services/wishlist.service';
 import { Loader2, LogOut, Package, MapPin, User as UserIcon, Trash2, Plus, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ProductCard } from '@/components/shop/ProductCard';
 
 type TabType = 'orders' | 'addresses' | 'profile' | 'wishlist';
@@ -161,10 +162,19 @@ export default function AccountPage() {
                             </span>
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-4 pt-2">
+                        <div className="flex flex-col gap-4 pt-4 mt-4 border-t border-[#E8E1DE]">
                           {order.items.map((item) => (
-                            <div key={item.id} className="text-sm text-[#7A7371]">
-                              <span className="font-medium text-[#3A3331]">{item.quantity}x</span> Item
+                            <div key={item.id} className="flex gap-4 items-center">
+                              <div className="relative w-16 h-20 bg-[#F5F2F0] shrink-0 overflow-hidden">
+                                <Image src={item.image_url || '/placeholder.jpg'} alt={item.product_name} fill className="object-cover" />
+                              </div>
+                              <div className="flex-1">
+                                <p className="text-sm text-[#3A3331] font-medium line-clamp-1">{item.product_name || `Item ${item.sku}`}</p>
+                                <p className="text-[10px] text-[#7A7371] uppercase tracking-widest mt-1">Qty: {item.quantity}</p>
+                              </div>
+                              <div className="text-sm font-medium text-[#3A3331]">
+                                ${(Number(item.price) * item.quantity).toFixed(2)}
+                              </div>
                             </div>
                           ))}
                         </div>

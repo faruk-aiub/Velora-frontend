@@ -14,6 +14,7 @@ export function ProductGrid() {
   const minPrice = searchParams.get('min_price');
   const maxPrice = searchParams.get('max_price');
   const sort = searchParams.get('sort') || '';
+  const searchQuery = searchParams.get('q');
 
   // Determine the active category filter (if subcategory is selected, it overrides main category)
   const activeCategoryId = subcategoryFilter || categoryFilter || undefined;
@@ -23,6 +24,7 @@ export function ProductGrid() {
     min_price: minPrice ? Number(minPrice) : undefined,
     max_price: maxPrice ? Number(maxPrice) : undefined,
     sort: sort || undefined,
+    search: searchQuery || undefined,
     limit: 20
   });
 
@@ -45,7 +47,9 @@ export function ProductGrid() {
   return (
     <div className="flex-1 w-full">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-serif text-4xl text-[#3A3331] font-light">All Products</h1>
+        <h1 className="font-serif text-4xl text-[#3A3331] font-light">
+          {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
+        </h1>
         
         <div className="flex items-center gap-2">
           <span className="text-[10px] uppercase tracking-widest text-[#7A7371] font-bold">Sort By</span>

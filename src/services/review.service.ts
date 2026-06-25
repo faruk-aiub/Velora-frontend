@@ -1,5 +1,5 @@
 import apiClient from '@/lib/axios';
-import type { ApiResponse, PaginatedResponse } from '@/types/auth.types';
+import type { PaginatedResponse } from '@/types/auth.types';
 
 export interface Review {
   id: string;
@@ -12,22 +12,20 @@ export interface Review {
   };
 }
 
-export interface CreateReviewPayload {
-  product_id: string;
-  rating: number;
-  comment?: string;
-}
-
 export const reviewService = {
-  getProductReviews: async (productId: string, page = 1, limit = 10) => {
+  getProductReviews: async (productId: string, page = 1, limit = 5) => {
     const res = await apiClient.get<PaginatedResponse<Review>>(`/products/${productId}/reviews`, {
       params: { page, limit },
     });
     return res.data;
   },
 
-  createReview: async (payload: CreateReviewPayload) => {
-    const res = await apiClient.post<ApiResponse<Review>>('/reviews', payload);
+  createReview: async (productId: string, rating: number, comment?: string) => {
+    const res = await apiClient.post('/reviews', {
+      product_id: productId,
+      rating,
+      comment,
+    });
     return res.data;
   },
 };

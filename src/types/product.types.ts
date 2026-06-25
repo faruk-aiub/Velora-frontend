@@ -86,8 +86,11 @@ export interface Order {
 export interface OrderItem {
   id: string;
   quantity: number;
-  unit_price: number;
+  price: number;
   variant_id: string;
+  product_name: string;
+  sku: string;
+  image_url: string | null;
 }
 
 // =============================

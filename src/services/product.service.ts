@@ -21,6 +21,10 @@ export const productService = {
       apiParams.category_id = apiParams.category;
       delete apiParams.category;
     }
+    if (apiParams.search) {
+      apiParams.q = apiParams.search;
+      delete apiParams.search;
+    }
     
     const res = await apiClient.get<PaginatedResponse<Product>>('/products', {
       params: apiParams,
