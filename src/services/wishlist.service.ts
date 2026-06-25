@@ -10,8 +10,9 @@ export interface WishlistItem {
     id: string;
     title: string;
     slug: string;
-    images: { url: string }[];
-    variants: { price: number; compare_price: number | null }[];
+    brand?: { name: string };
+    images: { url: string; alt_text?: string | null }[];
+    variants: { id: string; price: number; compare_price: number | null }[];
   };
 }
 

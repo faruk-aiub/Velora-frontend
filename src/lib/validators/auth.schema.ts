@@ -17,9 +17,7 @@ export const registerSchema = z
     email: z.string().email({ message: 'Please enter a valid email address' }),
     password: z
       .string()
-      .min(6, { message: 'Password must be at least 6 characters' })
-      .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-      .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
+      .min(6, { message: 'Password must be at least 6 characters' }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmPassword, {
@@ -35,9 +33,7 @@ export const resetPasswordSchema = z
   .object({
     new_password: z
       .string()
-      .min(6, { message: 'Password must be at least 6 characters' })
-      .regex(/[A-Z]/, { message: 'Password must contain at least one uppercase letter' })
-      .regex(/[0-9]/, { message: 'Password must contain at least one number' }),
+      .min(6, { message: 'Password must be at least 6 characters' }),
     confirmPassword: z.string(),
   })
   .refine((data) => data.new_password === data.confirmPassword, {

@@ -13,6 +13,11 @@ export interface UserAddress {
 
 export type CreateAddressPayload = Omit<UserAddress, 'id'>;
 
+export interface ChangePasswordPayload {
+  currentPassword: string;
+  newPassword: string;
+}
+
 export const userService = {
   getProfile: async () => {
     const res = await apiClient.get<ApiResponse<User>>('/users/me');

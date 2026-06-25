@@ -50,11 +50,12 @@ export default function ProductDetailsPage() {
   const [newReview, setNewReview] = useState({ rating: 5, comment: '' });
 
   const submitReviewMutation = useMutation({
-    mutationFn: reviewService.createReview,
+    mutationFn: ({ product_id, rating, comment }: { product_id: string; rating: number; comment: string }) =>
+      reviewService.createReview(product_id, rating, comment),
     onSuccess: (res) => {
       queryClient.invalidateQueries({ queryKey: ['reviews', productId] });
       setNewReview({ rating: 5, comment: '' });
-      toast.success(res.message);
+      toast.success(res.message || 'Review submitted!');
     },
     onError: () => toast.error('Failed to submit review'),
   });
