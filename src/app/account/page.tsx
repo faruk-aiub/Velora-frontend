@@ -50,6 +50,32 @@ const NAV_ITEMS = [
   { id: 'security',      label: 'Security',         icon: Shield },
 ];
 
+const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
+  <div className="mb-8 pb-6 border-b border-[#E8E1DE]">
+    <h2 className="font-serif text-2xl text-[#3A3331] font-light">{title}</h2>
+    {subtitle && <p className="text-sm text-[#7A7371] mt-1">{subtitle}</p>}
+  </div>
+);
+
+const EmptyState = ({ icon: Icon, message, action }: { icon: any; message: string; action?: React.ReactNode }) => (
+  <div className="flex flex-col items-center justify-center py-16 text-center">
+    <div className="w-16 h-16 bg-[#F5F2F0] rounded-full flex items-center justify-center mb-4">
+      <Icon size={28} className="text-[#B5AFAD]" />
+    </div>
+    <p className="text-[#7A7371] mb-4">{message}</p>
+    {action}
+  </div>
+);
+
+const OrderStatusBadge = ({ status }: { status: string }) => {
+  const cfg = STATUS_CONFIG[status] || STATUS_CONFIG['PENDING'];
+  return (
+    <span className={cn('inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase rounded', cfg.bg, cfg.color)}>
+      {cfg.icon}{status}
+    </span>
+  );
+};
+
 export default function AccountPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
@@ -159,6 +185,7 @@ export default function AccountPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['addresses'] });
       toast.success('Address updated!');
+      setShowAddressForm(false);
       setEditingAddress(null);
       resetAddressForm();
     },
@@ -216,33 +243,7 @@ export default function AccountPage() {
   const pendingOrders = orders.filter(o => o.status === 'PENDING' || o.status === 'PROCESSING');
 
   // ─── Shared Components ────────────────────────────────────────────────────
-  const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
-    <div className="mb-8 pb-6 border-b border-[#E8E1DE]">
-      <h2 className="font-serif text-2xl text-[#3A3331] font-light">{title}</h2>
-      {subtitle && <p className="text-sm text-[#7A7371] mt-1">{subtitle}</p>}
-    </div>
-  );
-
-  const EmptyState = ({ icon: Icon, message, action }: { icon: any; message: string; action?: React.ReactNode }) => (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-16 h-16 bg-[#F5F2F0] rounded-full flex items-center justify-center mb-4">
-        <Icon size={28} className="text-[#B5AFAD]" />
-      </div>
-      <p className="text-[#7A7371] mb-4">{message}</p>
-      {action}
-    </div>
-  );
-
-  const OrderStatusBadge = ({ status }: { status: string }) => {
-    const cfg = STATUS_CONFIG[status] || STATUS_CONFIG['PENDING'];
-    return (
-      <span className={cn('inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-bold tracking-widest uppercase rounded', cfg.bg, cfg.color)}>
-        {cfg.icon}{status}
-      </span>
-    );
-  };
-
-  const AddressForm = () => (
+  const renderAddressForm = () => (
     <div className="border border-[#BC8477] p-6 bg-[#FAF8F5] mt-4">
       <h3 className="text-sm font-bold tracking-widest uppercase text-[#3A3331] mb-4">
         {editingAddress ? 'Edit Address' : 'Add New Address'}
@@ -846,7 +847,7 @@ export default function AccountPage() {
       >
         <Plus size={14} /> Add New Address
       </button>
-      {showAddressForm && <AddressForm />}
+      {showAddressForm && renderAddressForm()}
 
       {loadingAddresses ? (
         <div className="flex justify-center py-10"><Loader2 className="animate-spin text-[#BC8477]" /></div>

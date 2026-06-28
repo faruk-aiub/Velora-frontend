@@ -45,7 +45,7 @@ export const authService = {
   },
 
   getMe: async () => {
-    const res = await apiClient.get<ApiResponse<User>>('/auth/me');
+    const res = await apiClient.get<ApiResponse<User>>('/users/me');
     return res.data;
   },
 

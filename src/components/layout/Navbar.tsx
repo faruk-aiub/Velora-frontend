@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart.store";
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useAuthStore } from "@/store/auth.store";
 
 interface NavbarProps {
   variant?: 'transparent' | 'solid';
@@ -16,6 +17,7 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
   
   const openCart = useCartStore((state) => state.openCart);
   const getTotalItems = useCartStore((state) => state.getTotalItems);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const router = useRouter();
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
@@ -79,10 +81,10 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
         >
           <Search size={20} />
         </button>
-        <Link href="/login" className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-[#3A3331]")}>
+        <Link href={mounted && isAuthenticated ? "/account" : "/login"} className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-[#3A3331]")}>
           <User size={20} />
         </Link>
-        <Link href="/account" className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-[#3A3331]")}>
+        <Link href={mounted && isAuthenticated ? "/account?tab=wishlist" : "/login"} className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-[#3A3331]")}>
           <Heart size={20} />
         </Link>
         <button onClick={openCart} className={cn("hover:text-[#BC8477] transition-colors relative", isTransparent ? "text-white" : "text-[#3A3331]")}>
