@@ -1365,6 +1365,17 @@ export default function AccountPage() {
                 </button>
               ))}
 
+              {/* Admin Panel Link */}
+              {user.role === 'ADMIN' && (
+                <Link
+                  href="/admin/dashboard"
+                  className="flex items-center gap-3 w-full text-left px-4 py-3 text-[#3A3331] hover:bg-white border-l-2 border-transparent"
+                >
+                  <Shield size={16} className="text-[#BC8477]" />
+                  <span className="text-xs font-bold tracking-wider uppercase">Go to Admin Panel</span>
+                </Link>
+              )}
+
               {/* Logout */}
               <button
                 onClick={handleLogout}

@@ -11,7 +11,16 @@ import type {
 } from '@/types/auth.types';
 
 export const authService = {
+  firebaseLogin: async (idToken: string) => {
+    const res = await apiClient.post<ApiResponse<AuthTokens & { user: User }>>(
+      '/auth/firebase/login',
+      { idToken }
+    );
+    return res.data;
+  },
+
   login: async (payload: LoginPayload) => {
+    // Deprecated: Handled by firebaseLogin now, keeping for type reference if needed
     const res = await apiClient.post<ApiResponse<AuthTokens & { user: User }>>(
       '/auth/login',
       payload

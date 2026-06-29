@@ -2,7 +2,6 @@
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { Loader2, Mail, ArrowLeft, ArrowRight } from 'lucide-react';
@@ -10,7 +9,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from '@/lib/validators/auth.schema';
-import { authService } from '@/services/auth.service';
+import { auth } from '@/lib/firebase';
+import { sendPasswordResetEmail } from 'firebase/auth';
 
 const item = (delay: number) => ({
   initial: { opacity: 0, y: 16 },
@@ -20,19 +20,31 @@ const item = (delay: number) => ({
 export default function ForgotPasswordPage() {
   const [emailSent, setEmailSent] = useState(false);
   const [sentTo, setSentTo] = useState('');
+  const [isPending, setIsPending] = useState(false);
 
   const { register, handleSubmit, formState: { errors } } = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const { mutate: sendReset, isPending } = useMutation({
-    mutationFn: authService.forgotPassword,
-    onSuccess: (_, variables) => { setSentTo(variables.email); setEmailSent(true); },
-    onError: (error: unknown) => {
-      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to send reset email.';
-      toast.error(msg);
-    },
-  });
+  const onSubmit = async (data: ForgotPasswordFormValues) => {
+    setIsPending(true);
+    try {
+      await sendPasswordResetEmail(auth, data.email);
+      setSentTo(data.email);
+      setEmailSent(true);
+    } catch (error: any) {
+      setIsPending(false);
+      let errorMessage = 'Failed to send reset email.';
+      if (error.code === 'auth/user-not-found') {
+        errorMessage = 'No user found with this email.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      }
+      toast.error(errorMessage);
+    } finally {
+      setIsPending(false);
+    }
+  };
 
   if (emailSent) {
     return (
@@ -45,7 +57,7 @@ export default function ForgotPasswordPage() {
         <div className="space-y-3">
           <h1 className="font-serif text-3xl font-light" style={{ color: 'hsl(20 15% 12%)' }}>Check your inbox</h1>
           <p className="text-sm leading-relaxed" style={{ color: 'hsl(20 10% 48%)' }}>
-            We sent a reset link to <span className="font-medium" style={{ color: 'hsl(20 15% 20%)' }}>{sentTo}</span>. It expires in 1 hour.
+            We sent a reset link to <span className="font-medium" style={{ color: 'hsl(20 15% 20%)' }}>{sentTo}</span>.
           </p>
         </div>
         <div className="space-y-3 pt-2">
@@ -80,7 +92,7 @@ export default function ForgotPasswordPage() {
         <div className="flex-1 h-px" style={{ background: 'hsl(35 20% 88%)' }} />
       </motion.div>
 
-      <form onSubmit={handleSubmit((v) => sendReset(v))} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <motion.div {...item(0.1)} className="space-y-2">
           <label htmlFor="email" className="block text-xs font-medium tracking-widest uppercase" style={{ color: 'hsl(20 15% 35%)' }}>
             Email Address

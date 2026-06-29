@@ -1,0 +1,1 @@
+export default function Page() { return <div className="p-6"><h1 className="text-2xl font-bold mb-4 capitalize">notifications Management</h1><p className="text-zinc-500">This module is currently under construction.</p></div>; }

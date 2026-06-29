@@ -5,12 +5,20 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { registerSchema, type RegisterFormValues } from '@/lib/validators/auth.schema';
+import { auth } from '@/lib/firebase';
+import { 
+  createUserWithEmailAndPassword, 
+  updateProfile, 
+  sendEmailVerification,
+  signInWithPopup, 
+  GoogleAuthProvider 
+} from 'firebase/auth';
 import { authService } from '@/services/auth.service';
+import { useAuthStore } from '@/store/auth.store';
 
 const item = (delay: number) => ({
   initial: { opacity: 0, y: 15 },
@@ -22,6 +30,8 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
     register,
@@ -31,30 +41,59 @@ export default function RegisterPage() {
     resolver: zodResolver(registerSchema),
   });
 
-  const { mutate: registerUser, isPending } = useMutation({
-    mutationFn: authService.register,
-    onSuccess: () => {
-      toast.success('Registration successful! Please check your email to verify your account.');
-      router.push('/login');
-    },
-    onError: (error: unknown) => {
-      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to register.';
-      toast.error(msg);
-    },
-  });
-
-  const onSubmit = (data: RegisterFormValues) => {
+  const onSubmit = async (data: RegisterFormValues) => {
     if (!acceptedTerms) {
       toast.error('You must accept the Terms of Service and Privacy Policy.');
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { confirmPassword, ...registerData } = data;
-    registerUser(registerData);
+
+    setIsPending(true);
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+      const user = userCredential.user;
+
+      await updateProfile(user, {
+        displayName: `${data.first_name} ${data.last_name}`
+      });
+
+      await sendEmailVerification(user);
+
+      toast.success('Registration successful! Please check your email to verify your account before logging in.');
+      router.push('/login');
+    } catch (error: any) {
+      setIsPending(false);
+      let errorMessage = 'Failed to register.';
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'Email is already in use.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password is too weak.';
+      }
+      toast.error(errorMessage);
+    }
   };
 
-  const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/api/v1/auth/google';
+  const handleGoogleLogin = async () => {
+    setIsPending(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const idToken = await userCredential.user.getIdToken();
+      
+      // Since Google auto-verifies email, we can log them in immediately
+      const data = await authService.firebaseLogin(idToken);
+      const user = data.data.user;
+      setAuth(user, data.data.accessToken);
+      
+      toast.success('Welcome to Velora!');
+      router.push('/account');
+    } catch (error: any) {
+      setIsPending(false);
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast.error('Google sign in failed.');
+      }
+    }
   };
 
   return (
@@ -214,7 +253,8 @@ export default function RegisterPage() {
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full h-12 bg-white border border-[#E8E1DE] text-[#3A3331] text-[11px] font-bold tracking-wider hover:bg-[#F5F2F0] transition-all duration-300 flex items-center justify-center gap-3"
+          disabled={isPending}
+          className="w-full h-12 bg-white border border-[#E8E1DE] text-[#3A3331] text-[11px] font-bold tracking-wider hover:bg-[#F5F2F0] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

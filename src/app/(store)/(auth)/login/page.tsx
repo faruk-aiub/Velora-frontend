@@ -12,7 +12,8 @@ import { motion } from 'framer-motion';
 import { loginSchema, type LoginFormValues } from '@/lib/validators/auth.schema';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
-import Image from 'next/image';
+import { auth } from '@/lib/firebase';
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 
 const item = (delay: number) => ({
   initial: { opacity: 0, y: 15 },
@@ -22,6 +23,7 @@ const item = (delay: number) => ({
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [isFirebaseLoading, setIsFirebaseLoading] = useState(false);
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
@@ -32,22 +34,66 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const { mutate: login, isPending } = useMutation({
-    mutationFn: authService.login,
+  const { mutate: loginBackend, isPending: isBackendPending } = useMutation({
+    mutationFn: authService.firebaseLogin,
     onSuccess: (data) => {
-      setAuth(data.data.user, data.data.accessToken);
-      toast.success('Welcome back to Velora!');
-      router.push('/');
+      const user = data.data.user;
+      setAuth(user, data.data.accessToken);
+      
+      if (user.role === 'ADMIN') {
+        toast.success('Welcome to Admin Panel');
+        router.push('/admin/dashboard');
+      } else {
+        toast.success('Welcome back to Velora!');
+        router.push('/account');
+      }
     },
     onError: (error: unknown) => {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Login failed. Please try again.';
       toast.error(msg);
+      auth.signOut(); // Ensure Firebase state is cleared if backend fails
     },
   });
 
-  const handleGoogleLogin = () => {
-    window.location.href = 'http://localhost:3000/api/v1/auth/google';
+  const onSubmit = async (data: LoginFormValues) => {
+    setIsFirebaseLoading(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      
+      if (!userCredential.user.emailVerified) {
+        toast.error('Please verify your email address before logging in.');
+        await auth.signOut();
+        setIsFirebaseLoading(false);
+        return;
+      }
+
+      const idToken = await userCredential.user.getIdToken();
+      loginBackend(idToken);
+    } catch (error: any) {
+      setIsFirebaseLoading(false);
+      let errorMessage = 'Failed to sign in.';
+      if (error.code === 'auth/invalid-credential') errorMessage = 'Invalid email or password.';
+      else if (error.code === 'auth/user-disabled') errorMessage = 'This account has been disabled.';
+      toast.error(errorMessage);
+    }
   };
+
+  const handleGoogleLogin = async () => {
+    setIsFirebaseLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      const userCredential = await signInWithPopup(auth, provider);
+      const idToken = await userCredential.user.getIdToken();
+      loginBackend(idToken);
+    } catch (error: any) {
+      setIsFirebaseLoading(false);
+      if (error.code !== 'auth/popup-closed-by-user') {
+        toast.error('Google sign in failed.');
+      }
+    }
+  };
+
+  const isPending = isFirebaseLoading || isBackendPending;
 
   return (
     <div className="w-full max-w-[420px] mx-auto">
@@ -70,7 +116,7 @@ export default function LoginPage() {
         </div>
       </motion.div>
 
-      <form onSubmit={handleSubmit((v) => login(v))} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <motion.div {...item(0.1)} className="space-y-1 relative group">
           <label htmlFor="email" className="block text-[10px] font-bold tracking-[0.1em] text-[#7A7371] uppercase">
             Email Address
@@ -162,7 +208,8 @@ export default function LoginPage() {
         <button
           onClick={handleGoogleLogin}
           type="button"
-          className="w-full h-12 bg-white border border-[#E8E1DE] text-[#3A3331] text-[11px] font-bold tracking-wider hover:bg-[#F5F2F0] transition-all duration-300 flex items-center justify-center gap-3"
+          disabled={isPending}
+          className="w-full h-12 bg-white border border-[#E8E1DE] text-[#3A3331] text-[11px] font-bold tracking-wider hover:bg-[#F5F2F0] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

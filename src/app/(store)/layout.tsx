@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Cormorant_Garamond } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 import { Providers } from "@/components/providers";
 import { CartDrawer } from "@/components/cart/CartDrawer";
 
