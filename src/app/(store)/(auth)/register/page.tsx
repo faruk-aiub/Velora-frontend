@@ -91,7 +91,8 @@ export default function RegisterPage() {
     } catch (error: any) {
       setIsPending(false);
       if (error.code !== 'auth/popup-closed-by-user') {
-        toast.error('Google sign in failed.');
+        const msg = error.response?.data?.message || error.message || 'Google sign in failed.';
+        toast.error(msg);
       }
     }
   };
