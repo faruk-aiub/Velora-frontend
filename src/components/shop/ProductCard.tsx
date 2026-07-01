@@ -1,3 +1,5 @@
+"use client";
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { ShoppingBag, Heart } from 'lucide-react';
@@ -16,13 +18,18 @@ export interface ProductCardProps {
   brand?: { name: string };
   variants: { id: string; price: number; compare_price?: number | null }[];
   images: { url: string; alt_text?: string | null }[];
+  base_price?: number;
 }
 
-export function ProductCard({ id, title, slug, brand, variants, images }: ProductCardProps) {
-  const price = variants?.[0]?.price || 0;
+export function ProductCard({ id, title, slug, brand, variants, images, base_price }: ProductCardProps) {
+  const price = variants?.[0]?.price ?? (base_price || 0);
   const comparePrice = variants?.[0]?.compare_price;
   const primaryImage = images?.[0]?.url || '/placeholder.jpg';
   const isNew = false;
+  
+  const discountPercent = comparePrice && comparePrice > price 
+    ? Math.round(((comparePrice - price) / comparePrice) * 100) 
+    : 0;
   
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
@@ -88,58 +95,76 @@ export function ProductCard({ id, title, slug, brand, variants, images }: Produc
   };
 
   return (
-    <div className="group flex flex-col">
-      <div className="relative aspect-[3/4] overflow-hidden bg-[#E8E1DE] mb-4">
+    <div className="group flex flex-col bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+      <div className="relative aspect-square overflow-hidden bg-gray-100 rounded-2xl mb-4 shadow-sm">
         {/* Actual Image */}
-        <Image 
-          src={primaryImage} 
-          alt={title} 
-          fill 
-          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-          className="object-cover transition-transform duration-700 group-hover:scale-105" 
-        />
+        <Link href={`/product/${slug}`} className="absolute inset-0 z-0 block">
+          <Image 
+            src={primaryImage} 
+            alt={title} 
+            fill 
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+            className="object-cover transition-transform duration-700 group-hover:scale-105" 
+          />
+        </Link>
 
-        {isNew && (
-          <div className="absolute top-4 left-4 bg-[#BC8477] text-white text-[9px] font-bold tracking-[0.2em] uppercase px-3 py-1">
-            New
-          </div>
-        )}
+        {/* Badges container */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10 pointer-events-none">
+          {isNew && (
+            <div className="bg-gray-900 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded-full shadow-sm">
+              New
+            </div>
+          )}
+          {discountPercent > 0 && (
+            <div className="bg-red-500 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded-full shadow-sm">
+              -{discountPercent}%
+            </div>
+          )}
+        </div>
 
         {/* Wishlist Button */}
         <button 
           onClick={handleToggleWishlist}
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/80 backdrop-blur-sm flex items-center justify-center text-[#7A7371] hover:text-[#BC8477] hover:bg-white transition-all z-10"
+          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-all z-10"
         >
-          <Heart size={14} className={isWishlisted ? "fill-[#BC8477] text-[#BC8477]" : ""} />
+          <Heart size={18} className={isWishlisted ? "fill-red-500 text-red-500" : ""} />
         </button>
 
-        <div className="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-          <button 
-            onClick={handleAddToCart}
-            className="w-full bg-white/90 backdrop-blur-sm text-[#3A3331] text-[10px] font-bold tracking-[0.2em] uppercase py-3 hover:bg-[#3A3331] hover:text-white transition-colors flex items-center justify-center gap-2"
-          >
-            <ShoppingBag size={14} /> Add to Cart
-          </button>
-        </div>
       </div>
 
-      <div className="flex flex-col">
+      <div className="flex flex-col mt-2">
         {brand && (
-          <span className="text-[10px] text-[#7A7371] tracking-widest uppercase mb-1">{brand.name}</span>
+          <span className="text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">{brand.name}</span>
         )}
-        <Link href={`/product/${slug}`} className="font-serif text-lg text-[#3A3331] group-hover:text-[#BC8477] transition-colors line-clamp-1">
+        <Link href={`/product/${slug}`} className="font-bold text-[15px] text-gray-900 hover:text-[#7A915C] transition-colors line-clamp-1 mb-1">
           {title}
         </Link>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="font-sans text-sm font-medium text-[#3A3331]">
-            ${Number(price).toFixed(2)}
+        
+        <div className="flex items-center gap-1 mb-2">
+          <svg className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
+            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
+          </svg>
+          <span className="text-xs font-bold text-gray-700">4.8</span>
+          <span className="text-xs text-gray-400">(64)</span>
+        </div>
+
+        <div className="flex items-center gap-2 mb-4">
+          <span className="font-bold text-[16px] text-gray-900">
+            ৳{Number(price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
           </span>
           {comparePrice && Number(comparePrice) > Number(price) && (
-            <span className="font-sans text-sm text-[#B5AFAD] line-through">
-              ${Number(comparePrice).toFixed(2)}
+            <span className="font-medium text-xs text-gray-400 line-through">
+              ৳{Number(comparePrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
             </span>
           )}
         </div>
+
+        <button 
+          onClick={handleAddToCart}
+          className="w-full bg-[#7A915C] text-white text-sm font-bold rounded-lg py-3 hover:bg-[#687C4D] transition-colors flex items-center justify-center gap-2"
+        >
+          <ShoppingBag size={16} /> Add to Cart
+        </button>
       </div>
     </div>
   );

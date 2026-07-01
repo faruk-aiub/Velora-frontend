@@ -1,5 +1,6 @@
 'use client';
 
+import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { 
@@ -21,11 +22,12 @@ import {
   Settings, 
   LogOut,
   Moon,
-  Sun
+  Sun,
+  MessageSquare
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { ThemeProvider, useTheme } from 'next-themes';
+import { contactService } from '@/services/contact.service';
 
 const navigationGroups = [
   {
@@ -57,6 +59,7 @@ const navigationGroups = [
     items: [
       { name: 'Users', href: '/admin/users', icon: Users },
       { name: 'Reviews', href: '/admin/reviews', icon: Star },
+      { name: 'Messages', href: '/admin/messages', icon: MessageSquare },
     ]
   },
   {
@@ -76,28 +79,25 @@ const navigationGroups = [
   }
 ];
 
-function ThemeToggle() {
-  const { theme, setTheme } = useTheme();
-  return (
-    <Button variant="ghost" size="icon" onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>
-      <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-      <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-      <span className="sr-only">Toggle theme</span>
-    </Button>
-  );
-}
 
 export function AdminClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [unreadMessages, setUnreadMessages] = React.useState(0);
+
+  React.useEffect(() => {
+    // Only fetch if logged in (token exists)
+    if (localStorage.getItem('admin_access_token')) {
+      contactService.getUnreadCount()
+        .then(res => setUnreadMessages(res.count))
+        .catch(() => {});
+    }
+  }, [pathname]); // Refresh count on navigation
+
 
   // If we are on the login page, render clean layout without sidebar
   if (pathname === '/admin/login') {
-    return (
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        {children}
-      </ThemeProvider>
-    );
+    return <>{children}</>;
   }
 
   const handleLogout = async () => {
@@ -112,7 +112,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
       localStorage.removeItem('admin_access_token');
       toast.success('Logged out successfully');
       router.push('/admin/login');
-    } catch (e) {
+    } catch (error) {
       toast.error('Logout failed');
     }
   };
@@ -123,73 +123,88 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
     .find(item => pathname.startsWith(item.href));
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      <div className="flex h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
-        {/* Sidebar */}
-        <aside className="w-64 border-r bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 flex flex-col hidden md:flex">
-          <div className="flex h-16 items-center px-6 border-b border-zinc-200 dark:border-zinc-800">
-            <Link href="/admin/dashboard" className="flex items-center gap-2 font-bold text-xl tracking-tight">
-              <span className="bg-zinc-900 dark:bg-white text-white dark:text-zinc-900 px-2 py-1 rounded-md text-sm">V</span>
-              Velora Admin
-            </Link>
-          </div>
-          
-          <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-6">
-            {navigationGroups.map((group) => (
-              <div key={group.label}>
-                <h3 className="px-3 text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
-                  {group.label}
-                </h3>
-                <div className="space-y-1">
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = pathname.startsWith(item.href);
-                    return (
-                      <Link
-                        key={item.name}
-                        href={item.href}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                          isActive
-                            ? 'bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-50'
-                            : 'text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-50'
-                        }`}
-                      >
-                        <Icon className="w-4 h-4" />
-                        {item.name}
-                      </Link>
-                    );
-                  })}
-                </div>
+    <div className="flex h-screen bg-[#F3F4F6] text-[#3A3331] font-sans selection:bg-[#BC8477] selection:text-white p-4 gap-6">
+      {/* Sidebar */}
+      <aside className="w-64 bg-white rounded-[32px] flex flex-col hidden md:flex shadow-sm z-10 h-full overflow-hidden shrink-0">
+        <div className="flex h-20 items-center px-8 border-b border-gray-100 shrink-0">
+          <Link href="/admin/dashboard" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900">
+            <span className="bg-[#BC8477] text-white w-10 h-10 flex items-center justify-center rounded-2xl font-sans font-bold text-lg">V</span>
+            Velora Admin
+          </Link>
+        </div>
+        
+        <nav className="flex-1 overflow-y-auto py-6 px-6 space-y-8">
+          {navigationGroups.map((group) => (
+            <div key={group.label}>
+              <h3 className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+                {group.label}
+              </h3>
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = pathname.startsWith(item.href);
+                  return (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
+                        isActive
+                          ? 'bg-[#F3F4F6] text-gray-900'
+                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                      }`}
+                    >
+                      <Icon className={isActive ? "text-gray-900" : "text-gray-400"} size={20} strokeWidth={isActive ? 2.5 : 2} />
+                      <span className="flex-1">{item.name}</span>
+                      {item.name === 'Messages' && unreadMessages > 0 && (
+                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                          {unreadMessages}
+                        </span>
+                      )}
+                    </Link>
+                  );
+                })}
               </div>
-            ))}
-          </nav>
-
-          <div className="p-4 border-t border-zinc-200 dark:border-zinc-800">
-            <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950/30" onClick={handleLogout}>
-              <LogOut className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-          </div>
-        </aside>
-
-        {/* Main Content */}
-        <main className="flex-1 flex flex-col overflow-hidden">
-          <header className="h-16 border-b bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 flex items-center justify-between px-6">
-            <div className="font-semibold text-lg text-zinc-800 dark:text-zinc-200">
-              {currentItem?.name || 'Admin Panel'}
             </div>
-            <div className="flex items-center gap-4">
-              <ThemeToggle />
-              <div className="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-800 flex items-center justify-center font-medium text-sm text-zinc-600 dark:text-zinc-300">
+          ))}
+        </nav>
+
+        <div className="p-6 border-t border-gray-100 shrink-0">
+          <Button variant="ghost" className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 rounded-2xl py-6 font-bold" onClick={handleLogout}>
+            <LogOut size={20} className="mr-3" />
+            Logout
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        {/* Top Header Row */}
+        <header className="h-16 bg-white rounded-full flex items-center justify-between px-8 shrink-0 shadow-sm mb-6 mt-2 mr-2">
+          <div className="font-bold text-2xl tracking-tight text-gray-900">
+            {currentItem?.name || 'Admin Panel'}
+          </div>
+          <div className="flex items-center gap-4">
+            <button className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
+              <Bell size={18} />
+            </button>
+            <div className="flex items-center gap-3 ml-2">
+              <div className="text-right hidden sm:block">
+                <div className="text-sm font-bold text-gray-900">Super Admin</div>
+                <div className="text-[10px] uppercase tracking-wider font-bold text-gray-500">admin@velora.com</div>
+              </div>
+              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center font-bold text-[#BC8477]">
                 SA
               </div>
             </div>
-          </header>
-          <div className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-6">
+          </div>
+        </header>
+        
+        <div className="flex-1 overflow-y-auto">
+          <div className="max-w-7xl mx-auto pb-8 pr-2">
             {children}
           </div>
-        </main>
-      </div>
-    </ThemeProvider>
+        </div>
+      </main>
+    </div>
   );
 }

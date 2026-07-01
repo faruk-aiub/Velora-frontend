@@ -1,0 +1,7 @@
+/* Global Admin overrides */
+.bg-zinc-900 {
+  background-color: #111827 !important;
+}
+.hover\:bg-zinc-800:hover {
+  background-color: #1f2937 !important;
+}

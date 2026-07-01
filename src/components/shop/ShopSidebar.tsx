@@ -6,67 +6,13 @@ import { cn } from '@/lib/utils';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const CATEGORIES = [
-  {
-    name: 'Electronics & Gadgets',
-    subcategories: ['Smartphone', 'Laptop', 'Desktop Computer', 'Tablet', 'Smart Watch', 'Headphone / Earbuds', 'Bluetooth Speaker', 'Camera', 'Gaming Console', 'Computer Accessories', 'Chargers & Cables']
-  },
-  {
-    name: 'Fashion & Clothing',
-    subcategories: ['T-shirt', 'Shirt', 'Jeans', 'Pants', 'Jacket', 'Hoodie', 'Shoes', 'Sandals', 'Bags', 'Watches', 'Sunglasses', 'Fashion Accessories']
-  },
-  {
-    name: 'Beauty & Personal Care',
-    subcategories: ['Skincare Products', 'Makeup Products', 'Perfume', 'Hair Care Products', 'Grooming Products', 'Beauty Tools']
-  },
-  {
-    name: 'Home & Living',
-    subcategories: ['Furniture', 'Bed & Mattress', 'Sofa', 'Table & Chair', 'Home Decor', 'Lighting', 'Kitchen Tools', 'Storage Items', 'Curtains', 'Carpets']
-  },
-  {
-    name: 'Kitchen & Appliances',
-    subcategories: ['Refrigerator', 'Microwave Oven', 'Blender', 'Rice Cooker', 'Electric Kettle', 'Coffee Maker', 'Cookware', 'Dinner Set']
-  },
-  {
-    name: 'Books & Stationery',
-    subcategories: ['Books', 'Notebooks', 'Pens', 'Office Supplies', 'Educational Materials', 'Art Supplies']
-  },
-  {
-    name: 'Sports & Fitness',
-    subcategories: ['Gym Equipment', 'Sports Shoes', 'Fitness Tracker', 'Yoga Mat', 'Sports Accessories', 'Bicycles']
-  },
-  {
-    name: 'Kids & Baby Products',
-    subcategories: ['Baby Clothes', 'Toys', 'School Bags', 'Baby Care Products', 'Kids Accessories']
-  },
-  {
-    name: 'Automotive',
-    subcategories: ['Car Accessories', 'Bike Accessories', 'Helmet', 'Car Electronics', 'Cleaning Products']
-  },
-  {
-    name: 'Pet Supplies',
-    subcategories: ['Pet Food', 'Pet Toys', 'Pet Accessories', 'Pet Care Products']
-  },
-  {
-    name: 'Grocery & Food',
-    subcategories: ['Snacks', 'Beverages', 'Dry Food', 'Fresh Food', 'Cooking Ingredients']
-  },
-  {
-    name: 'Digital Products',
-    subcategories: ['Software', 'Online Courses', 'E-books', 'Subscriptions', 'Templates']
-  },
-  {
-    name: 'Others',
-    subcategories: ['Gifts', 'Jewelry', 'Watches', 'Handmade Products', 'Travel Accessories']
-  }
-];
-
-export function ShopSidebar() {
+import { CATEGORIES, generateCategorySlug } from "@/lib/categories";
+export function ShopSidebar({ categoryOverride }: { categoryOverride?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  const currentCategory = searchParams.get('category');
+  const currentCategory = categoryOverride || searchParams.get('category');
   const currentSubcategory = searchParams.get('subcategory');
   
   const minPriceParam = searchParams.get('min_price') || '';
@@ -96,16 +42,11 @@ export function ShopSidebar() {
 
   const toggleCategory = (name: string) => {
     setOpenCategory(openCategory === name ? null : name);
-    
-    // Update URL with category (clear subcategory)
-    const params = new URLSearchParams(searchParams.toString());
     if (openCategory !== name) {
-      params.set('category', name);
+      router.push(`/category/${generateCategorySlug(name)}`);
     } else {
-      params.delete('category');
+      router.push('/shop');
     }
-    params.delete('subcategory');
-    router.push(`${pathname}?${params.toString()}`);
   };
 
   const selectSubcategory = (categoryName: string, subName: string) => {
@@ -118,33 +59,33 @@ export function ShopSidebar() {
   return (
     <div className="w-full lg:w-72 flex-shrink-0">
       <div className="flex items-center gap-2 mb-8">
-        <SlidersHorizontal size={20} className="text-[#3A3331]" />
-        <h2 className="font-serif text-2xl text-[#3A3331] font-light">Filters</h2>
+        <SlidersHorizontal size={20} className="text-gray-900" />
+        <h2 className="font-bold text-2xl text-gray-900 tracking-tight">Filters</h2>
       </div>
 
       <div className="space-y-6">
         <div>
-          <h3 className="text-xs font-bold tracking-[0.2em] text-[#BC8477] uppercase mb-4">Categories</h3>
+          <h3 className="text-sm font-bold text-gray-900 mb-4">Categories</h3>
           <div className="space-y-2">
             {CATEGORIES.map((category) => {
               const isOpen = openCategory === category.name;
               
               return (
-                <div key={category.name} className="border-b border-[#E8E1DE] last:border-0 pb-2">
+                <div key={category.name} className="border-b border-gray-100 last:border-0 pb-2">
                   <button
                     onClick={() => toggleCategory(category.name)}
                     className="w-full flex items-center justify-between py-2 text-left group"
                   >
                     <span className={cn(
                       "text-sm transition-colors duration-200",
-                      isOpen ? "text-[#BC8477] font-medium" : "text-[#3A3331] group-hover:text-[#BC8477]"
+                      isOpen ? "text-[#BC8477] font-medium" : "text-gray-900 group-hover:text-[#BC8477]"
                     )}>
                       {category.name}
                     </span>
                     <ChevronDown
                       size={16}
                       className={cn(
-                        "transition-transform duration-300 text-[#7A7371]",
+                        "transition-transform duration-300 text-gray-500",
                         isOpen && "rotate-180 text-[#BC8477]"
                       )}
                     />
@@ -165,14 +106,11 @@ export function ShopSidebar() {
                               <button 
                                 onClick={() => selectSubcategory(category.name, sub)}
                                 className={cn(
-                                  "text-sm hover:text-[#BC8477] transition-colors flex items-center gap-2 group w-full text-left",
-                                  currentSubcategory === sub ? "text-[#BC8477] font-medium" : "text-[#7A7371]"
+                                  "text-sm hover:text-[#BC8477] transition-colors flex items-center gap-2 w-full text-left",
+                                  currentSubcategory === sub ? "text-[#BC8477] font-medium" : "text-gray-500"
                                 )}
                               >
-                                <div className={cn(
-                                  "w-1 h-1 rounded-full transition-colors",
-                                  currentSubcategory === sub ? "bg-[#BC8477]" : "bg-[#D5CFCD] group-hover:bg-[#BC8477]"
-                                )} />
+                                <span className="text-gray-400 text-xs mr-1">•</span>
                                 {sub}
                               </button>
                             </li>
@@ -188,8 +126,8 @@ export function ShopSidebar() {
         </div>
 
         {/* Price Filter */}
-        <div className="pt-6 border-t border-[#E8E1DE]">
-          <h3 className="text-xs font-bold tracking-[0.2em] text-[#BC8477] uppercase mb-4">Price Range</h3>
+        <div className="pt-6 border-t border-gray-100">
+          <h3 className="text-sm font-bold text-gray-900 mb-4">Price Range</h3>
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-4">
               <input 
@@ -197,20 +135,20 @@ export function ShopSidebar() {
                 placeholder="$ Min" 
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
-                className="w-full h-10 bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] focus:outline-none focus:border-[#BC8477]" 
+                className="w-full h-10 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] border border-gray-200 transition-all" 
               />
-              <span className="text-[#7A7371]">-</span>
+              <span className="text-gray-500">-</span>
               <input 
                 type="number" 
                 placeholder="$ Max" 
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
-                className="w-full h-10 bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] focus:outline-none focus:border-[#BC8477]" 
+                className="w-full h-10 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] border border-gray-200 transition-all" 
               />
             </div>
             <button 
               onClick={applyPriceFilter}
-              className="w-full h-10 border border-[#BC8477] text-[#BC8477] text-xs font-bold tracking-[0.1em] uppercase hover:bg-[#BC8477] hover:text-white transition-colors"
+              className="w-full h-10 bg-gray-900 text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-colors shadow-sm"
             >
               Apply Filter
             </button>

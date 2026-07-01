@@ -55,7 +55,7 @@ export default function ForgotPasswordPage() {
           <Mail className="w-9 h-9" style={{ color: 'hsl(10 30% 55%)' }} />
         </motion.div>
         <div className="space-y-3">
-          <h1 className="font-serif text-3xl font-light" style={{ color: 'hsl(20 15% 12%)' }}>Check your inbox</h1>
+          <h1 className="font-bold text-3xl font-light" style={{ color: 'hsl(20 15% 12%)' }}>Check your inbox</h1>
           <p className="text-sm leading-relaxed" style={{ color: 'hsl(20 10% 48%)' }}>
             We sent a reset link to <span className="font-medium" style={{ color: 'hsl(20 15% 20%)' }}>{sentTo}</span>.
           </p>
@@ -80,7 +80,7 @@ export default function ForgotPasswordPage() {
     <div className="space-y-8">
       <motion.div {...item(0)} className="space-y-2">
         <p className="text-xs tracking-[0.25em] uppercase font-medium" style={{ color: 'hsl(10 30% 55%)' }}>Account Recovery</p>
-        <h1 className="font-serif text-4xl font-light tracking-wide" style={{ color: 'hsl(20 15% 12%)' }}>
+        <h1 className="font-bold text-4xl font-light tracking-wide" style={{ color: 'hsl(20 15% 12%)' }}>
           Reset your{' '}<span className="italic" style={{ color: 'hsl(10 30% 55%)' }}>password</span>
         </h1>
         <p className="text-sm font-light" style={{ color: 'hsl(20 10% 48%)' }}>Enter your email and we&apos;ll send you a secure reset link.</p>

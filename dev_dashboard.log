@@ -1,0 +1,13 @@
+
+> tmp-frontend@0.1.0 dev
+> next dev --turbopack -p 3006
+
+   ▲ Next.js 15.5.19 (Turbopack)
+   - Local:        http://localhost:3006
+   - Network:      http://192.168.0.111:3006
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Compiled middleware in 117ms
+ ✓ Ready in 897ms
+[?25h

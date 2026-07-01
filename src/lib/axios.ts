@@ -16,16 +16,25 @@ apiClient.interceptors.request.use(
   (config) => {
     // Access token is stored in Zustand / memory — retrieve it here
     if (typeof window !== 'undefined') {
-      const authStorage = localStorage.getItem('velora-auth');
-      if (authStorage) {
-        try {
-          const parsed = JSON.parse(authStorage);
-          const token = parsed?.state?.accessToken;
-          if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+      const isAdminRoute = window.location.pathname.startsWith('/admin');
+      
+      if (isAdminRoute) {
+        const adminToken = localStorage.getItem('admin_access_token');
+        if (adminToken) {
+          config.headers.Authorization = `Bearer ${adminToken}`;
+        }
+      } else {
+        const authStorage = localStorage.getItem('velora-auth');
+        if (authStorage) {
+          try {
+            const parsed = JSON.parse(authStorage);
+            const token = parsed?.state?.accessToken;
+            if (token) {
+              config.headers.Authorization = `Bearer ${token}`;
+            }
+          } catch {
+            // ignore parse errors
           }
-        } catch {
-          // ignore parse errors
         }
       }
     }
@@ -76,16 +85,23 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        const response = await apiClient.post('/auth/refresh-token');
+        const isAdminRoute = typeof window !== 'undefined' && window.location.pathname.startsWith('/admin');
+        const refreshUrl = isAdminRoute ? '/admin/auth/refresh-token' : '/auth/refresh-token';
+        
+        const response = await apiClient.post(refreshUrl);
         const newToken = response.data?.data?.accessToken;
 
-        // Update Zustand store
+        // Update state
         if (typeof window !== 'undefined' && newToken) {
-          const authStorage = localStorage.getItem('velora-auth');
-          if (authStorage) {
-            const parsed = JSON.parse(authStorage);
-            parsed.state.accessToken = newToken;
-            localStorage.setItem('velora-auth', JSON.stringify(parsed));
+          if (isAdminRoute) {
+            localStorage.setItem('admin_access_token', newToken);
+          } else {
+            const authStorage = localStorage.getItem('velora-auth');
+            if (authStorage) {
+              const parsed = JSON.parse(authStorage);
+              parsed.state.accessToken = newToken;
+              localStorage.setItem('velora-auth', JSON.stringify(parsed));
+            }
           }
         }
 
@@ -96,8 +112,14 @@ apiClient.interceptors.response.use(
         processQueue(refreshError, null);
         // Clear auth state and redirect to login
         if (typeof window !== 'undefined') {
-          localStorage.removeItem('velora-auth');
-          window.location.href = '/login';
+          const isAdminRoute = window.location.pathname.startsWith('/admin');
+          if (isAdminRoute) {
+            localStorage.removeItem('admin_access_token');
+            window.location.href = '/admin/login';
+          } else {
+            localStorage.removeItem('velora-auth');
+            window.location.href = '/login';
+          }
         }
         return Promise.reject(refreshError);
       } finally {

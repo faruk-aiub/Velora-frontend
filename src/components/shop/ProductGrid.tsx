@@ -5,11 +5,11 @@ import { ProductCard } from './ProductCard';
 import { useProducts } from '@/hooks/useProducts';
 import type { Product } from '@/types/product.types';
 
-export function ProductGrid() {
+export function ProductGrid({ categoryOverride }: { categoryOverride?: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const categoryFilter = searchParams.get('category');
+  const categoryFilter = categoryOverride || searchParams.get('category');
   const subcategoryFilter = searchParams.get('subcategory');
   const minPrice = searchParams.get('min_price');
   const maxPrice = searchParams.get('max_price');
@@ -47,16 +47,16 @@ export function ProductGrid() {
   return (
     <div className="flex-1 w-full">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="font-serif text-4xl text-[#3A3331] font-light">
+        <h1 className="hidden font-bold text-4xl text-gray-900 tracking-tight">
           {searchQuery ? `Search Results for "${searchQuery}"` : 'All Products'}
         </h1>
         
         <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-widest text-[#7A7371] font-bold">Sort By</span>
+          <span className="text-[10px] uppercase tracking-widest text-gray-500 font-bold">Sort By</span>
           <select 
             value={sort}
             onChange={handleSortChange}
-            className="bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] pb-1 focus:outline-none focus:border-[#BC8477]"
+            className="bg-transparent border-b border-[#E8E1DE] text-sm text-gray-900 pb-1 focus:outline-none focus:border-[#7A915C]"
           >
             <option value="">Featured</option>
             <option value="created_at:desc">Newest Arrivals</option>
@@ -68,14 +68,14 @@ export function ProductGrid() {
 
       {isLoading ? (
         <div className="w-full py-20 flex justify-center">
-          <div className="animate-pulse flex flex-col items-center gap-4 text-[#BC8477]">
-            <div className="w-8 h-8 rounded-full border-2 border-t-[#BC8477] border-r-[#BC8477] border-b-transparent border-l-transparent animate-spin" />
+          <div className="animate-pulse flex flex-col items-center gap-4 text-[#7A915C]">
+            <div className="w-8 h-8 rounded-full border-2 border-t-[#7A915C] border-r-[#7A915C] border-b-transparent border-l-transparent animate-spin" />
             <p className="text-sm font-bold tracking-widest uppercase">Loading products...</p>
           </div>
         </div>
       ) : isError ? (
         <div className="w-full py-20 text-center text-red-500">
-          <p className="font-serif text-2xl mb-2">Failed to load products</p>
+          <p className="font-bold text-2xl mb-2">Failed to load products</p>
           <p className="text-sm">Please try refreshing the page.</p>
         </div>
       ) : (
@@ -89,8 +89,8 @@ export function ProductGrid() {
                 />
               ))
             ) : (
-              <div className="col-span-full py-20 text-center text-[#7A7371]">
-                <p className="font-serif text-2xl mb-2">No products found</p>
+              <div className="col-span-full py-20 text-center text-gray-500">
+                <p className="font-bold text-2xl mb-2">No products found</p>
                 <p className="text-sm">Try selecting a different category or clearing filters.</p>
               </div>
             )}
@@ -98,7 +98,7 @@ export function ProductGrid() {
 
           {products.length > 0 && (
             <div className="mt-16 flex justify-center">
-              <button className="h-12 px-8 border border-[#BC8477] text-[#BC8477] text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-[#BC8477] hover:text-white transition-colors">
+              <button className="h-12 px-8 bg-gray-900 text-white text-sm font-bold rounded-full hover:bg-gray-800 transition-colors shadow-sm">
                 Load More
               </button>
             </div>

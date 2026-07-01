@@ -1,0 +1,16 @@
+
+> tmp-frontend@0.1.0 dev
+> next dev --turbopack -p 3008
+
+   ▲ Next.js 15.5.19 (Turbopack)
+   - Local:        http://localhost:3008
+   - Network:      http://192.168.0.111:3008
+   - Environments: .env.local
+
+ ✓ Starting...
+ ✓ Compiled middleware in 113ms
+ ✓ Ready in 775ms
+ ○ Compiling /admin/dashboard ...
+ ✓ Compiled /admin/dashboard in 3s
+ GET /admin/dashboard 200 in 3382ms
+[?25h

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { useAuthStore } from '@/store/auth.store';
@@ -12,19 +12,20 @@ import { orderService } from '@/services/order.service';
 import { wishlistService } from '@/services/wishlist.service';
 import { reviewService } from '@/services/review.service';
 import { cn } from '@/lib/utils';
+import { MessagesTab } from '@/components/account/MessagesTab';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
   LayoutDashboard, Package, MapPin, User as UserIcon, Heart, ShoppingCart,
   LogOut, Trash2, Plus, Star, Bell, HelpCircle, RotateCcw, Shield, CreditCard,
   ChevronRight, ChevronDown, Edit3, Eye, EyeOff, Loader2, Check, X, AlertCircle,
-  Truck, Clock, CheckCircle, XCircle, ArrowRight, Phone, Mail, Camera, Save
+  Truck, Clock, CheckCircle, XCircle, ArrowRight, Phone, Mail, Camera, Save, MessageCircle
 } from 'lucide-react';
 
 type TabType =
   | 'dashboard' | 'profile' | 'orders' | 'tracking' | 'wishlist'
   | 'cart' | 'addresses' | 'payment' | 'reviews' | 'notifications'
-  | 'support' | 'returns' | 'security';
+  | 'messages' | 'support' | 'returns' | 'security';
 
 const STATUS_CONFIG: Record<string, { color: string; bg: string; icon: React.ReactNode }> = {
   PENDING:    { color: 'text-amber-600',  bg: 'bg-amber-50',  icon: <Clock size={12} /> },
@@ -45,15 +46,16 @@ const NAV_ITEMS = [
   { id: 'payment',       label: 'Payment Methods',  icon: CreditCard },
   { id: 'reviews',       label: 'Reviews & Ratings',icon: Star },
   { id: 'notifications', label: 'Notifications',    icon: Bell },
+  { id: 'messages',      label: 'Messages',         icon: MessageCircle },
   { id: 'support',       label: 'Help & Support',   icon: HelpCircle },
   { id: 'returns',       label: 'Returns & Refunds',icon: RotateCcw },
   { id: 'security',      label: 'Security',         icon: Shield },
 ];
 
 const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
-  <div className="mb-8 pb-6 border-b border-[#E8E1DE]">
-    <h2 className="font-serif text-2xl text-[#3A3331] font-light">{title}</h2>
-    {subtitle && <p className="text-sm text-[#7A7371] mt-1">{subtitle}</p>}
+  <div className="mb-6">
+    <h2 className="font-bold text-xl text-gray-900">{title}</h2>
+    {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
   </div>
 );
 
@@ -81,7 +83,15 @@ export default function AccountPage() {
   const queryClient = useQueryClient();
   const { user, logout, setUser } = useAuthStore();
   const cartStore = useCartStore();
+  const searchParams = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
+
+  useEffect(() => {
+    const tabParam = searchParams.get('tab') as TabType | null;
+    if (tabParam && NAV_ITEMS.some(item => item.id === tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -121,6 +131,7 @@ export default function AccountPage() {
     queryKey: ['orders'],
     queryFn: () => orderService.getAll(1, 50),
     enabled: !!user,
+    refetchInterval: 5000,
   });
 
   const { data: addressesData, isLoading: loadingAddresses } = useQuery({
@@ -137,7 +148,7 @@ export default function AccountPage() {
 
   const { data: myReviewsData, isLoading: loadingReviews } = useQuery({
     queryKey: ['my-reviews'],
-    queryFn: () => reviewService.getProductReviews('all'),
+    queryFn: () => reviewService.getMyReviews(1, 20),
     enabled: !!user && activeTab === 'reviews',
     retry: false,
   });
@@ -333,139 +344,129 @@ export default function AccountPage() {
 
   const renderDashboard = () => (
     <div>
-      {/* Welcome Banner */}
-      <div className="relative bg-gradient-to-r from-[#3A3331] to-[#BC8477] p-8 mb-8 overflow-hidden">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4" />
-        <div className="absolute bottom-0 left-1/3 w-32 h-32 bg-white/5 rounded-full translate-y-1/2" />
-        <div className="relative z-10">
-          <p className="text-white/70 text-xs font-bold tracking-[0.2em] uppercase mb-2">Welcome Back</p>
-          <h2 className="font-serif text-3xl text-white font-light">{user.first_name} {user.last_name}</h2>
-          <p className="text-white/60 text-sm mt-1">{user.email}</p>
-          <div className="flex items-center gap-2 mt-3">
-            <span className={cn(
-              'inline-flex items-center gap-1 px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full',
-              user.is_email_verified ? 'bg-green-500/20 text-green-300' : 'bg-amber-500/20 text-amber-300'
-            )}>
-              {user.is_email_verified ? <><Check size={10} /> Verified</> : <><AlertCircle size={10} /> Unverified</>}
-            </span>
-            <span className="bg-white/10 text-white/80 px-3 py-1 text-[10px] font-bold tracking-widest uppercase rounded-full">
-              {user.role}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total Orders', value: orders.length, icon: Package, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Wishlist Items', value: wishlistItems.length, icon: Heart, color: 'text-rose-600', bg: 'bg-rose-50' },
-          { label: 'Cart Items', value: cartItems.reduce((a, i) => a + i.quantity, 0), icon: ShoppingCart, color: 'text-violet-600', bg: 'bg-violet-50' },
-          { label: 'Addresses', value: addresses.length, icon: MapPin, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+          { label: 'Total Orders', value: orders.length, icon: Package, color: 'text-[#BC8477]', bg: 'bg-[#BC8477]/10' },
+          { label: 'Wishlist Items', value: wishlistItems.length, icon: Heart, color: 'text-gray-900', bg: 'bg-gray-100' },
+          { label: 'Cart Items', value: cartItems.reduce((a, i) => a + i.quantity, 0), icon: ShoppingCart, color: 'text-[#BC8477]', bg: 'bg-[#BC8477]/10' },
+          { label: 'Addresses', value: addresses.length, icon: MapPin, color: 'text-gray-900', bg: 'bg-gray-100' },
         ].map(stat => (
-          <div key={stat.label} className="bg-white border border-[#E8E1DE] p-5">
-            <div className={cn('w-10 h-10 rounded flex items-center justify-center mb-3', stat.bg)}>
-              <stat.icon size={20} className={stat.color} />
+          <div key={stat.label} className="bg-white rounded-3xl p-6 shadow-sm border border-transparent hover:border-gray-100 transition-colors">
+            <div className="flex justify-between items-start mb-4">
+              <div className={cn('w-12 h-12 rounded-full flex items-center justify-center', stat.bg)}>
+                <stat.icon size={24} className={stat.color} />
+              </div>
             </div>
-            <p className="text-2xl font-serif text-[#3A3331] font-light">{stat.value}</p>
-            <p className="text-[10px] text-[#7A7371] tracking-widest uppercase mt-1">{stat.label}</p>
+            <p className="text-sm font-bold text-gray-500 mb-1">{stat.label}</p>
+            <p className="text-4xl font-bold text-gray-900">{stat.value.toLocaleString()}</p>
           </div>
         ))}
       </div>
 
-      {/* Quick Actions */}
-      <div className="mb-8">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#7A7371] mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-          {[
-            { label: 'View Orders', tab: 'orders' as TabType, icon: Package },
-            { label: 'Edit Profile', tab: 'profile' as TabType, icon: Edit3 },
-            { label: 'Track Order', tab: 'tracking' as TabType, icon: Truck },
-            { label: 'My Wishlist', tab: 'wishlist' as TabType, icon: Heart },
-            { label: 'Addresses', tab: 'addresses' as TabType, icon: MapPin },
-            { label: 'Get Support', tab: 'support' as TabType, icon: HelpCircle },
-          ].map(action => (
-            <button
-              key={action.label}
-              onClick={() => setActiveTab(action.tab)}
-              className="flex items-center gap-3 p-4 bg-white border border-[#E8E1DE] hover:border-[#BC8477] hover:text-[#BC8477] transition-all text-left group"
-            >
-              <action.icon size={18} className="text-[#B5AFAD] group-hover:text-[#BC8477] transition-colors" />
-              <span className="text-xs font-bold tracking-widest uppercase text-[#3A3331] group-hover:text-[#BC8477] transition-colors">
-                {action.label}
-              </span>
-              <ArrowRight size={14} className="ml-auto text-[#B5AFAD] group-hover:text-[#BC8477] transition-colors" />
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Recent Orders */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xs font-bold tracking-widest uppercase text-[#7A7371]">Recent Orders</h3>
-          <button onClick={() => setActiveTab('orders')} className="text-xs text-[#BC8477] hover:underline">
-            View All
-          </button>
-        </div>
-        {loadingOrders ? (
-          <div className="flex justify-center py-8"><Loader2 className="animate-spin text-[#BC8477]" /></div>
-        ) : recentOrders.length === 0 ? (
-          <div className="bg-white border border-[#E8E1DE] p-8 text-center">
-            <p className="text-sm text-[#7A7371] mb-3">No orders yet.</p>
-            <Link href="/shop" className="text-xs font-bold tracking-widest uppercase text-[#BC8477] hover:underline">
-              Start Shopping
-            </Link>
+      <div className="flex gap-6 mb-8 flex-col lg:flex-row">
+        {/* Quick Actions */}
+        <div className="flex-1 bg-white rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Quick Actions</h3>
           </div>
-        ) : (
-          <div className="space-y-3">
-            {recentOrders.map(order => (
-              <div key={order.id} className="bg-white border border-[#E8E1DE] p-5 flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold tracking-widest text-[#7A7371] mb-1">Order #{order.order_number}</p>
-                  <p className="text-sm text-[#3A3331]">{new Date(order.created_at).toLocaleDateString()}</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { label: 'View Orders', tab: 'orders' as TabType, icon: Package },
+              { label: 'Edit Profile', tab: 'profile' as TabType, icon: Edit3 },
+              { label: 'Track Order', tab: 'tracking' as TabType, icon: Truck },
+              { label: 'My Wishlist', tab: 'wishlist' as TabType, icon: Heart },
+              { label: 'Addresses', tab: 'addresses' as TabType, icon: MapPin },
+              { label: 'Get Support', tab: 'support' as TabType, icon: HelpCircle },
+            ].map(action => (
+              <button
+                key={action.label}
+                onClick={() => setActiveTab(action.tab)}
+                className="flex flex-col items-center justify-center gap-3 p-4 bg-[#F9FAFB] rounded-2xl hover:bg-gray-100 transition-colors group"
+              >
+                <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm text-gray-500 group-hover:text-[#BC8477] transition-colors">
+                  <action.icon size={18} />
                 </div>
-                <div className="flex items-center gap-4">
-                  <p className="font-serif text-[#3A3331]">${Number(order.total_amount).toFixed(2)}</p>
-                  <OrderStatusBadge status={order.status} />
-                </div>
-              </div>
+                <span className="text-xs font-bold text-gray-700">
+                  {action.label}
+                </span>
+              </button>
             ))}
           </div>
-        )}
+        </div>
+
+        {/* Recent Orders */}
+        <div className="flex-1 bg-white rounded-3xl p-6 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-900">Recent Orders</h3>
+            <button onClick={() => setActiveTab('orders')} className="text-sm font-bold text-[#BC8477] hover:underline">
+              View All
+            </button>
+          </div>
+          {loadingOrders ? (
+            <div className="flex justify-center py-8"><Loader2 className="animate-spin text-[#BC8477]" /></div>
+          ) : recentOrders.length === 0 ? (
+            <div className="bg-gray-50 rounded-2xl p-8 text-center border border-dashed border-gray-200">
+              <p className="text-sm text-gray-500 mb-3">No orders yet.</p>
+              <Link href="/shop" className="text-sm font-bold text-[#BC8477] hover:underline">
+                Start Shopping
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {recentOrders.map(order => (
+                <div key={order.id} className="bg-[#F9FAFB] rounded-2xl p-4 flex items-center justify-between border border-gray-100 hover:border-gray-200 transition-colors">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
+                      <Package size={18} className="text-gray-400" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                      <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2">
+                    <p className="font-bold text-gray-900">${Number(order.total_amount).toFixed(2)}</p>
+                    <OrderStatusBadge status={order.status} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 
   const renderProfile = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="My Profile" subtitle="Manage your personal information and account settings" />
 
       {/* Avatar + Name */}
-      <div className="flex items-center gap-6 mb-8 p-6 bg-white border border-[#E8E1DE]">
+      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 p-6 bg-[#F9FAFB] rounded-2xl border border-gray-100">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] flex items-center justify-center text-white font-serif text-3xl">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] flex items-center justify-center text-white font-bold text-4xl shadow-sm border-4 border-white">
             {user.first_name.charAt(0)}{user.last_name.charAt(0)}
           </div>
         </div>
-        <div className="flex-1">
-          <h3 className="font-serif text-xl text-[#3A3331]">{user.first_name} {user.last_name}</h3>
-          <p className="text-sm text-[#7A7371]">{user.email}</p>
-          <p className="text-xs text-[#B5AFAD] mt-1">
-            Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+        <div className="flex-1 text-center sm:text-left">
+          <h3 className="font-bold text-2xl text-gray-900">{user.first_name} {user.last_name}</h3>
+          <p className="text-sm text-gray-500 mt-1">{user.email}</p>
+          <p className="text-xs font-bold text-gray-400 mt-2 bg-white px-3 py-1 rounded-full w-fit mx-auto sm:mx-0 border border-gray-100 shadow-sm">
+            Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
           </p>
         </div>
         <button
           onClick={() => setIsEditingProfile(!isEditingProfile)}
-          className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-[#BC8477] hover:text-[#9A6B60] transition-colors"
+          className="flex items-center gap-2 text-sm font-bold text-gray-700 bg-white px-4 py-2 rounded-full shadow-sm hover:bg-gray-50 transition-colors border border-gray-100"
         >
-          <Edit3 size={14} /> {isEditingProfile ? 'Cancel' : 'Edit'}
+          <Edit3 size={16} className="text-gray-400" /> {isEditingProfile ? 'Cancel' : 'Edit Profile'}
         </button>
       </div>
 
       {/* Profile Form */}
-      <div className="bg-white border border-[#E8E1DE] p-8 mb-6">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#3A3331] mb-6">Personal Information</h3>
+      <div className="mb-10">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Personal Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl">
           <div>
             <label className="label-style">First Name</label>
@@ -506,15 +507,15 @@ export default function AccountPage() {
             disabled={updateProfileMutation.isPending}
             className="btn-primary mt-6 flex items-center gap-2"
           >
-            {updateProfileMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            {updateProfileMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
             Save Changes
           </button>
         )}
       </div>
 
       {/* Change Password */}
-      <div className="bg-white border border-[#E8E1DE] p-8">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#3A3331] mb-6">Change Password</h3>
+      <div className="pt-8 border-t border-gray-100">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Change Password</h3>
         <div className="max-w-md space-y-4">
           {(['current', 'new', 'confirm'] as const).map((field) => (
             <div key={field}>
@@ -555,9 +556,9 @@ export default function AccountPage() {
               changePasswordMutation.mutate({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
             }}
             disabled={changePasswordMutation.isPending}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary mt-6 flex items-center gap-2"
           >
-            {changePasswordMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : <Shield size={14} />}
+            {changePasswordMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
             Update Password
           </button>
         </div>
@@ -566,7 +567,7 @@ export default function AccountPage() {
   );
 
   const renderOrders = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="My Orders" subtitle="Track and manage all your orders" />
       {loadingOrders ? (
         <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[#BC8477] w-8 h-8" /></div>
@@ -577,41 +578,46 @@ export default function AccountPage() {
           action={<Link href="/shop" className="btn-primary">Browse Shop</Link>}
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 mt-6">
           {orders.map(order => (
-            <div key={order.id} className="bg-white border border-[#E8E1DE] overflow-hidden">
+            <div key={order.id} className="bg-[#F9FAFB] rounded-2xl overflow-hidden border border-gray-100 transition-all hover:border-gray-200 hover:shadow-sm">
               {/* Order Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border-b border-[#E8E1DE] gap-3">
-                <div>
-                  <p className="text-xs font-bold tracking-[0.15em] text-[#7A7371] mb-1">ORDER #{order.order_number}</p>
-                  <p className="text-sm text-[#3A3331]">{new Date(order.created_at).toLocaleDateString('en-US', { dateStyle: 'medium' })}</p>
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border-b border-gray-100 gap-3">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-sm">
+                    <Package size={20} className="text-[#BC8477]" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                    <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString('en-US', { dateStyle: 'medium' })}</p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="text-right">
-                    <p className="text-xs text-[#7A7371] mb-0.5">Total</p>
-                    <p className="font-serif text-lg text-[#3A3331]">${Number(order.total_amount).toFixed(2)}</p>
+                    <p className="text-xs text-gray-500 mb-0.5">Total</p>
+                    <p className="font-bold text-base text-gray-900">${Number(order.total_amount).toFixed(2)}</p>
                   </div>
                   <OrderStatusBadge status={order.status} />
                 </div>
               </div>
               {/* Order Items */}
-              <div className="p-5 space-y-3">
+              <div className="p-5 space-y-3 bg-white">
                 {order.items?.map(item => (
                   <div key={item.id} className="flex gap-4 items-center">
-                    <div className="relative w-14 h-18 min-w-[56px] bg-[#F5F2F0] overflow-hidden">
+                    <div className="relative w-14 h-14 min-w-[56px] rounded-xl bg-[#F9FAFB] overflow-hidden">
                       {item.image_url ? (
                         <Image src={item.image_url} alt={item.product_name || 'Product'} fill className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
-                          <Package size={18} className="text-[#B5AFAD]" />
+                          <Package size={18} className="text-gray-400" />
                         </div>
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-[#3A3331] font-medium truncate">{item.product_name || `Item ${item.sku}`}</p>
-                      <p className="text-xs text-[#7A7371] mt-0.5">Qty: {item.quantity} × ${Number(item.price).toFixed(2)}</p>
+                      <p className="text-sm font-bold text-gray-900 truncate">{item.product_name || `Item ${item.sku}`}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity} × ${Number(item.price).toFixed(2)}</p>
                     </div>
-                    <p className="text-sm font-medium text-[#3A3331]">
+                    <p className="text-sm font-bold text-gray-900">
                       ${(Number(item.price) * item.quantity).toFixed(2)}
                     </p>
                   </div>
@@ -625,7 +631,7 @@ export default function AccountPage() {
   );
 
   const renderTracking = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Order Tracking" subtitle="Track the current status of your orders" />
       {pendingOrders.length === 0 ? (
         <EmptyState
@@ -638,16 +644,16 @@ export default function AccountPage() {
           }
         />
       ) : (
-        <div className="space-y-6">
+        <div className="space-y-6 mt-6">
           {pendingOrders.map(order => {
             const steps = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
             const currentStep = steps.indexOf(order.status);
             return (
-              <div key={order.id} className="bg-white border border-[#E8E1DE] p-6">
+              <div key={order.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                 <div className="flex justify-between items-start mb-8">
                   <div>
-                    <p className="text-xs font-bold tracking-widest text-[#7A7371] mb-1">ORDER #{order.order_number}</p>
-                    <p className="text-sm text-[#3A3331]">{new Date(order.created_at).toLocaleDateString()}</p>
+                    <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                    <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
                   <OrderStatusBadge status={order.status} />
                 </div>
@@ -655,35 +661,36 @@ export default function AccountPage() {
                 <div className="relative">
                   <div className="flex justify-between mb-3">
                     {steps.map((step, idx) => (
-                      <div key={step} className="flex flex-col items-center gap-2 flex-1">
+                      <div key={step} className="flex flex-col items-center gap-2 flex-1 relative z-10">
                         <div className={cn(
-                          'w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all',
+                          'w-8 h-8 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all bg-white',
                           idx <= currentStep
-                            ? 'bg-[#BC8477] border-[#BC8477] text-white'
-                            : 'bg-white border-[#E8E1DE] text-[#B5AFAD]'
+                            ? 'border-[#BC8477] text-[#BC8477]'
+                            : 'border-gray-200 text-gray-400'
                         )}>
                           {idx < currentStep ? <Check size={14} /> : idx + 1}
                         </div>
                         <span className={cn(
-                          'text-[9px] font-bold tracking-widest uppercase text-center hidden sm:block',
-                          idx <= currentStep ? 'text-[#3A3331]' : 'text-[#B5AFAD]'
+                          'text-xs font-bold text-center hidden sm:block',
+                          idx <= currentStep ? 'text-gray-900' : 'text-gray-400'
                         )}>
                           {step}
                         </span>
                       </div>
                     ))}
                   </div>
-                  <div className="absolute top-4 left-[10%] right-[10%] h-0.5 -z-0">
-                    <div className="h-full bg-[#E8E1DE]" />
+                  <div className="absolute top-4 left-[10%] right-[10%] h-1 -z-0 rounded-full overflow-hidden">
+                    <div className="h-full bg-gray-100" />
                     <div
-                      className="absolute top-0 left-0 h-full bg-[#BC8477] transition-all duration-500"
+                      className="absolute top-0 left-0 h-full bg-[#BC8477] transition-all duration-500 rounded-full"
                       style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                     />
                   </div>
                 </div>
-                <div className="mt-6 bg-[#FAF8F5] p-4 border border-[#E8E1DE]">
-                  <p className="text-xs text-[#7A7371]">
-                    <span className="font-bold text-[#3A3331]">Estimated Delivery:</span>{' '}
+                <div className="mt-8 bg-blue-50 rounded-xl p-4 border border-blue-100 flex items-center gap-3">
+                  <Truck className="text-blue-500 shrink-0" size={20} />
+                  <p className="text-sm text-blue-900">
+                    <span className="font-bold">Estimated Delivery:</span>{' '}
                     {new Date(new Date(order.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { dateStyle: 'long' })}
                   </p>
                 </div>
@@ -696,7 +703,7 @@ export default function AccountPage() {
   );
 
   const renderWishlist = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="My Wishlist" subtitle={`${wishlistItems.length} saved items`} />
       {loadingWishlist ? (
         <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[#BC8477] w-8 h-8" /></div>
@@ -707,10 +714,10 @@ export default function AccountPage() {
           action={<Link href="/shop" className="btn-primary">Discover Products</Link>}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
           {wishlistItems.map(item => (
-            <div key={item.id} className="bg-white border border-[#E8E1DE] group overflow-hidden">
-              <Link href={`/product/${item.product.slug}`} className="block relative aspect-[4/5] bg-[#F5F2F0]">
+            <div key={item.id} className="bg-white border border-gray-100 rounded-2xl group overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <Link href={`/product/${item.product.slug}`} className="block relative aspect-[4/5] bg-gray-50 overflow-hidden">
                 <Image
                   src={item.product.images?.[0]?.url || '/placeholder.jpg'}
                   alt={item.product.title}
@@ -718,17 +725,17 @@ export default function AccountPage() {
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </Link>
-              <div className="p-4">
-                <p className="text-xs text-[#B5AFAD] uppercase tracking-widest mb-1">{item.product.brand?.name}</p>
+              <div className="p-5">
+                <p className="text-xs font-bold text-gray-500 mb-1">{item.product.brand?.name}</p>
                 <Link href={`/product/${item.product.slug}`}>
-                  <p className="text-sm font-medium text-[#3A3331] hover:text-[#BC8477] transition-colors line-clamp-1">
+                  <p className="text-sm font-bold text-gray-900 hover:text-[#BC8477] transition-colors line-clamp-1">
                     {item.product.title}
                   </p>
                 </Link>
-                <p className="text-sm text-[#BC8477] font-medium mt-1">
+                <p className="text-base text-[#BC8477] font-bold mt-1">
                   ${Number(item.product.variants?.[0]?.price || 0).toFixed(2)}
                 </p>
-                <div className="flex gap-2 mt-3">
+                <div className="flex gap-2 mt-4">
                   <button
                     onClick={() => {
                       if (item.product.variants?.[0]) {
@@ -737,15 +744,15 @@ export default function AccountPage() {
                         toast.success('Added to cart!');
                       }
                     }}
-                    className="flex-1 text-[10px] font-bold tracking-widest uppercase bg-[#3A3331] text-white py-2 hover:bg-[#BC8477] transition-colors"
+                    className="flex-1 text-xs font-bold bg-gray-900 rounded-xl text-white py-2 hover:bg-[#BC8477] transition-colors"
                   >
                     Add to Cart
                   </button>
                   <button
                     onClick={() => removeWishlistMutation.mutate(item.product.id)}
-                    className="w-9 h-9 border border-[#E8E1DE] flex items-center justify-center text-[#B5AFAD] hover:text-[#E46962] hover:border-[#E46962] transition-colors"
+                    className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <Trash2 size={14} />
+                    <Trash2 size={16} />
                   </button>
                 </div>
               </div>
@@ -757,7 +764,7 @@ export default function AccountPage() {
   );
 
   const renderCart = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Shopping Cart" subtitle={`${cartItems.reduce((a, i) => a + i.quantity, 0)} items in your cart`} />
       {cartItems.length === 0 ? (
         <EmptyState
@@ -766,10 +773,10 @@ export default function AccountPage() {
           action={<Link href="/shop" className="btn-primary">Continue Shopping</Link>}
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-4 mt-6">
           {cartItems.map(item => (
-            <div key={item.id} className="bg-white border border-[#E8E1DE] p-5 flex gap-4 items-center">
-              <div className="relative w-16 h-20 min-w-[64px] bg-[#F5F2F0] overflow-hidden">
+            <div key={item.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-center shadow-sm">
+              <div className="relative w-20 h-24 min-w-[80px] rounded-xl bg-gray-50 overflow-hidden">
                 <Image
                   src={item.product.images?.[0]?.url || '/placeholder.jpg'}
                   alt={item.product.title}
@@ -777,60 +784,64 @@ export default function AccountPage() {
                   className="object-cover"
                 />
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs text-[#B5AFAD] uppercase tracking-widest mb-0.5">{item.product.brand?.name}</p>
+              <div className="flex-1 min-w-0 text-center sm:text-left">
+                <p className="text-xs font-bold text-gray-500 mb-1">{item.product.brand?.name}</p>
                 <Link href={`/product/${item.product.slug}`}>
-                  <p className="text-sm font-medium text-[#3A3331] hover:text-[#BC8477] transition-colors line-clamp-1">
+                  <p className="text-sm font-bold text-gray-900 hover:text-[#BC8477] transition-colors line-clamp-1">
                     {item.product.title}
                   </p>
                 </Link>
-                <p className="text-sm text-[#BC8477] mt-1">${Number(item.variant.price).toFixed(2)}</p>
+                <p className="text-sm font-bold text-[#BC8477] mt-1">${Number(item.variant.price).toFixed(2)}</p>
               </div>
-              <div className="flex items-center border border-[#E8E1DE]">
-                <button
-                  onClick={() => cartStore.updateQuantity(item.id, item.quantity - 1)}
-                  className="w-8 h-8 flex items-center justify-center text-[#7A7371] hover:bg-[#F5F2F0] transition-colors"
-                >−</button>
-                <span className="w-8 h-8 flex items-center justify-center text-sm">{item.quantity}</span>
-                <button
-                  onClick={() => cartStore.updateQuantity(item.id, item.quantity + 1)}
-                  className="w-8 h-8 flex items-center justify-center text-[#7A7371] hover:bg-[#F5F2F0] transition-colors"
-                >+</button>
+              <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                <div className="flex items-center bg-gray-100 rounded-full p-1">
+                  <button
+                    onClick={() => cartStore.updateQuantity(item.id, item.quantity - 1)}
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-white rounded-full transition-colors"
+                  >−</button>
+                  <span className="w-8 flex items-center justify-center text-sm font-bold text-gray-900">{item.quantity}</span>
+                  <button
+                    onClick={() => cartStore.updateQuantity(item.id, item.quantity + 1)}
+                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-white rounded-full transition-colors"
+                  >+</button>
+                </div>
+                <div className="flex items-center gap-4">
+                  <p className="text-base font-bold text-gray-900 w-20 text-right">
+                    ${(Number(item.variant.price) * item.quantity).toFixed(2)}
+                  </p>
+                  <button
+                    onClick={() => cartStore.removeItem(item.id)}
+                    className="w-10 h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                  >
+                    <Trash2 size={18} />
+                  </button>
+                </div>
               </div>
-              <p className="text-sm font-medium text-[#3A3331] w-20 text-right">
-                ${(Number(item.variant.price) * item.quantity).toFixed(2)}
-              </p>
-              <button
-                onClick={() => cartStore.removeItem(item.id)}
-                className="text-[#B5AFAD] hover:text-[#E46962] transition-colors"
-              >
-                <Trash2 size={16} />
-              </button>
             </div>
           ))}
 
-          <div className="bg-white border border-[#E8E1DE] p-6">
-            <div className="flex justify-between items-center text-sm mb-2">
-              <span className="text-[#7A7371]">Subtotal</span>
-              <span className="text-[#3A3331]">${cartStore.getTotalPrice().toFixed(2)}</span>
+          <div className="bg-[#F9FAFB] rounded-2xl border border-gray-100 p-6 mt-6">
+            <div className="flex justify-between items-center text-sm mb-3">
+              <span className="text-gray-600 font-bold">Subtotal</span>
+              <span className="text-gray-900 font-bold">${cartStore.getTotalPrice().toFixed(2)}</span>
             </div>
             {cartStore.discountAmount > 0 && (
-              <div className="flex justify-between items-center text-sm mb-2">
-                <span className="text-green-600">Discount ({cartStore.couponCode})</span>
-                <span className="text-green-600">-${cartStore.discountAmount.toFixed(2)}</span>
+              <div className="flex justify-between items-center text-sm mb-3">
+                <span className="text-green-600 font-bold">Discount ({cartStore.couponCode})</span>
+                <span className="text-green-600 font-bold">-${cartStore.discountAmount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between items-center font-medium pt-3 border-t border-[#E8E1DE]">
-              <span className="text-[#3A3331]">Total</span>
-              <span className="font-serif text-xl text-[#3A3331]">${cartStore.getFinalPrice().toFixed(2)}</span>
+            <div className="flex justify-between items-center font-bold pt-4 border-t border-gray-200 mt-2">
+              <span className="text-gray-900">Total</span>
+              <span className="text-2xl text-gray-900">${cartStore.getFinalPrice().toFixed(2)}</span>
             </div>
-            <div className="flex gap-3 mt-5">
-              <Link href="/checkout" className="flex-1 btn-primary text-center block">
-                Proceed to Checkout
-              </Link>
-              <button onClick={() => { cartStore.clearCart(); toast.success('Cart cleared'); }} className="btn-ghost">
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <button onClick={() => { cartStore.clearCart(); toast.success('Cart cleared'); }} className="btn-ghost flex-1">
                 Clear Cart
               </button>
+              <Link href="/checkout" className="btn-primary flex-[2] text-center justify-center flex">
+                Proceed to Checkout
+              </Link>
             </div>
           </div>
         </div>
@@ -839,13 +850,13 @@ export default function AccountPage() {
   );
 
   const renderAddresses = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Address Management" subtitle="Manage your shipping and billing addresses" />
       <button
         onClick={() => { setShowAddressForm(!showAddressForm); setEditingAddress(null); resetAddressForm(); }}
         className="btn-primary flex items-center gap-2 mb-6"
       >
-        <Plus size={14} /> Add New Address
+        <Plus size={16} /> Add New Address
       </button>
       {showAddressForm && renderAddressForm()}
 
@@ -857,31 +868,31 @@ export default function AccountPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
           {addresses.map(addr => (
             <div key={addr.id} className={cn(
-              'relative p-6 border transition-colors',
-              addr.is_default ? 'border-[#BC8477] bg-[#FDF9F8]' : 'border-[#E8E1DE] bg-white hover:border-[#D5CFCD]'
+              'relative p-6 rounded-2xl border transition-colors',
+              addr.is_default ? 'border-[#BC8477] bg-[#FDF9F8] shadow-sm' : 'border-gray-100 bg-white hover:border-gray-200'
             )}>
               <div className="flex items-center gap-2 mb-3">
-                <MapPin size={16} className="text-[#BC8477]" />
-                <span className="text-[10px] font-bold tracking-widest uppercase text-[#7A7371]">{addr.type}</span>
+                <MapPin size={18} className="text-[#BC8477]" />
+                <span className="text-xs font-bold text-gray-500 uppercase">{addr.type}</span>
                 {addr.is_default && (
-                  <span className="bg-[#BC8477] text-white text-[9px] px-2 py-0.5 uppercase tracking-widest">Default</span>
+                  <span className="bg-[#BC8477] text-white text-[10px] px-2 py-0.5 rounded-full font-bold ml-auto">Default</span>
                 )}
               </div>
-              <p className="text-sm font-medium text-[#3A3331] mb-1">{addr.address_line1}</p>
-              <p className="text-xs text-[#7A7371]">{addr.city}, {addr.postal_code}</p>
+              <p className="text-sm font-bold text-gray-900 mb-1">{addr.address_line1}</p>
+              <p className="text-sm text-gray-500">{addr.city}, {addr.postal_code}</p>
 
-              <div className="flex gap-2 mt-5">
+              <div className="flex gap-2 mt-5 pt-5 border-t border-gray-100">
                 <button
                   onClick={() => startEditAddress(addr)}
-                  className="flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-[#7A7371] hover:text-[#BC8477] transition-colors"
+                  className="flex flex-1 items-center justify-center gap-2 text-sm font-bold text-gray-600 bg-gray-50 py-2 rounded-xl hover:bg-gray-100 transition-colors"
                 >
-                  <Edit3 size={12} /> Edit
+                  <Edit3 size={16} /> Edit
                 </button>
                 <button
                   onClick={() => deleteAddressMutation.mutate(addr.id)}
-                  className="flex items-center gap-1 text-[10px] font-bold tracking-widest uppercase text-[#B5AFAD] hover:text-[#E46962] transition-colors ml-3"
+                  className="flex flex-1 items-center justify-center gap-2 text-sm font-bold text-red-500 bg-red-50 py-2 rounded-xl hover:bg-red-100 transition-colors"
                 >
-                  <Trash2 size={12} /> Delete
+                  <Trash2 size={16} /> Delete
                 </button>
               </div>
             </div>
@@ -892,34 +903,34 @@ export default function AccountPage() {
   );
 
   const renderPayment = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Payment Methods" subtitle="Manage your saved payment methods" />
-      <div className="bg-white border border-[#E8E1DE] p-8 text-center">
-        <div className="w-16 h-16 bg-[#F5F2F0] rounded-full flex items-center justify-center mx-auto mb-4">
-          <CreditCard size={28} className="text-[#B5AFAD]" />
+      <div className="bg-[#F9FAFB] rounded-2xl border border-gray-100 p-8 text-center shadow-sm">
+        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
+          <CreditCard size={28} className="text-gray-400" />
         </div>
-        <p className="text-sm text-[#7A7371] mb-2">Payment method management coming soon.</p>
-        <p className="text-xs text-[#B5AFAD]">Currently payments are processed at checkout.</p>
+        <p className="text-base font-bold text-gray-900 mb-2">Payment method management coming soon.</p>
+        <p className="text-sm text-gray-500">Currently payments are processed at checkout.</p>
       </div>
 
       {/* Transaction History */}
-      <div className="mt-6">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#7A7371] mb-4">Transaction History</h3>
+      <div className="mt-8">
+        <h3 className="text-lg font-bold text-gray-900 mb-4">Transaction History</h3>
         {orders.length === 0 ? (
-          <div className="bg-white border border-[#E8E1DE] p-6 text-center">
-            <p className="text-sm text-[#7A7371]">No transactions yet.</p>
+          <div className="bg-white border border-gray-100 rounded-2xl p-6 text-center shadow-sm">
+            <p className="text-sm text-gray-500">No transactions yet.</p>
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {orders.slice(0, 10).map(order => (
-              <div key={order.id} className="bg-white border border-[#E8E1DE] p-4 flex items-center justify-between">
+              <div key={order.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between hover:shadow-sm transition-shadow">
                 <div>
-                  <p className="text-xs font-bold tracking-widest text-[#7A7371]">Order #{order.order_number}</p>
-                  <p className="text-xs text-[#B5AFAD]">{new Date(order.created_at).toLocaleDateString()}</p>
+                  <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                  <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-[#3A3331]">${Number(order.total_amount).toFixed(2)}</span>
-                  <span className="text-[10px] font-bold tracking-widest uppercase text-green-600 bg-green-50 px-2 py-0.5">
+                <div className="flex items-center gap-4">
+                  <span className="text-base font-bold text-gray-900">${Number(order.total_amount).toFixed(2)}</span>
+                  <span className="text-[10px] font-bold tracking-widest uppercase text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
                     PAID
                   </span>
                 </div>
@@ -932,35 +943,67 @@ export default function AccountPage() {
   );
 
   const renderReviews = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Reviews & Ratings" subtitle="Your product reviews and ratings" />
 
-      <div className="bg-white border border-[#E8E1DE] p-6 mb-6">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#3A3331] mb-4">Write a Review</h3>
-        <p className="text-sm text-[#7A7371] mb-4">
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 mb-8 shadow-sm">
+        <h3 className="text-lg font-bold text-gray-900 mb-2">Write a Review</h3>
+        <p className="text-sm text-gray-500 mb-6">
           Purchased a product recently? Share your experience by going to the product page.
         </p>
         <Link href="/shop" className="btn-ghost flex items-center gap-2 w-fit">
-          <Package size={14} /> Browse Purchased Products
+          <Package size={16} className="text-gray-400" /> Browse Purchased Products
         </Link>
       </div>
 
       {loadingReviews ? (
         <div className="flex justify-center py-8"><Loader2 className="animate-spin text-[#BC8477]" /></div>
+      ) : myReviewsData?.data && myReviewsData.data.length > 0 ? (
+        <div className="space-y-4">
+          {myReviewsData.data.map((review: any) => (
+            <div key={review.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="relative w-16 h-16 rounded-xl bg-gray-50 overflow-hidden shrink-0">
+                    {review.product.images?.[0]?.url ? (
+                      <Image src={review.product.images[0].url} alt={review.product.title} fill className="object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center"><Package className="text-gray-400" size={20} /></div>
+                    )}
+                  </div>
+                  <div>
+                    <Link href={`/product/${review.product.slug}`} className="text-sm font-bold text-gray-900 hover:text-[#BC8477] transition-colors line-clamp-1">
+                      {review.product.title}
+                    </Link>
+                    <p className="text-xs text-gray-500 mt-1">{new Date(review.created_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star key={star} size={14} className={star <= review.rating ? "fill-[#BC8477] text-[#BC8477]" : "text-gray-200 fill-gray-200"} />
+                  ))}
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 font-medium bg-[#F9FAFB] p-4 rounded-xl border border-gray-50">
+                {review.comment || 'No comment provided.'}
+              </p>
+            </div>
+          ))}
+        </div>
       ) : (
-        <div className="bg-white border border-[#E8E1DE] p-8 text-center">
-          <div className="w-16 h-16 bg-[#F5F2F0] rounded-full flex items-center justify-center mx-auto mb-4">
-            <Star size={28} className="text-[#B5AFAD]" />
+        <div className="bg-[#F9FAFB] border border-gray-100 rounded-2xl p-8 text-center shadow-sm">
+          <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm border border-gray-100">
+            <Star size={28} className="text-gray-400" />
           </div>
-          <p className="text-sm text-[#7A7371] mb-1">Your reviews will appear here once submitted.</p>
-          <p className="text-xs text-[#B5AFAD]">Visit any product page to leave a review.</p>
+          <p className="text-base font-bold text-gray-900 mb-1">Your reviews will appear here once submitted.</p>
+          <p className="text-sm text-gray-500">Visit any product page to leave a review.</p>
         </div>
       )}
     </div>
   );
 
   const renderNotifications = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Notifications" subtitle="Stay updated on orders, promotions, and more" />
       {[
         { title: 'Order Placed Successfully', body: 'Your order has been placed and is being processed.', time: '2 hours ago', type: 'order', read: false },
@@ -968,24 +1011,24 @@ export default function AccountPage() {
         { title: 'Special Offer: 20% Off', body: 'Use code VELORA20 for 20% off your next purchase.', time: '3 days ago', type: 'promo', read: true },
       ].map((notif, i) => (
         <div key={i} className={cn(
-          'bg-white border border-[#E8E1DE] p-5 mb-3 flex gap-4',
-          !notif.read && 'border-l-4 border-l-[#BC8477]'
+          'bg-white border p-5 mb-3 flex gap-4 rounded-2xl transition-shadow',
+          !notif.read ? 'border-[#BC8477] shadow-sm' : 'border-gray-100 hover:shadow-sm'
         )}>
           <div className={cn(
-            'w-10 h-10 rounded-full flex items-center justify-center shrink-0 mt-0.5',
-            notif.type === 'order' ? 'bg-blue-50' : notif.type === 'promo' ? 'bg-amber-50' : 'bg-[#F5F2F0]'
+            'w-12 h-12 rounded-full flex items-center justify-center shrink-0 mt-0.5',
+            notif.type === 'order' ? 'bg-blue-50 text-blue-600' : notif.type === 'promo' ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-400'
           )}>
-            {notif.type === 'order' ? <Package size={16} className="text-blue-600" /> :
-             notif.type === 'promo' ? <Bell size={16} className="text-amber-600" /> :
-             <Bell size={16} className="text-[#7A7371]" />}
+            {notif.type === 'order' ? <Package size={20} /> :
+             notif.type === 'promo' ? <Bell size={20} /> :
+             <Bell size={20} />}
           </div>
           <div className="flex-1">
             <div className="flex items-start justify-between">
-              <p className={cn('text-sm font-medium', notif.read ? 'text-[#7A7371]' : 'text-[#3A3331]')}>{notif.title}</p>
+              <p className={cn('text-sm font-bold', notif.read ? 'text-gray-500' : 'text-gray-900')}>{notif.title}</p>
               {!notif.read && <span className="w-2 h-2 bg-[#BC8477] rounded-full shrink-0 mt-1.5" />}
             </div>
-            <p className="text-xs text-[#B5AFAD] mt-0.5">{notif.body}</p>
-            <p className="text-[10px] text-[#B5AFAD] mt-2 uppercase tracking-widest">{notif.time}</p>
+            <p className="text-sm text-gray-500 mt-0.5">{notif.body}</p>
+            <p className="text-xs text-gray-400 mt-2 font-bold">{notif.time}</p>
           </div>
         </div>
       ))}
@@ -993,7 +1036,7 @@ export default function AccountPage() {
   );
 
   const renderSupport = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Help & Support" subtitle="Get help with your orders and account" />
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -1002,18 +1045,18 @@ export default function AccountPage() {
           { icon: Mail, label: 'Email Us', value: 'support@velora.com' },
           { icon: Clock, label: 'Support Hours', value: 'Mon–Sat, 9am–6pm' },
         ].map(c => (
-          <div key={c.label} className="bg-white border border-[#E8E1DE] p-5 text-center">
-            <div className="w-10 h-10 bg-[#F5F2F0] rounded-full flex items-center justify-center mx-auto mb-3">
-              <c.icon size={18} className="text-[#BC8477]" />
+          <div key={c.label} className="bg-[#F9FAFB] border border-gray-100 rounded-2xl p-6 text-center shadow-sm">
+            <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <c.icon size={20} className="text-[#BC8477]" />
             </div>
-            <p className="text-[10px] font-bold tracking-widest uppercase text-[#7A7371] mb-1">{c.label}</p>
-            <p className="text-sm text-[#3A3331]">{c.value}</p>
+            <p className="text-xs font-bold text-gray-500 mb-1">{c.label}</p>
+            <p className="text-sm font-bold text-gray-900">{c.value}</p>
           </div>
         ))}
       </div>
 
-      <div className="bg-white border border-[#E8E1DE] p-8 mb-6">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#3A3331] mb-6">Submit a Request</h3>
+      <div className="bg-white border border-gray-100 rounded-2xl p-8 mb-8 shadow-sm">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Submit a Request</h3>
         <div className="max-w-lg space-y-4">
           <div>
             <label className="label-style">Subject</label>
@@ -1057,8 +1100,8 @@ export default function AccountPage() {
       </div>
 
       {/* FAQ */}
-      <div className="bg-white border border-[#E8E1DE] p-8">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#3A3331] mb-6">Frequently Asked Questions</h3>
+      <div className="bg-white border border-gray-100 rounded-2xl p-8 shadow-sm">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Frequently Asked Questions</h3>
         <div className="space-y-4">
           {[
             { q: 'How do I track my order?', a: 'Go to My Account → Order Tracking to see real-time status of your orders.' },
@@ -1066,12 +1109,12 @@ export default function AccountPage() {
             { q: 'What is the return policy?', a: 'We accept returns within 30 days of delivery for unused items in original packaging.' },
             { q: 'How long does delivery take?', a: 'Standard delivery takes 5–7 business days. Express options are available at checkout.' },
           ].map((faq, i) => (
-            <details key={i} className="group border border-[#E8E1DE] rounded">
-              <summary className="flex items-center justify-between cursor-pointer p-4 text-sm font-medium text-[#3A3331] list-none">
+            <details key={i} className="group border border-gray-100 rounded-2xl bg-[#F9FAFB]">
+              <summary className="flex items-center justify-between cursor-pointer p-4 text-sm font-bold text-gray-900 list-none">
                 {faq.q}
-                <ChevronDown size={16} className="text-[#B5AFAD] group-open:rotate-180 transition-transform" />
+                <ChevronDown size={18} className="text-gray-400 group-open:rotate-180 transition-transform" />
               </summary>
-              <p className="px-4 pb-4 text-sm text-[#7A7371] font-light">{faq.a}</p>
+              <p className="px-4 pb-4 text-sm text-gray-600">{faq.a}</p>
             </details>
           ))}
         </div>
@@ -1080,11 +1123,11 @@ export default function AccountPage() {
   );
 
   const renderReturns = () => (
-    <div>
+    <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Returns & Refunds" subtitle="Request returns and track refund status" />
 
-      <div className="bg-white border border-[#E8E1DE] p-8 mb-6">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-[#3A3331] mb-6">Submit Return Request</h3>
+      <div className="bg-white border border-gray-100 rounded-2xl p-8 mb-8 shadow-sm">
+        <h3 className="text-lg font-bold text-gray-900 mb-6">Submit Return Request</h3>
         <div className="max-w-lg space-y-4">
           <div>
             <label className="label-style">Select Order</label>
@@ -1137,19 +1180,16 @@ export default function AccountPage() {
             }}
             className="btn-primary flex items-center gap-2"
           >
-            <RotateCcw size={14} /> Submit Return Request
+            <RotateCcw size={16} /> Submit Return Request
           </button>
         </div>
       </div>
 
-      <div className="bg-[#FDF9F8] border border-[#E8E1DE] p-6">
-        <h4 className="text-xs font-bold tracking-widest uppercase text-[#3A3331] mb-3">Return Policy</h4>
-        <ul className="text-sm text-[#7A7371] space-y-2">
+      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6">
+        <h4 className="text-sm font-bold text-blue-900 mb-3">Return Policy</h4>
+        <ul className="text-sm text-blue-800 space-y-2">
           {[
             '30-day return window from delivery date',
-            'Items must be unused and in original packaging',
-            'Refunds processed within 5–10 business days',
-            'Free return shipping on defective items',
           ].map(point => (
             <li key={point} className="flex items-start gap-2">
               <Check size={14} className="text-[#BC8477] shrink-0 mt-0.5" />
@@ -1232,6 +1272,7 @@ export default function AccountPage() {
     payment: renderPayment,
     reviews: renderReviews,
     notifications: renderNotifications,
+    messages: () => <MessagesTab />,
     support: renderSupport,
     returns: renderReturns,
     security: renderSecurity,
@@ -1242,111 +1283,112 @@ export default function AccountPage() {
       <style jsx global>{`
         .label-style {
           display: block;
-          font-size: 10px;
-          font-weight: 700;
-          letter-spacing: 0.1em;
-          color: #7A7371;
-          text-transform: uppercase;
-          margin-bottom: 4px;
+          font-size: 12px;
+          font-weight: 600;
+          color: #4B5563;
+          margin-bottom: 6px;
         }
         .input-style {
           width: 100%;
           height: 48px;
-          border: 1px solid #E8E1DE;
+          border: 1px solid #E5E7EB;
+          border-radius: 12px;
           padding: 0 16px;
           font-size: 14px;
-          color: #3A3331;
-          background: white;
+          color: #111827;
+          background: #F9FAFB;
           outline: none;
-          transition: border-color 0.15s;
+          transition: all 0.2s;
         }
         .input-style:focus {
           border-color: #BC8477;
+          background: white;
+          box-shadow: 0 0 0 4px rgba(188, 132, 119, 0.1);
         }
         .input-style:is(textarea) {
           height: auto;
           padding: 12px 16px;
+          border-radius: 16px;
         }
         .input-style:is(select) {
           appearance: none;
           cursor: pointer;
         }
         .btn-primary {
-          height: 44px;
+          height: 48px;
           padding: 0 24px;
-          background: #3A3331;
+          background: #BC8477;
           color: white;
-          font-size: 11px;
+          font-size: 13px;
           font-weight: 700;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
+          border-radius: 9999px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
-          transition: background 0.2s;
+          transition: all 0.2s;
           cursor: pointer;
           border: none;
         }
-        .btn-primary:hover { background: #BC8477; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-primary:hover { background: #9A6B60; transform: translateY(-1px); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .btn-ghost {
-          height: 44px;
-          padding: 0 20px;
-          border: 1px solid #E8E1DE;
-          background: transparent;
-          color: #7A7371;
-          font-size: 11px;
-          font-weight: 700;
-          letter-spacing: 0.2em;
-          text-transform: uppercase;
+          height: 48px;
+          padding: 0 24px;
+          border: 1px solid #E5E7EB;
+          background: white;
+          color: #4B5563;
+          font-size: 13px;
+          font-weight: 600;
+          border-radius: 9999px;
           display: inline-flex;
           align-items: center;
           justify-content: center;
           transition: all 0.2s;
           cursor: pointer;
         }
-        .btn-ghost:hover { border-color: #BC8477; color: #BC8477; }
+        .btn-ghost:hover { border-color: #BC8477; color: #BC8477; background: #FDF9F8; }
       `}</style>
 
-      <main className="w-full min-h-screen pt-20 pb-16 bg-[#FAF8F5]">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6">
+      <main className="w-full min-h-screen py-8 lg:py-12 bg-[#F3F4F6]">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-8">
 
           {/* Mobile Header */}
           <div className="flex items-center justify-between mb-6 lg:hidden">
             <div>
-              <h1 className="font-serif text-2xl text-[#3A3331] font-light">My Account</h1>
-              <p className="text-xs text-[#7A7371] mt-0.5">Welcome back, {user.first_name}</p>
+              <h1 className="font-bold text-2xl text-gray-900">Velora</h1>
             </div>
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="flex items-center gap-2 border border-[#E8E1DE] px-4 py-2 text-xs font-bold tracking-widest uppercase text-[#7A7371]"
+              className="flex items-center gap-2 bg-white rounded-full px-4 py-2 text-sm font-bold text-gray-700 shadow-sm"
             >
-              <LayoutDashboard size={14} /> Menu
+              <LayoutDashboard size={16} /> Menu
             </button>
           </div>
 
-          <div className="flex gap-8">
+          <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Sidebar */}
             <aside className={cn(
-              'w-64 shrink-0 flex-col gap-1',
-              sidebarOpen ? 'flex fixed inset-0 z-50 bg-white flex-col w-72 pt-8 px-4 pb-8 overflow-y-auto shadow-2xl' : 'hidden lg:flex'
+              'w-64 shrink-0 flex-col gap-2 bg-white rounded-[32px] p-4 shadow-sm h-fit sticky top-12',
+              sidebarOpen ? 'flex fixed inset-0 z-50 rounded-none w-full h-full pt-8 px-6 pb-8 overflow-y-auto' : 'hidden lg:flex'
             )}>
               {sidebarOpen && (
                 <button
                   onClick={() => setSidebarOpen(false)}
-                  className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center text-[#7A7371]"
+                  className="absolute top-6 right-6 w-10 h-10 flex items-center justify-center text-gray-500 bg-gray-100 rounded-full"
                 >
                   <X size={20} />
                 </button>
               )}
 
-              {/* User Info */}
-              <div className="p-4 mb-2 bg-gradient-to-r from-[#3A3331] to-[#5A4B48] text-white">
-                <div className="w-10 h-10 rounded-full bg-[#BC8477] flex items-center justify-center font-serif text-lg mb-2">
+              {/* Logo / Header Area */}
+              <div className="flex items-center gap-3 px-4 py-4 mb-4">
+                <div className="w-10 h-10 rounded-full bg-[#BC8477] text-white flex items-center justify-center font-bold text-lg shrink-0">
                   {user.first_name.charAt(0)}{user.last_name.charAt(0)}
                 </div>
-                <p className="text-sm font-medium">{user.first_name} {user.last_name}</p>
-                <p className="text-[10px] text-white/60 truncate">{user.email}</p>
+                <div className="min-w-0">
+                  <p className="text-base font-bold text-gray-900 truncate">{user.first_name} {user.last_name}</p>
+                  <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                </div>
               </div>
 
               {NAV_ITEMS.map(item => (
@@ -1354,53 +1396,66 @@ export default function AccountPage() {
                   key={item.id}
                   onClick={() => { setActiveTab(item.id as TabType); setSidebarOpen(false); }}
                   className={cn(
-                    'flex items-center gap-3 w-full text-left px-4 py-3 transition-all text-sm',
+                    'flex items-center gap-4 w-full text-left px-5 py-3.5 transition-all text-sm rounded-2xl',
                     activeTab === item.id
-                      ? 'bg-white border-l-2 border-[#BC8477] text-[#BC8477] font-medium'
-                      : 'text-[#7A7371] hover:bg-white hover:text-[#3A3331] border-l-2 border-transparent'
+                      ? 'bg-[#F3F4F6] text-gray-900 font-bold'
+                      : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900 font-medium'
                   )}
                 >
-                  <item.icon size={16} className="shrink-0" />
-                  <span className="text-xs font-bold tracking-wider uppercase">{item.label}</span>
+                  <item.icon size={20} className={cn("shrink-0", activeTab === item.id ? "text-gray-900" : "text-gray-400")} />
+                  <span className="text-sm">{item.label}</span>
+                  {item.id === 'notifications' && (
+                    <span className="ml-auto bg-red-100 text-red-600 text-[10px] font-bold px-2 py-0.5 rounded-full">2</span>
+                  )}
                 </button>
               ))}
+
+              <div className="h-px bg-gray-100 my-4 mx-4" />
 
               {/* Admin Panel Link */}
               {user.role === 'ADMIN' && (
                 <Link
                   href="/admin/dashboard"
-                  className="flex items-center gap-3 w-full text-left px-4 py-3 text-[#3A3331] hover:bg-white border-l-2 border-transparent"
+                  className="flex items-center gap-4 w-full text-left px-5 py-3.5 text-gray-600 hover:bg-gray-50 rounded-2xl font-medium"
                 >
-                  <Shield size={16} className="text-[#BC8477]" />
-                  <span className="text-xs font-bold tracking-wider uppercase">Go to Admin Panel</span>
+                  <Shield size={20} className="text-[#BC8477] shrink-0" />
+                  <span className="text-sm">Admin Panel</span>
                 </Link>
               )}
 
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-3 w-full text-left px-4 py-3 mt-2 text-[#E46962] hover:bg-red-50 transition-colors border-l-2 border-transparent"
+                className="flex items-center gap-4 w-full text-left px-5 py-3.5 text-red-500 hover:bg-red-50 rounded-2xl font-medium transition-colors"
               >
-                <LogOut size={16} />
-                <span className="text-xs font-bold tracking-wider uppercase">Logout</span>
+                <LogOut size={20} className="shrink-0" />
+                <span className="text-sm">Logout</span>
               </button>
             </aside>
 
             {/* Main Content */}
             <div className="flex-1 min-w-0">
-              {/* Desktop Page Title */}
-              <div className="hidden lg:flex items-center justify-between mb-8">
-                <div>
-                  <h1 className="font-serif text-3xl text-[#3A3331] font-light">
-                    {NAV_ITEMS.find(n => n.id === activeTab)?.label}
-                  </h1>
+              {/* Top Navigation Row */}
+              <div className="hidden lg:flex items-center justify-between mb-8 bg-white rounded-full p-2 pr-4 shadow-sm">
+                <h1 className="font-bold text-2xl text-gray-900 pl-6 py-2">
+                  {NAV_ITEMS.find(n => n.id === activeTab)?.label}
+                </h1>
+                
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <input type="text" placeholder="Search anything..." className="pl-10 pr-4 py-2.5 bg-[#F3F4F6] rounded-full text-sm outline-none w-64 focus:ring-2 ring-[#BC8477]/20" />
+                    <HelpCircle size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                  </div>
+                  <button className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors">
+                    Explore
+                  </button>
+                  <button className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-gray-600 hover:bg-gray-200">
+                    <Bell size={18} />
+                  </button>
+                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-200">
+                    <Image src="/placeholder.jpg" alt="Profile" width={40} height={40} className="object-cover" />
+                  </div>
                 </div>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-2 text-xs font-bold tracking-widest uppercase text-[#7A7371] hover:text-[#E46962] transition-colors"
-                >
-                  <LogOut size={16} /> Logout
-                </button>
               </div>
 
               {TAB_RENDERERS[activeTab]()}

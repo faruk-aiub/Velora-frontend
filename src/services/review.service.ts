@@ -20,6 +20,13 @@ export const reviewService = {
     return res.data;
   },
 
+  getMyReviews: async (page = 1, limit = 10) => {
+    const res = await apiClient.get<PaginatedResponse<Review>>('/reviews/me', {
+      params: { page, limit },
+    });
+    return res.data;
+  },
+
   createReview: async (productId: string, rating: number, comment?: string) => {
     const res = await apiClient.post('/reviews', {
       product_id: productId,

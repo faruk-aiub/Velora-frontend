@@ -46,6 +46,7 @@ export interface Product {
   category?: Category;
   brand?: Brand;
   variants: ProductVariant[];
+  base_price?: number;
   tags: string[];
   is_active: boolean;
   created_at: string;

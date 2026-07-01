@@ -25,20 +25,7 @@ import {
 import { DataTable } from '@/components/ui/data-table';
 import { columns, Order } from './columns';
 
-const salesData = [
-  { name: 'Jan', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Feb', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Mar', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Apr', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'May', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Jun', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Jul', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Aug', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Sep', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Oct', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Nov', total: Math.floor(Math.random() * 5000) + 1000 },
-  { name: 'Dec', total: Math.floor(Math.random() * 5000) + 1000 },
-];
+// removed static salesData
 
 const revenueData = [
   { name: 'Mon', revenue: 4000 },
@@ -60,6 +47,7 @@ export default function AdminDashboard() {
     totalProducts: 0,
     recentOrders: []
   });
+  const [salesData, setSalesData] = useState<any[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -75,11 +63,25 @@ export default function AdminDashboard() {
             setStats(data.data);
           }
         }
+        
+        const salesRes = await fetch('http://localhost:3000/api/v1/admin/sales-report', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (salesRes.ok) {
+          const salesDataRaw = await salesRes.json();
+          if (salesDataRaw.data?.monthly) {
+            setSalesData(salesDataRaw.data.monthly);
+          }
+        }
       } catch (e) {
         console.error('Failed to fetch stats', e);
       }
     };
     fetchStats();
+    
+    // Poll for real-time order updates
+    const interval = setInterval(fetchStats, 5000);
+    return () => clearInterval(interval);
   }, []);
 
   if (!mounted) return null;
@@ -88,51 +90,51 @@ export default function AdminDashboard() {
     <div className="space-y-6">
       {/* Overview Stats */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+            <CardTitle className="text-sm font-bold text-gray-500">Total Revenue</CardTitle>
+            <DollarSign className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${(stats.totalSales || 45231.89).toLocaleString()}</div>
-            <p className="text-xs text-emerald-500 flex items-center mt-1">
-              <ArrowUpRight className="w-3 h-3 mr-1" /> +20.1% from last month
+            <div className="text-4xl font-bold text-gray-900">${(stats.totalSales || 45231.89).toLocaleString()}</div>
+            <p className="text-sm font-bold text-green-500 flex items-center mt-2">
+              <ArrowUpRight className="w-4 h-4 mr-1" /> +20.1% <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Total Orders</CardTitle>
-            <CreditCard className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+            <CardTitle className="text-sm font-bold text-gray-500">Total Orders</CardTitle>
+            <CreditCard className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{stats.totalOrders || 2350}</div>
-            <p className="text-xs text-emerald-500 flex items-center mt-1">
-              <ArrowUpRight className="w-3 h-3 mr-1" /> +15% from last month
+            <div className="text-4xl font-bold text-gray-900">+{stats.totalOrders || 2350}</div>
+            <p className="text-sm font-bold text-green-500 flex items-center mt-2">
+              <ArrowUpRight className="w-4 h-4 mr-1" /> +15% <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Active Customers</CardTitle>
-            <Users className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+            <CardTitle className="text-sm font-bold text-gray-500">Active Customers</CardTitle>
+            <Users className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">+{stats.totalCustomers || 12234}</div>
-            <p className="text-xs text-emerald-500 flex items-center mt-1">
-              <ArrowUpRight className="w-3 h-3 mr-1" /> +7% from last month
+            <div className="text-4xl font-bold text-gray-900">+{stats.totalCustomers || 12234}</div>
+            <p className="text-sm font-bold text-green-500 flex items-center mt-2">
+              <ArrowUpRight className="w-4 h-4 mr-1" /> +7% <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-zinc-500 dark:text-zinc-400">Total Products</CardTitle>
-            <Package className="h-4 w-4 text-zinc-500 dark:text-zinc-400" />
+            <CardTitle className="text-sm font-bold text-gray-500">Total Products</CardTitle>
+            <Package className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalProducts || 573}</div>
-            <p className="text-xs text-rose-500 flex items-center mt-1">
-              <ArrowDownRight className="w-3 h-3 mr-1" /> -2 from last month
+            <div className="text-4xl font-bold text-gray-900">{stats.totalProducts || 573}</div>
+            <p className="text-sm font-bold text-red-500 flex items-center mt-2">
+              <ArrowDownRight className="w-4 h-4 mr-1" /> -2 <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
           </CardContent>
         </Card>
@@ -140,38 +142,38 @@ export default function AdminDashboard() {
 
       {/* Charts */}
       <div className="grid gap-6 md:grid-cols-7">
-        <Card className="col-span-4">
+        <Card className="col-span-4 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
-            <CardTitle>Sales Overview</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-900">Sales Overview</CardTitle>
           </CardHeader>
           <CardContent className="pl-2">
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={salesData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
-                  <XAxis dataKey="name" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                  <Tooltip cursor={{ fill: 'rgba(255, 255, 255, 0.05)' }} contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }} />
-                  <Bar dataKey="total" fill="#0f172a" radius={[4, 4, 0, 0]} className="dark:fill-zinc-50" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
+                  <XAxis dataKey="name" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                  <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111827', fontWeight: 'bold' }} />
+                  <Bar dataKey="total" fill="#BC8477" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="col-span-3">
+        <Card className="col-span-3 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
-            <CardTitle>Weekly Revenue</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-900">Weekly Revenue</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={revenueData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#3f3f46" opacity={0.2} />
-                  <XAxis dataKey="name" stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#71717a" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#18181b', border: '1px solid #27272a', borderRadius: '8px' }} />
-                  <Line type="monotone" dataKey="revenue" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
+                  <XAxis dataKey="name" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
+                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111827', fontWeight: 'bold' }} />
+                  <Line type="monotone" dataKey="revenue" stroke="#BC8477" strokeWidth={4} dot={{ r: 5, fill: '#BC8477' }} activeDot={{ r: 7, fill: '#BC8477', stroke: '#fff', strokeWidth: 3 }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -180,20 +182,20 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-7 mt-6">
-        <Card className="col-span-5">
+        <Card className="col-span-5 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
-            <CardTitle>Recent Orders</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-900">Recent Orders</CardTitle>
           </CardHeader>
           <CardContent>
             <DataTable columns={columns} data={stats.recentOrders as Order[]} searchKey="customer" />
           </CardContent>
         </Card>
-        <Card className="col-span-2">
+        <Card className="col-span-2 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
-            <CardTitle>Top Selling Products</CardTitle>
+            <CardTitle className="text-xl font-bold text-gray-900">Top Selling Products</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-8">
+            <div className="space-y-6">
               {[
                 { name: 'Wireless Headphones', sales: 245, price: '$120' },
                 { name: 'Smart Watch Series 7', sales: 190, price: '$299' },
@@ -202,16 +204,16 @@ export default function AdminDashboard() {
                 { name: 'USB-C Hub', sales: 98, price: '$45' },
               ].map((product, i) => (
                 <div key={i} className="flex items-center">
-                  <div className="w-9 h-9 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center mr-4">
-                    <Package className="w-5 h-5 text-zinc-500" />
+                  <div className="w-12 h-12 rounded-[20px] bg-gray-50 flex items-center justify-center mr-4">
+                    <Package className="w-5 h-5 text-[#BC8477]" />
                   </div>
-                  <div className="ml-4 space-y-1 flex-1">
-                    <p className="text-sm font-medium leading-none">{product.name}</p>
-                    <p className="text-sm text-zinc-500 dark:text-zinc-400">
+                  <div className="ml-2 space-y-1 flex-1">
+                    <p className="text-sm font-bold leading-none text-gray-900">{product.name}</p>
+                    <p className="text-xs text-gray-500 font-medium">
                       {product.sales} sales
                     </p>
                   </div>
-                  <div className="font-medium text-sm">{product.price}</div>
+                  <div className="font-bold text-sm text-gray-900">{product.price}</div>
                 </div>
               ))}
             </div>

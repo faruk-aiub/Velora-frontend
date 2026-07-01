@@ -100,21 +100,21 @@ export default function RegisterPage() {
   return (
     <div className="w-full max-w-[420px] mx-auto">
       <motion.div {...item(0)} className="text-center mb-8">
-        <h3 className="text-xs font-semibold tracking-[0.2em] text-[#BC8477] uppercase mb-4">
+        <h3 className="text-sm font-bold text-[#BC8477] mb-4">
           New Member
         </h3>
-        <h1 className="font-serif text-4xl text-[#3A3331] font-light mb-4">
+        <h1 className="font-bold text-4xl text-gray-900 tracking-tight mb-4">
           Create your <span className="text-[#BC8477] italic">account</span>
         </h1>
-        <p className="text-sm text-[#7A7371] font-light">
+        <p className="text-sm text-gray-500 font-medium">
           Join thousands of women who trust Velora.
         </p>
         
         {/* Divider */}
         <div className="flex items-center justify-center gap-4 mt-8">
-          <div className="w-16 h-[1px] bg-[#E8E1DE]" />
+          <div className="w-16 h-[1px] bg-gray-100" />
           <div className="w-1 h-1 rounded-full bg-[#BC8477]" />
-          <div className="w-16 h-[1px] bg-[#E8E1DE]" />
+          <div className="w-16 h-[1px] bg-gray-100" />
         </div>
       </motion.div>
 
@@ -122,26 +122,26 @@ export default function RegisterPage() {
         
         <div className="grid grid-cols-2 gap-6">
           <motion.div {...item(0.1)} className="space-y-1 relative group">
-            <label htmlFor="first_name" className="block text-[10px] font-bold tracking-[0.1em] text-[#7A7371] uppercase">
+            <label htmlFor="first_name" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
               First Name
             </label>
             <input
               id="first_name"
               placeholder="Jane"
-              className="w-full h-10 bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] transition-colors focus:outline-none focus:border-[#BC8477] placeholder:text-[#B5AFAD]"
+              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400"
               style={{ borderColor: errors.first_name ? '#E46962' : undefined }}
               {...register('first_name')}
             />
             {errors.first_name && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.first_name.message}</p>}
           </motion.div>
           <motion.div {...item(0.2)} className="space-y-1 relative group">
-            <label htmlFor="last_name" className="block text-[10px] font-bold tracking-[0.1em] text-[#7A7371] uppercase">
+            <label htmlFor="last_name" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
               Last Name
             </label>
             <input
               id="last_name"
               placeholder="Smith"
-              className="w-full h-10 bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] transition-colors focus:outline-none focus:border-[#BC8477] placeholder:text-[#B5AFAD]"
+              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400"
               style={{ borderColor: errors.last_name ? '#E46962' : undefined }}
               {...register('last_name')}
             />
@@ -150,14 +150,14 @@ export default function RegisterPage() {
         </div>
 
         <motion.div {...item(0.3)} className="space-y-1 relative group pt-2">
-          <label htmlFor="email" className="block text-[10px] font-bold tracking-[0.1em] text-[#7A7371] uppercase">
+          <label htmlFor="email" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
             Email Address
           </label>
           <input
             id="email"
             type="email"
             placeholder="your@email.com"
-            className="w-full h-10 bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] transition-colors focus:outline-none focus:border-[#BC8477] placeholder:text-[#B5AFAD]"
+            className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400"
             style={{ borderColor: errors.email ? '#E46962' : undefined }}
             {...register('email')}
           />
@@ -165,7 +165,7 @@ export default function RegisterPage() {
         </motion.div>
 
         <motion.div {...item(0.4)} className="space-y-1 relative group pt-2">
-          <label htmlFor="password" className="block text-[10px] font-bold tracking-[0.1em] text-[#7A7371] uppercase">
+          <label htmlFor="password" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
             Password
           </label>
           <div className="relative">
@@ -173,7 +173,7 @@ export default function RegisterPage() {
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Create a strong password"
-              className="w-full h-10 bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] transition-colors focus:outline-none focus:border-[#BC8477] placeholder:text-[#B5AFAD] pr-10"
+              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 pr-10"
               style={{ borderColor: errors.password ? '#E46962' : undefined }}
               {...register('password')}
             />
@@ -189,7 +189,7 @@ export default function RegisterPage() {
         </motion.div>
 
         <motion.div {...item(0.5)} className="space-y-1 relative group pt-2">
-          <label htmlFor="confirmPassword" className="block text-[10px] font-bold tracking-[0.1em] text-[#7A7371] uppercase">
+          <label htmlFor="confirmPassword" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
             Confirm Password
           </label>
           <div className="relative">
@@ -197,7 +197,7 @@ export default function RegisterPage() {
               id="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               placeholder="Repeat your password"
-              className="w-full h-10 bg-transparent border-b border-[#E8E1DE] text-sm text-[#3A3331] transition-colors focus:outline-none focus:border-[#BC8477] placeholder:text-[#B5AFAD] pr-10"
+              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 pr-10"
               style={{ borderColor: errors.confirmPassword ? '#E46962' : undefined }}
               {...register('confirmPassword')}
             />
