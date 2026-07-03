@@ -32,7 +32,7 @@ export const createColumns = (
  const logoUrl = row.getValue('logo_url') as string | null;
  return logoUrl ? (
  <div className="relative w-10 h-10 rounded overflow-hidden border border-zinc-200">
- <Image src={logoUrl} alt={row.getValue('name')} fill className="object-cover"/>
+ <Image src={logoUrl} alt={row.getValue('name')} fill sizes="40px" className="object-cover"/>
  </div>
  ) : (
  <div className="w-10 h-10 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-500 font-medium">

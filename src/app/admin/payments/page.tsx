@@ -53,7 +53,7 @@ export default function PaymentsPage() {
                   </TableCell>
                   <TableCell>{payment.order?.order_number || payment.order_id}</TableCell>
                   <TableCell>{payment.provider}</TableCell>
-                  <TableCell>${payment.amount}</TableCell>
+                  <TableCell>৳{payment.amount}</TableCell>
                   <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-semibold 

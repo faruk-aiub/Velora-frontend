@@ -74,7 +74,7 @@ export const createColumns = (
  header: 'Price',
  cell: ({ row }) => {
  const price = row.getValue('base_price') as number;
- return <div>${price !== undefined ? price.toFixed(2) : '0.00'}</div>;
+ return <div>৳{price !== undefined ? price.toFixed(2) : '0.00'}</div>;
  }
  },
  {

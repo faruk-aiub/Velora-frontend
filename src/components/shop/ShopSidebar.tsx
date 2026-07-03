@@ -132,7 +132,7 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
             <div className="flex items-center gap-4">
               <input 
                 type="number" 
-                placeholder="$ Min" 
+                placeholder="৳ Min" 
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="w-full h-10 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] border border-gray-200 transition-all" 
@@ -140,7 +140,7 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
               <span className="text-gray-500">-</span>
               <input 
                 type="number" 
-                placeholder="$ Max" 
+                placeholder="৳ Max" 
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="w-full h-10 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] border border-gray-200 transition-all" 

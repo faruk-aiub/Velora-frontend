@@ -3,6 +3,8 @@ import type { ApiResponse, PaginatedResponse } from '@/types/auth.types';
 import type { Order } from '@/types/product.types';
 
 export interface CreateOrderPayload {
+  customer_name: string;
+  contact_number: string;
   shippingAddressId: string;
   cartItems: {
     variantId: string;

@@ -75,8 +75,8 @@ export default function AnalyticsPage() {
               <BarChart data={salesData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
                 <XAxis dataKey="name" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
-                <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
-                <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111827', fontWeight: 'bold' }} />
+                <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
+                <Tooltip formatter={(value: number) => [`৳${value}`, 'Revenue']} cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111827', fontWeight: 'bold' }} />
                 <Bar dataKey="total" fill="#BC8477" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>

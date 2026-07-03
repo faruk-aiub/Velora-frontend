@@ -197,11 +197,11 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="space-y-6">
               {[
-                { name: 'Wireless Headphones', sales: 245, price: '$120' },
-                { name: 'Smart Watch Series 7', sales: 190, price: '$299' },
-                { name: 'Mechanical Keyboard', sales: 154, price: '$150' },
-                { name: 'Gaming Mouse', sales: 121, price: '$80' },
-                { name: 'USB-C Hub', sales: 98, price: '$45' },
+                { name: 'Wireless Headphones', sales: 245, price: '৳120' },
+                { name: 'Smart Watch Series 7', sales: 190, price: '৳299' },
+                { name: 'Mechanical Keyboard', sales: 154, price: '৳150' },
+                { name: 'Gaming Mouse', sales: 121, price: '৳80' },
+                { name: 'USB-C Hub', sales: 98, price: '৳45' },
               ].map((product, i) => (
                 <div key={i} className="flex items-center">
                   <div className="w-12 h-12 rounded-[20px] bg-gray-50 flex items-center justify-center mr-4">

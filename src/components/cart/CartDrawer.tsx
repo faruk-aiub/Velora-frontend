@@ -136,7 +136,7 @@ export function CartDrawer() {
                           </button>
                         </div>
                         <span className="font-bold text-sm text-gray-900">
-                          ${(item.variant.price * item.quantity).toFixed(2)}
+                          ৳{(item.variant.price * item.quantity).toFixed(2)}
                         </span>
                       </div>
                     </div>
@@ -177,19 +177,19 @@ export function CartDrawer() {
                 </div>
 
                 <div className="space-y-2 mb-6">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold text-gray-500">Subtotal</span>
-                    <span className="font-sans text-sm text-gray-900">${getTotalPrice().toFixed(2)}</span>
+                  <div className="flex justify-between items-center mb-4">
+                    <span className="font-sans text-sm text-gray-500">Subtotal</span>
+                    <span className="font-sans text-sm text-gray-900">৳{getTotalPrice().toFixed(2)}</span>
                   </div>
                   {discountAmount > 0 && (
-                    <div className="flex items-center justify-between text-[#BC8477]">
-                      <span className="text-xs font-bold tracking-widest uppercase">Discount</span>
-                      <span className="font-sans text-sm">-${discountAmount.toFixed(2)}</span>
+                    <div className="flex justify-between items-center mb-4 text-[#BC8477]">
+                      <span className="font-sans text-sm">Discount</span>
+                      <span className="font-sans text-sm">-৳{discountAmount.toFixed(2)}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                    <span className="text-lg font-bold text-gray-900">Total</span>
-                    <span className="font-bold text-2xl text-gray-900">${getFinalPrice().toFixed(2)}</span>
+                  <div className="flex justify-between items-center pt-4 border-t border-gray-100 mb-6">
+                    <span className="font-bold text-gray-900">Total</span>
+                    <span className="font-bold text-2xl text-gray-900">৳{getFinalPrice().toFixed(2)}</span>
                   </div>
                 </div>
 

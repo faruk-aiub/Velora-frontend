@@ -23,6 +23,8 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState<'STRIPE' | 'COD'>('STRIPE');
   const [isAddingAddress, setIsAddingAddress] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [customerName, setCustomerName] = useState('');
+  const [contactNumber, setContactNumber] = useState('');
 
   useEffect(() => {
     setMounted(true);
@@ -124,21 +126,28 @@ export default function CheckoutPage() {
       toast.error('Please select a shipping address');
       return;
     }
-    
-    const cartItems = items.map(item => ({
-      variantId: item.variant?.id || item.variant_id,
-      quantity: item.quantity,
-    }));
 
-    if (cartItems.some(item => !item.variantId)) {
+    if (!customerName.trim() || !contactNumber.trim()) {
+      toast.error('Please provide your full name and contact number');
+      return;
+    }
+    
+    const payload = {
+      shippingAddressId: selectedAddress,
+      customer_name: customerName,
+      contact_number: contactNumber,
+      cartItems: items.map(item => ({
+        variantId: item.variant?.id || item.variant_id,
+        quantity: item.quantity,
+      })),
+    };
+
+    if (payload.cartItems.some(item => !item.variantId)) {
       toast.error('Your cart contains outdated items. Please clear your cart and add them again.');
       return;
     }
 
-    placeOrderMutation.mutate({
-      shippingAddressId: selectedAddress,
-      cartItems,
-    });
+    placeOrderMutation.mutate(payload);
   };
 
   if (!mounted || !user || items.length === 0) return null;
@@ -166,10 +175,31 @@ export default function CheckoutPage() {
           {/* Left Column (Shipping Details) */}
           <div className="lg:col-span-7 flex flex-col gap-10">
             
+            {/* Contact Information Section */}
+            <div className="bg-white p-8 border border-gray-100 rounded-[32px] shadow-sm">
+              <h2 className="text-lg font-bold text-gray-900 tracking-tight mb-6">1. Contact Information</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input 
+                  required 
+                  placeholder="Full Name" 
+                  value={customerName} 
+                  onChange={e => setCustomerName(e.target.value)}
+                  className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] border border-gray-200"
+                />
+                <input 
+                  required 
+                  placeholder="Contact Number (e.g. +8801...)" 
+                  value={contactNumber} 
+                  onChange={e => setContactNumber(e.target.value)}
+                  className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] border border-gray-200"
+                />
+              </div>
+            </div>
+
             {/* Address Selection Section */}
             <div className="bg-white p-8 border border-gray-100 rounded-[32px] shadow-sm">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-bold text-gray-900 tracking-tight">1. Shipping Address</h2>
+                <h2 className="text-lg font-bold text-gray-900 tracking-tight">2. Shipping Address</h2>
                 {!isAddingAddress && (
                   <button 
                     onClick={() => setIsAddingAddress(true)}
@@ -249,7 +279,7 @@ export default function CheckoutPage() {
 
             {/* Payment Info Section */}
             <div className="bg-white p-8 border border-gray-100 rounded-[32px] shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900 tracking-tight mb-6">2. Payment Method</h2>
+              <h2 className="text-lg font-bold text-gray-900 tracking-tight mb-6">3. Payment Method</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div 
                   onClick={() => setPaymentMethod('STRIPE')}
@@ -292,37 +322,37 @@ export default function CheckoutPage() {
                 {items.map(item => (
                   <div key={item.id} className="flex gap-4">
                     <div className="relative w-16 h-20 bg-gray-50 shrink-0 rounded-xl overflow-hidden">
-                      <Image src={item.product.images?.[0]?.url || '/placeholder.jpg'} alt={item.product.title} fill className="object-cover" />
+                      <Image src={item.product.images?.[0]?.url || '/placeholder.jpg'} alt={item.product.title} fill sizes="64px" className="object-cover" />
                     </div>
                     <div className="flex-1 flex flex-col justify-center">
                       <p className="text-sm text-gray-900 font-medium line-clamp-1">{item.product.title}</p>
                       <p className="text-[10px] text-gray-500 uppercase tracking-widest mt-1">Qty: {item.quantity}</p>
                     </div>
-                    <div className="flex items-center text-sm font-medium text-gray-900">
-                      ${(item.variant.price * item.quantity).toFixed(2)}
-                    </div>
+                    <span className="font-bold text-sm text-gray-900">
+                      ৳{(item.variant.price * item.quantity).toFixed(2)}
+                    </span>
                   </div>
                 ))}
               </div>
 
               <div className="border-t border-gray-100 pt-4 space-y-3 mb-6">
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Subtotal</span>
+                  <span className="font-sans font-medium text-gray-900">৳{subtotal.toFixed(2)}</span>
                 </div>
                 {discountAmount > 0 && (
-                  <div className="flex justify-between text-sm text-[#BC8477]">
+                  <div className="flex justify-between items-center text-sm text-[#BC8477]">
                     <span>Discount {couponCode ? `(${couponCode})` : ''}</span>
-                    <span>-${discountAmount.toFixed(2)}</span>
+                    <span className="font-sans font-medium">-৳{discountAmount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between text-sm text-gray-500">
-                  <span>Shipping</span>
-                  <span>{shippingCost === 0 ? 'Free' : `$${shippingCost.toFixed(2)}`}</span>
+                <div className="flex justify-between items-center text-sm">
+                  <span className="text-gray-500">Shipping</span>
+                  <span className="font-sans font-medium text-gray-900">{shippingCost === 0 ? 'Free' : `৳${shippingCost.toFixed(2)}`}</span>
                 </div>
-                <div className="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t border-gray-100">
-                  <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                <div className="pt-4 border-t border-gray-100 flex justify-between items-center">
+                  <span className="font-bold text-gray-900">Total</span>
+                  <span className="font-bold text-2xl tracking-tight text-gray-900">৳{total.toFixed(2)}</span>
                 </div>
               </div>
 

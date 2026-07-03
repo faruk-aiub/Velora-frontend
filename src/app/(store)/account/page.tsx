@@ -426,7 +426,7 @@ export default function AccountPage() {
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-2">
-                    <p className="font-bold text-gray-900">${Number(order.total_amount).toFixed(2)}</p>
+                    <p className="font-bold text-gray-900">৳{Number(order.total_amount).toFixed(2)}</p>
                     <OrderStatusBadge status={order.status} />
                   </div>
                 </div>
@@ -595,7 +595,7 @@ export default function AccountPage() {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p className="text-xs text-gray-500 mb-0.5">Total</p>
-                    <p className="font-bold text-base text-gray-900">${Number(order.total_amount).toFixed(2)}</p>
+                    <p className="font-bold text-base text-gray-900">৳{Number(order.total_amount).toFixed(2)}</p>
                   </div>
                   <OrderStatusBadge status={order.status} />
                 </div>
@@ -606,7 +606,7 @@ export default function AccountPage() {
                   <div key={item.id} className="flex gap-4 items-center">
                     <div className="relative w-14 h-14 min-w-[56px] rounded-xl bg-[#F9FAFB] overflow-hidden">
                       {item.image_url ? (
-                        <Image src={item.image_url} alt={item.product_name || 'Product'} fill className="object-cover" />
+                        <Image src={item.image_url} alt={item.product_name || 'Product'} fill sizes="48px" className="object-cover" />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
                           <Package size={18} className="text-gray-400" />
@@ -615,10 +615,10 @@ export default function AccountPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-gray-900 truncate">{item.product_name || `Item ${item.sku}`}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity} × ${Number(item.price).toFixed(2)}</p>
+                      <p className="text-xs text-gray-500 mt-0.5">Qty: {item.quantity} × ৳{Number(item.price).toFixed(2)}</p>
                     </div>
                     <p className="text-sm font-bold text-gray-900">
-                      ${(Number(item.price) * item.quantity).toFixed(2)}
+                      ৳{(Number(item.price) * item.quantity).toFixed(2)}
                     </p>
                   </div>
                 ))}
@@ -733,7 +733,7 @@ export default function AccountPage() {
                   </p>
                 </Link>
                 <p className="text-base text-[#BC8477] font-bold mt-1">
-                  ${Number(item.product.variants?.[0]?.price || 0).toFixed(2)}
+                  ৳{Number(item.product.variants?.[0]?.price || 0).toFixed(2)}
                 </p>
                 <div className="flex gap-2 mt-4">
                   <button
@@ -791,7 +791,7 @@ export default function AccountPage() {
                     {item.product.title}
                   </p>
                 </Link>
-                <p className="text-sm font-bold text-[#BC8477] mt-1">${Number(item.variant.price).toFixed(2)}</p>
+                <p className="text-sm font-bold text-[#BC8477] mt-1">৳{Number(item.variant.price).toFixed(2)}</p>
               </div>
               <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                 <div className="flex items-center bg-gray-100 rounded-full p-1">
@@ -807,7 +807,7 @@ export default function AccountPage() {
                 </div>
                 <div className="flex items-center gap-4">
                   <p className="text-base font-bold text-gray-900 w-20 text-right">
-                    ${(Number(item.variant.price) * item.quantity).toFixed(2)}
+                    ৳{(Number(item.variant.price) * item.quantity).toFixed(2)}
                   </p>
                   <button
                     onClick={() => cartStore.removeItem(item.id)}
@@ -823,17 +823,17 @@ export default function AccountPage() {
           <div className="bg-[#F9FAFB] rounded-2xl border border-gray-100 p-6 mt-6">
             <div className="flex justify-between items-center text-sm mb-3">
               <span className="text-gray-600 font-bold">Subtotal</span>
-              <span className="text-gray-900 font-bold">${cartStore.getTotalPrice().toFixed(2)}</span>
+              <span className="text-gray-900 font-bold">৳{cartStore.getTotalPrice().toFixed(2)}</span>
             </div>
             {cartStore.discountAmount > 0 && (
               <div className="flex justify-between items-center text-sm mb-3">
                 <span className="text-green-600 font-bold">Discount ({cartStore.couponCode})</span>
-                <span className="text-green-600 font-bold">-${cartStore.discountAmount.toFixed(2)}</span>
+                <span className="text-green-600 font-bold">-৳{cartStore.discountAmount.toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between items-center font-bold pt-4 border-t border-gray-200 mt-2">
               <span className="text-gray-900">Total</span>
-              <span className="text-2xl text-gray-900">${cartStore.getFinalPrice().toFixed(2)}</span>
+              <span className="text-2xl text-gray-900">৳{cartStore.getFinalPrice().toFixed(2)}</span>
             </div>
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
               <button onClick={() => { cartStore.clearCart(); toast.success('Cart cleared'); }} className="btn-ghost flex-1">
@@ -929,7 +929,7 @@ export default function AccountPage() {
                   <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="flex items-center gap-4">
-                  <span className="text-base font-bold text-gray-900">${Number(order.total_amount).toFixed(2)}</span>
+                  <span className="text-base font-bold text-gray-900">৳{Number(order.total_amount).toFixed(2)}</span>
                   <span className="text-[10px] font-bold tracking-widest uppercase text-green-600 bg-green-50 px-3 py-1 rounded-full border border-green-100">
                     PAID
                   </span>
@@ -966,7 +966,7 @@ export default function AccountPage() {
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-xl bg-gray-50 overflow-hidden shrink-0">
                     {review.product.images?.[0]?.url ? (
-                      <Image src={review.product.images[0].url} alt={review.product.title} fill className="object-cover" />
+                      <Image src={review.product.images[0].url} alt={review.product.title} fill sizes="48px" className="object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center"><Package className="text-gray-400" size={20} /></div>
                     )}
@@ -1139,7 +1139,7 @@ export default function AccountPage() {
               <option value="">Choose an order...</option>
               {orders.map(order => (
                 <option key={order.id} value={order.id}>
-                  Order #{order.order_number} — ${Number(order.total_amount).toFixed(2)}
+                  Order #{order.order_number} — ৳{Number(order.total_amount).toFixed(2)}
                 </option>
               ))}
             </select>

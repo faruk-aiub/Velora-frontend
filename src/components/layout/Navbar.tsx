@@ -5,7 +5,7 @@ import { ShoppingBag, Search, User, Menu, Heart, Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCartStore } from "@/store/cart.store";
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/store/auth.store";
 import axios from "@/lib/axios";
 
@@ -20,8 +20,10 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
   const getTotalItems = useCartStore((state) => state.getTotalItems);
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const router = useRouter();
+  const pathname = usePathname();
   
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const searchInputRef = useRef<HTMLInputElement>(null);
   
@@ -77,7 +79,10 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
       isTransparent ? "absolute top-0 text-white" : "sticky top-0 bg-white text-gray-900 border-b border-gray-100"
     )}>
       <div className="flex items-center gap-4 lg:hidden">
-        <button className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-gray-900")}>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-gray-900")}
+        >
           <Menu size={24} />
         </button>
       </div>
@@ -95,10 +100,11 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
       </Link>
 
       <div className="hidden lg:flex items-center gap-8">
-        <Link href="/shop" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : "text-gray-600 hover:text-[#BC8477]")}>Shop</Link>
-        <Link href="/categories" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : "text-gray-600 hover:text-[#BC8477]")}>Categories</Link>
-        <Link href="/about" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : "text-gray-600 hover:text-[#BC8477]")}>About</Link>
-        <Link href="/contact" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : "text-gray-600 hover:text-[#BC8477]")}>Contact</Link>
+        <Link href="/" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Home</Link>
+        <Link href="/shop" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/shop" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Shop</Link>
+        <Link href="/categories" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/categories" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Categories</Link>
+        <Link href="/about" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/about" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>About</Link>
+        <Link href="/contact" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/contact" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Contact</Link>
       </div>
 
       <div className="flex items-center gap-5">
@@ -137,7 +143,7 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
       {/* Search Dropdown */}
       <div 
         className={cn(
-          "absolute top-full left-0 w-full bg-white border-b border-gray-100 transition-all duration-300 origin-top overflow-hidden",
+          "absolute top-full left-0 w-full bg-white border-b border-gray-100 transition-all duration-300 origin-top overflow-hidden z-40",
           isSearchOpen ? "scale-y-100 opacity-100 h-[72px]" : "scale-y-0 opacity-0 h-0"
         )}
       >
@@ -162,6 +168,22 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
             Close
           </button>
         </form>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <div 
+        className={cn(
+          "absolute top-full left-0 w-full bg-white border-b border-gray-100 transition-all duration-300 origin-top overflow-hidden z-40 lg:hidden shadow-lg",
+          isMobileMenuOpen ? "scale-y-100 opacity-100 py-4" : "scale-y-0 opacity-0 h-0"
+        )}
+      >
+        <div className="flex flex-col px-6 gap-4">
+          <Link onClick={() => setIsMobileMenuOpen(false)} href="/" className={cn("text-base font-bold transition-colors", pathname === "/" ? "text-[#BC8477]" : "text-gray-900 hover:text-[#BC8477]")}>Home</Link>
+          <Link onClick={() => setIsMobileMenuOpen(false)} href="/shop" className={cn("text-base font-bold transition-colors", pathname === "/shop" ? "text-[#BC8477]" : "text-gray-900 hover:text-[#BC8477]")}>Shop</Link>
+          <Link onClick={() => setIsMobileMenuOpen(false)} href="/categories" className={cn("text-base font-bold transition-colors", pathname === "/categories" ? "text-[#BC8477]" : "text-gray-900 hover:text-[#BC8477]")}>Categories</Link>
+          <Link onClick={() => setIsMobileMenuOpen(false)} href="/about" className={cn("text-base font-bold transition-colors", pathname === "/about" ? "text-[#BC8477]" : "text-gray-900 hover:text-[#BC8477]")}>About</Link>
+          <Link onClick={() => setIsMobileMenuOpen(false)} href="/contact" className={cn("text-base font-bold transition-colors", pathname === "/contact" ? "text-[#BC8477]" : "text-gray-900 hover:text-[#BC8477]")}>Contact</Link>
+        </div>
       </div>
     </nav>
   );

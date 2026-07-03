@@ -58,7 +58,7 @@ export const createColumns = (
  cell: ({ row }) => {
  const type = row.original.discount_type;
  const val = row.getValue('discount_value') as number;
- return <span>{type === 'PERCENT' ? `${val}%` : `$${val}`}</span>;
+ return <span>{type === 'PERCENT' ? `${val}%` : `৳${val}`}</span>;
  }
  },
  {

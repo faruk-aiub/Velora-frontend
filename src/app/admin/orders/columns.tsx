@@ -19,11 +19,12 @@ import {
 export type Order = {
  id: string;
  order_number: string;
+ customer_name: string;
+ contact_number: string;
  total_amount: number;
  status: 'PENDING' | 'PROCESSING' | 'SHIPPED' | 'DELIVERED' | 'CANCELLED';
  created_at: string;
  user: {
- full_name: string;
  email: string;
  };
 };
@@ -41,15 +42,15 @@ export const createColumns = (
  header: 'Customer',
  cell: ({ row }) => (
  <div>
- <div className="font-medium text-sm">{row.original.user?.full_name || 'Guest'}</div>
- <div className="text-xs text-zinc-500">{row.original.user?.email || ''}</div>
+ <div className="font-medium text-sm">{row.original.customer_name || 'Guest'}</div>
+ <div className="text-xs text-zinc-500">{row.original.contact_number || row.original.user?.email}</div>
  </div>
  )
  },
  {
  accessorKey: 'total_amount',
  header: 'Total',
- cell: ({ row }) => <span className="font-medium">${Number(row.getValue('total_amount')).toFixed(2)}</span>
+ cell: ({ row }) => <span className="font-medium">৳{Number(row.getValue('total_amount')).toFixed(2)}</span>
  },
  {
  accessorKey: 'status',

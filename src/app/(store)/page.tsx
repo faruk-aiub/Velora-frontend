@@ -19,24 +19,26 @@ export default function HomePage() {
               <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">New Arrivals</span>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-gray-900 leading-[1.1] tracking-tight">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-[1.2] tracking-tight">
               Discover The Best Products for You
             </h1>
             
-            <p className="text-lg text-gray-500 max-w-lg leading-relaxed font-medium">
+            <p className="text-base text-gray-600 max-w-md leading-relaxed font-normal">
               Explore our wide range of high-quality products at affordable prices. Shop now and enjoy the best deals!
             </p>
             
             <div className="flex items-center gap-4 pt-4">
               <Link 
                 href="/shop"
-                className="bg-[#BC8477] text-white px-8 py-4 rounded-full font-bold shadow-md hover:bg-[#A87569] transition-all flex items-center gap-2"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+                className="bg-[#FFFFFF] text-gray-900 px-8 py-3 rounded-full font-bold shadow-sm hover:bg-gray-50 transition-all flex items-center gap-2"
               >
                 Shop Now <span className="ml-1">→</span>
               </Link>
               <Link 
-                href="/shop?deals=true"
-                className="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-full font-bold shadow-sm hover:bg-gray-50 transition-all"
+                href="/shop?deals=true#products"
+                style={{ fontFamily: 'Arial, sans-serif' }}
+                className="bg-transparent text-gray-900 border border-gray-900 px-8 py-3 rounded-full font-bold hover:bg-gray-900 hover:text-white transition-all"
               >
                 Explore Deals
               </Link>
@@ -45,25 +47,24 @@ export default function HomePage() {
             <div className="flex items-center gap-4 pt-6">
               <div className="flex -space-x-3">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-10 h-10 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
-                    <Image src={`https://i.pravatar.cc/100?img=${i+10}`} alt="Customer" fill sizes="40px" className="object-cover" />
+                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
+                    <Image src={`https://i.pravatar.cc/100?img=${i+10}`} alt="Customer" fill sizes="32px" className="object-cover" />
                   </div>
                 ))}
               </div>
-              <p className="text-sm font-medium text-gray-500">
+              <p className="text-xs font-medium text-gray-500">
                 Trusted by <span className="font-bold text-gray-900">10,000+</span> Happy Customers
               </p>
             </div>
           </div>
           
-          <div className="relative h-[400px] lg:h-[600px] w-full hidden md:block">
-            {/* You can replace this placeholder with an actual hero image like the headphones/backpack combo */}
+          <div className="relative h-[300px] lg:h-[500px] w-full hidden md:block">
             <Image
-              src="https://picsum.photos/seed/hero-commerce/1000/1000"
+              src="/hero-products.png"
               alt="Hero Products"
               fill
               sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain drop-shadow-2xl z-10"
+              className="object-contain drop-shadow-xl z-10"
               priority
             />
           </div>
@@ -74,7 +75,7 @@ export default function HomePage() {
       <section className="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-10 relative z-20">
         <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { icon: Truck, title: "Free Shipping", desc: "On orders over $50" },
+            { icon: Truck, title: "Free Shipping", desc: "On orders over ৳50" },
             { icon: ShieldCheck, title: "Secure Payment", desc: "100% secure payment" },
             { icon: RefreshCw, title: "Easy Returns", desc: "30 days return policy" },
             { icon: Headset, title: "24/7 Support", desc: "Dedicated support" }
@@ -131,7 +132,7 @@ export default function HomePage() {
             <p className="text-gray-500 font-medium leading-relaxed">
               Limited time offer on selected items. Hurry up and grab the best deals before they are gone!
             </p>
-            <Link href="/shop?sale=true" className="inline-block bg-[#BC8477] text-white px-8 py-4 rounded-full font-bold shadow-md hover:bg-[#A87569] transition-colors mt-4">
+            <Link href="/shop?sale=true#products" className="inline-block bg-[#BC8477] text-white px-8 py-4 rounded-full font-bold shadow-md hover:bg-[#A87569] transition-colors mt-4">
               Shop the Sale →
             </Link>
           </div>
