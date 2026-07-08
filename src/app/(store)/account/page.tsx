@@ -11,6 +11,8 @@ import { userService } from '@/services/user.service';
 import { orderService } from '@/services/order.service';
 import { wishlistService } from '@/services/wishlist.service';
 import { reviewService } from '@/services/review.service';
+import { useNotifications } from '@/hooks/useNotifications';
+import { notificationService } from '@/services/notification.service';
 import { cn } from '@/lib/utils';
 import { MessagesTab } from '@/components/account/MessagesTab';
 import Link from 'next/link';
@@ -19,7 +21,7 @@ import {
   LayoutDashboard, Package, MapPin, User as UserIcon, Heart, ShoppingCart,
   LogOut, Trash2, Plus, Star, Bell, HelpCircle, RotateCcw, Shield, CreditCard,
   ChevronRight, ChevronDown, Edit3, Eye, EyeOff, Loader2, Check, X, AlertCircle,
-  Truck, Clock, CheckCircle, XCircle, ArrowRight, Phone, Mail, Camera, Save, MessageCircle
+  Truck, Clock, CheckCircle, XCircle, ArrowRight, Phone, Mail, Camera, Save, MessageCircle, Search
 } from 'lucide-react';
 
 type TabType =
@@ -94,6 +96,19 @@ export default function AccountPage() {
   }, [searchParams]);
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [dashboardSearchQuery, setDashboardSearchQuery] = useState('');
+
+  const { notifications, unreadCount } = useNotifications();
+
+  // Mark as read when entering notifications tab
+  useEffect(() => {
+    if (activeTab === 'notifications' && unreadCount > 0) {
+      notificationService.markAsRead().then(() => {
+        queryClient.invalidateQueries({ queryKey: ['unread-notifications'] });
+        queryClient.invalidateQueries({ queryKey: ['notifications'] });
+      });
+    }
+  }, [activeTab, unreadCount, queryClient]);
 
   // Profile edit state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -107,8 +122,18 @@ export default function AccountPage() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [editingAddress, setEditingAddress] = useState<string | null>(null);
   const [addressForm, setAddressForm] = useState({
-    address_line1: '', city: '', postal_code: '', type: 'SHIPPING' as 'SHIPPING' | 'BILLING', is_default: false,
+    title: '', address_line1: '', address_line2: '', city: '', state: '', postal_code: '', country: '', is_default: false
   });
+
+  // Helper function to display order items dynamically
+  const getOrderDisplayName = (order: any) => {
+    if (order.items && order.items.length > 0) {
+      const firstProductName = order.items[0].product_name;
+      const otherItemsCount = order.items.length - 1;
+      return otherItemsCount > 0 ? `${firstProductName} +${otherItemsCount} more` : firstProductName;
+    }
+    return `Order #${order.order_number}`;
+  };
 
   // Support form state
   const [supportForm, setSupportForm] = useState({ subject: '', message: '' });
@@ -125,6 +150,33 @@ export default function AccountPage() {
     if (!user) router.push('/login');
     else setProfileForm({ first_name: user.first_name, last_name: user.last_name, phone: user.phone || '' });
   }, [user, router, mounted]);
+  useEffect(() => {
+    if (!user) return;
+    
+    const authStorage = localStorage.getItem('velora-auth');
+    let token = '';
+    try {
+      if (authStorage) token = JSON.parse(authStorage)?.state?.accessToken || '';
+    } catch (e) {}
+
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+    const sseUrl = `${baseUrl}/orders/stream?token=${token}`;
+    
+    const eventSource = new EventSource(sseUrl);
+    
+    eventSource.onmessage = (event) => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('SSE Error:', error);
+      // We don't close it on error, EventSource will automatically try to reconnect.
+    };
+
+    return () => {
+      eventSource.close();
+    };
+  }, [user, queryClient]);
 
   // ─── Queries ─────────────────────────────────────────────────────────────
   const { data: ordersData, isLoading: loadingOrders } = useQuery({
@@ -245,13 +297,21 @@ export default function AccountPage() {
 
   if (!mounted || !user) return null;
 
-  const orders = ordersData?.data || [];
-  const addresses = addressesData?.data || [];
-  const wishlistItems = wishlistData?.data || [];
+  const q = dashboardSearchQuery.toLowerCase();
+  
+  const orders = (ordersData?.data || []).filter((o: any) => 
+    !q || o.order_number.toLowerCase().includes(q) || o.status.toLowerCase().includes(q)
+  );
+  const addresses = (addressesData?.data || []).filter((a: any) => 
+    !q || a.city.toLowerCase().includes(q) || a.address_line1.toLowerCase().includes(q) || a.postal_code.toLowerCase().includes(q)
+  );
+  const wishlistItems = (wishlistData?.data || []).filter((w: any) => 
+    !q || w.product.title.toLowerCase().includes(q)
+  );
   const cartItems = cartStore.items;
 
   const recentOrders = orders.slice(0, 3);
-  const pendingOrders = orders.filter(o => o.status === 'PENDING' || o.status === 'PROCESSING');
+  const pendingOrders = orders.filter((o: any) => o.status === 'PENDING' || o.status === 'PROCESSING');
 
   // ─── Shared Components ────────────────────────────────────────────────────
   const renderAddressForm = () => (
@@ -421,7 +481,7 @@ export default function AccountPage() {
                       <Package size={18} className="text-gray-400" />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                      <p className="text-sm font-bold text-gray-900 mb-0.5">{getOrderDisplayName(order)}</p>
                       <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
@@ -588,7 +648,7 @@ export default function AccountPage() {
                     <Package size={20} className="text-[#BC8477]" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                    <p className="text-sm font-bold text-gray-900 mb-0.5">{getOrderDisplayName(order)}</p>
                     <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString('en-US', { dateStyle: 'medium' })}</p>
                   </div>
                 </div>
@@ -652,7 +712,7 @@ export default function AccountPage() {
               <div key={order.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                 <div className="flex justify-between items-start mb-8">
                   <div>
-                    <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                    <p className="text-sm font-bold text-gray-900 mb-0.5">{getOrderDisplayName(order)}</p>
                     <p className="text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
                   </div>
                   <OrderStatusBadge status={order.status} />
@@ -925,7 +985,7 @@ export default function AccountPage() {
             {orders.slice(0, 10).map(order => (
               <div key={order.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between hover:shadow-sm transition-shadow">
                 <div>
-                  <p className="text-sm font-bold text-gray-900 mb-0.5">Order #{order.order_number}</p>
+                  <p className="text-sm font-bold text-gray-900 mb-0.5">{getOrderDisplayName(order)}</p>
                   <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
                 <div className="flex items-center gap-4">
@@ -1005,33 +1065,33 @@ export default function AccountPage() {
   const renderNotifications = () => (
     <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
       <SectionHeader title="Notifications" subtitle="Stay updated on orders, promotions, and more" />
-      {[
-        { title: 'Order Placed Successfully', body: 'Your order has been placed and is being processed.', time: '2 hours ago', type: 'order', read: false },
-        { title: 'Welcome to Velora!', body: 'Thank you for joining us. Enjoy your first purchase.', time: '1 day ago', type: 'system', read: true },
-        { title: 'Special Offer: 20% Off', body: 'Use code VELORA20 for 20% off your next purchase.', time: '3 days ago', type: 'promo', read: true },
-      ].map((notif, i) => (
-        <div key={i} className={cn(
-          'bg-white border p-5 mb-3 flex gap-4 rounded-2xl transition-shadow',
-          !notif.read ? 'border-[#BC8477] shadow-sm' : 'border-gray-100 hover:shadow-sm'
-        )}>
-          <div className={cn(
-            'w-12 h-12 rounded-full flex items-center justify-center shrink-0 mt-0.5',
-            notif.type === 'order' ? 'bg-blue-50 text-blue-600' : notif.type === 'promo' ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-400'
+      {notifications.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">No notifications yet.</div>
+      ) : (
+        notifications.map((notif: any, i: number) => (
+          <div key={notif.id || i} className={cn(
+            'bg-white border p-5 mb-3 flex gap-4 rounded-2xl transition-shadow',
+            !notif.is_read ? 'border-[#BC8477] shadow-sm' : 'border-gray-100 hover:shadow-sm'
           )}>
-            {notif.type === 'order' ? <Package size={20} /> :
-             notif.type === 'promo' ? <Bell size={20} /> :
-             <Bell size={20} />}
-          </div>
-          <div className="flex-1">
-            <div className="flex items-start justify-between">
-              <p className={cn('text-sm font-bold', notif.read ? 'text-gray-500' : 'text-gray-900')}>{notif.title}</p>
-              {!notif.read && <span className="w-2 h-2 bg-[#BC8477] rounded-full shrink-0 mt-1.5" />}
+            <div className={cn(
+              'w-12 h-12 rounded-full flex items-center justify-center shrink-0 mt-0.5',
+              notif.type === 'order' ? 'bg-blue-50 text-blue-600' : notif.type === 'promo' ? 'bg-amber-50 text-amber-600' : 'bg-gray-50 text-gray-400'
+            )}>
+              {notif.type === 'order' ? <Package size={20} /> :
+              notif.type === 'promo' ? <Bell size={20} /> :
+              <Bell size={20} />}
             </div>
-            <p className="text-sm text-gray-500 mt-0.5">{notif.body}</p>
-            <p className="text-xs text-gray-400 mt-2 font-bold">{notif.time}</p>
+            <div className="flex-1">
+              <div className="flex items-start justify-between">
+                <p className={cn('text-sm font-bold', notif.is_read ? 'text-gray-500' : 'text-gray-900')}>{notif.title}</p>
+                {!notif.is_read && <span className="w-2 h-2 bg-[#BC8477] rounded-full shrink-0 mt-1.5" />}
+              </div>
+              <p className="text-sm text-gray-500 mt-0.5">{notif.message}</p>
+              <p className="text-xs text-gray-400 mt-2 font-bold">{new Date(notif.created_at).toLocaleString()}</p>
+            </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   );
 
@@ -1139,7 +1199,7 @@ export default function AccountPage() {
               <option value="">Choose an order...</option>
               {orders.map(order => (
                 <option key={order.id} value={order.id}>
-                  Order #{order.order_number} — ৳{Number(order.total_amount).toFixed(2)}
+                  {getOrderDisplayName(order)} — ৳{Number(order.total_amount).toFixed(2)}
                 </option>
               ))}
             </select>
@@ -1443,14 +1503,29 @@ export default function AccountPage() {
                 
                 <div className="flex items-center gap-3">
                   <div className="relative">
-                    <input type="text" placeholder="Search anything..." className="pl-10 pr-4 py-2.5 bg-[#F3F4F6] rounded-full text-sm outline-none w-64 focus:ring-2 ring-[#BC8477]/20" />
-                    <HelpCircle size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input 
+                      type="text" 
+                      placeholder="Search anything..." 
+                      className="pl-10 pr-4 py-2.5 bg-[#F3F4F6] rounded-full text-sm outline-none w-64 focus:ring-2 ring-[#BC8477]/20" 
+                      value={dashboardSearchQuery}
+                      onChange={(e) => setDashboardSearchQuery(e.target.value)}
+                    />
+                    <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                   </div>
-                  <button className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors">
+                  <button 
+                    onClick={() => router.push('/shop')}
+                    className="bg-gray-900 text-white px-5 py-2.5 rounded-full text-sm font-bold hover:bg-gray-800 transition-colors"
+                  >
                     Explore
                   </button>
-                  <button className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-gray-600 hover:bg-gray-200">
+                  <button 
+                    onClick={() => setActiveTab('notifications')}
+                    className="relative w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-gray-600 hover:bg-gray-200"
+                  >
                     <Bell size={18} />
+                    {unreadCount > 0 && (
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
+                    )}
                   </button>
                   <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-200">
                     <Image src="/placeholder.jpg" alt="Profile" width={40} height={40} className="object-cover" />

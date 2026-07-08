@@ -27,16 +27,26 @@ export type Order = {
  user: {
  email: string;
  };
+ items?: { product_name: string }[];
 };
 
 export const createColumns = (
  onUpdateStatus: (order: Order, status: string) => void
 ): ColumnDef<Order>[] => [
- {
- accessorKey: 'order_number',
- header: 'Order #',
- cell: ({ row }) => <span className="font-mono font-medium">{row.getValue('order_number')}</span>
- },
+  {
+    accessorKey: 'order_number',
+    header: 'Items',
+    cell: ({ row }) => {
+      const order = row.original;
+      let displayName = `Order #${order.order_number}`;
+      if (order.items && order.items.length > 0) {
+        const firstProductName = order.items[0].product_name;
+        const otherItemsCount = order.items.length - 1;
+        displayName = otherItemsCount > 0 ? `${firstProductName} +${otherItemsCount} more` : firstProductName;
+      }
+      return <span className="font-medium text-sm text-gray-900 truncate max-w-[250px] inline-block" title={displayName}>{displayName}</span>;
+    }
+  },
  {
  accessorKey: 'user',
  header: 'Customer',
