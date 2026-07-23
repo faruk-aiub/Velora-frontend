@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import api from '@/lib/axios';
 import { Category, createColumns } from './columns';
+import { flattenCategoryTree } from '@/lib/categories';
 import { CategoryFormDialog } from './CategoryFormDialog';
 import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
@@ -20,8 +21,8 @@ export default function CategoriesPage() {
  const { data, isLoading } = useQuery({
  queryKey: ['admin-categories'],
  queryFn: async () => {
- const res = await api.get('/categories');
- return res.data.data as Category[];
+ const res = await api.get('/categories/tree');
+ return flattenCategoryTree(res.data.data) as Category[];
  },
  });
 
@@ -74,7 +75,7 @@ export default function CategoriesPage() {
  <DataTable
  columns={columns}
  data={data || []}
- searchKey="name"
+ searchKey="displayName"
  isLoading={isLoading}
  />
  </div>

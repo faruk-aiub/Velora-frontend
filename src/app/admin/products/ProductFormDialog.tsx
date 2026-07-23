@@ -33,8 +33,8 @@ import {
  SelectTrigger,
  SelectValue,
 } from '@/components/ui/select';
-import { Product } from './columns';
 import api from '@/lib/axios';
+import { flattenCategoryTree, FlatCategory } from '@/lib/categories';
 import { FileUpload } from '@/components/admin/FileUpload';
 import { Trash } from 'lucide-react';
 
@@ -63,8 +63,8 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  const { data: categories } = useQuery({
  queryKey: ['admin-categories'],
  queryFn: async () => {
- const res = await api.get('/categories');
- return res.data.data;
+ const res = await api.get('/categories/tree');
+ return flattenCategoryTree(res.data.data);
  },
  enabled: open,
  });
@@ -260,9 +260,9 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  </SelectTrigger>
  </FormControl>
  <SelectContent>
- {categories?.map((cat: any) => (
+ {categories?.map((cat: FlatCategory) => (
  <SelectItem key={cat.id} value={cat.id}>
- {cat.name}
+ {cat.displayName}
  </SelectItem>
  ))}
  </SelectContent>

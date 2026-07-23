@@ -6,7 +6,8 @@ import { cn } from '@/lib/utils';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 
-import { CATEGORIES, generateCategorySlug } from "@/lib/categories";
+import { fetchCategoryTree, CategoryTree } from "@/lib/categories";
+
 export function ShopSidebar({ categoryOverride }: { categoryOverride?: string }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -20,12 +21,18 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
   
   const [minPrice, setMinPrice] = useState(minPriceParam);
   const [maxPrice, setMaxPrice] = useState(maxPriceParam);
+  
+  const [categories, setCategories] = useState<CategoryTree[]>([]);
 
   // Sync state with URL params
   useEffect(() => {
     setMinPrice(searchParams.get('min_price') || '');
     setMaxPrice(searchParams.get('max_price') || '');
   }, [searchParams]);
+
+  useEffect(() => {
+    fetchCategoryTree().then(setCategories);
+  }, []);
 
   const applyPriceFilter = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -35,17 +42,17 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
     if (maxPrice) params.set('max_price', maxPrice);
     else params.delete('max_price');
     
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}#products`, { scroll: true });
   };
 
-  const [openCategory, setOpenCategory] = useState<string | null>(currentCategory || 'Fashion & Clothing');
+  const [openCategory, setOpenCategory] = useState<string | null>(currentCategory || 'Agricultural Products');
 
-  const toggleCategory = (name: string) => {
+  const toggleCategory = (name: string, slug: string) => {
     setOpenCategory(openCategory === name ? null : name);
     if (openCategory !== name) {
-      router.push(`/category/${generateCategorySlug(name)}`);
+      router.push(`/category/${slug}#products`, { scroll: true });
     } else {
-      router.push('/shop');
+      router.push('/shop#products', { scroll: true });
     }
   };
 
@@ -53,7 +60,7 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
     const params = new URLSearchParams(searchParams.toString());
     params.set('category', categoryName);
     params.set('subcategory', subName);
-    router.push(`${pathname}?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}#products`, { scroll: true });
   };
 
   return (
@@ -67,13 +74,13 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
         <div>
           <h3 className="text-sm font-bold text-gray-900 mb-4">Categories</h3>
           <div className="space-y-2">
-            {CATEGORIES.map((category) => {
+            {categories.map((category) => {
               const isOpen = openCategory === category.name;
               
               return (
-                <div key={category.name} className="border-b border-gray-100 last:border-0 pb-2">
+                <div key={category.id} className="border-b border-gray-100 last:border-0 pb-2">
                   <button
-                    onClick={() => toggleCategory(category.name)}
+                    onClick={() => toggleCategory(category.name, category.slug)}
                     className="w-full flex items-center justify-between py-2 text-left group"
                   >
                     <span className={cn(
@@ -92,7 +99,7 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
                   </button>
                   
                   <AnimatePresence>
-                    {isOpen && (
+                    {isOpen && category.children && category.children.length > 0 && (
                       <motion.div
                         initial={{ height: 0, opacity: 0 }}
                         animate={{ height: 'auto', opacity: 1 }}
@@ -101,17 +108,17 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
                         className="overflow-hidden"
                       >
                         <ul className="pt-2 pb-4 space-y-2 pl-4">
-                          {category.subcategories.map((sub) => (
-                            <li key={sub}>
+                          {category.children.map((sub) => (
+                            <li key={sub.id}>
                               <button 
-                                onClick={() => selectSubcategory(category.name, sub)}
+                                onClick={() => selectSubcategory(category.name, sub.name)}
                                 className={cn(
                                   "text-sm hover:text-[#BC8477] transition-colors flex items-center gap-2 w-full text-left",
-                                  currentSubcategory === sub ? "text-[#BC8477] font-medium" : "text-gray-500"
+                                  currentSubcategory === sub.name ? "text-[#BC8477] font-medium" : "text-gray-500"
                                 )}
                               >
                                 <span className="text-gray-400 text-xs mr-1">•</span>
-                                {sub}
+                                {sub.name}
                               </button>
                             </li>
                           ))}

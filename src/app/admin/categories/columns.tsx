@@ -13,14 +13,7 @@ import {
  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export type Category = {
- id: string;
- name: string;
- slug: string;
- image_url: string | null;
- parent_id: string | null;
- created_at: string;
-};
+import { FlatCategory as Category } from '@/lib/categories';
 
 export const createColumns = (
  onEdit: (category: Category) => void,
@@ -43,7 +36,7 @@ export const createColumns = (
  },
  },
  {
- accessorKey: 'name',
+ accessorKey: 'displayName',
  header: ({ column }) => {
  return (
  <Button

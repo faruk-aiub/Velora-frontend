@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/select';
 import { Category } from './columns';
 import api from '@/lib/axios';
+import { flattenCategoryTree, FlatCategory } from '@/lib/categories';
 import { FileUpload } from '@/components/admin/FileUpload';
 
 const formSchema = z.object({
@@ -55,8 +56,8 @@ export function CategoryFormDialog({ open, onOpenChange, categoryToEdit }: Categ
   const { data: categories } = useQuery({
     queryKey: ['admin-categories'],
     queryFn: async () => {
-      const res = await api.get('/categories');
-      return res.data.data as Category[];
+      const res = await api.get('/categories/tree');
+      return flattenCategoryTree(res.data.data) as Category[];
     },
     enabled: open,
   });
@@ -90,8 +91,8 @@ export function CategoryFormDialog({ open, onOpenChange, categoryToEdit }: Categ
     mutationFn: async (values: FormValues) => {
       const payload = {
         name: values.name,
-        image_url: values.image_url || undefined,
-        parent_id: values.parent_id === 'none' ? undefined : values.parent_id,
+        image_url: values.image_url === '' ? '' : values.image_url,
+        parent_id: values.parent_id === 'none' ? '' : values.parent_id,
       };
 
       if (categoryToEdit) {
@@ -163,9 +164,9 @@ export function CategoryFormDialog({ open, onOpenChange, categoryToEdit }: Categ
                       <SelectItem value="none">None (Root Category)</SelectItem>
                       {categories
                         ?.filter(c => c.id !== categoryToEdit?.id) // Prevent self-referencing
-                        .map((category) => (
+                        .map((category: FlatCategory) => (
                         <SelectItem key={category.id} value={category.id}>
-                          {category.name}
+                          {category.displayName}
                         </SelectItem>
                       ))}
                     </SelectContent>

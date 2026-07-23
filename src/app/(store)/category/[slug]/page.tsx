@@ -12,7 +12,7 @@ type Props = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const resolvedParams = await params;
-  const categoryName = getCategoryNameFromSlug(resolvedParams.slug);
+  const categoryName = await getCategoryNameFromSlug(resolvedParams.slug);
   return {
     title: `${categoryName} | Velora`,
     description: `Shop our wide selection of ${categoryName}.`
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Props) {
   const resolvedParams = await params;
-  const categoryName = getCategoryNameFromSlug(resolvedParams.slug);
+  const categoryName = await getCategoryNameFromSlug(resolvedParams.slug);
 
   return (
     <div className="min-h-screen bg-white">
@@ -38,7 +38,7 @@ export default async function CategoryPage({ params }: Props) {
       </section>
 
       {/* ── Main Content Area (Product Grid Full Width) ── */}
-      <section className="px-6 lg:px-12 max-w-[1600px] mx-auto w-full pb-24">
+      <section id="products" className="px-6 lg:px-12 max-w-[1600px] mx-auto w-full pb-24 scroll-mt-24">
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 relative">
           <Suspense fallback={<div>Loading filters...</div>}>
             <ShopSidebar categoryOverride={categoryName} />

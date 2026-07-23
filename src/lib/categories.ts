@@ -1,89 +1,72 @@
-export const CATEGORIES = [
-  {
-    name: 'Electronics & Gadgets',
-    img: 'headphone',
-    color: 'bg-[#E8F0FA]',
-    subcategories: ['Smartphones', 'Laptops', 'Cameras', 'Headphones', 'Smartwatches', 'Accessories']
-  },
-  {
-    name: 'Fashion & Clothing',
-    img: 'tshirt',
-    color: 'bg-[#FBEBEB]',
-    subcategories: ['Men\'s Clothing', 'Women\'s Clothing', 'Kid\'s Clothing', 'Shoes', 'Bags & Accessories', 'Jewelry']
-  },
-  {
-    name: 'Beauty & Personal Care',
-    img: 'cosmetic',
-    color: 'bg-[#F4EAFC]',
-    subcategories: ['Skincare Products', 'Makeup Products', 'Perfume', 'Hair Care Products', 'Grooming Products', 'Beauty Tools']
-  },
-  {
-    name: 'Home & Living',
-    img: 'sofa',
-    color: 'bg-[#FCF5EA]',
-    subcategories: ['Furniture', 'Bed & Mattress', 'Sofa', 'Table & Chair', 'Home Decor', 'Lighting', 'Kitchen Tools', 'Storage Items', 'Curtains', 'Carpets']
-  },
-  {
-    name: 'Kitchen & Appliances',
-    img: 'kitchen',
-    color: 'bg-[#F5F5F5]',
-    subcategories: ['Refrigerator', 'Microwave Oven', 'Blender', 'Rice Cooker', 'Electric Kettle', 'Coffee Maker', 'Cookware', 'Dinner Set']
-  },
-  {
-    name: 'Books & Stationery',
-    img: 'book',
-    color: 'bg-[#EBF5EE]',
-    subcategories: ['Books', 'Notebooks', 'Pens', 'Office Supplies', 'Educational Materials', 'Art Supplies']
-  },
-  {
-    name: 'Sports & Fitness',
-    img: 'shoe',
-    color: 'bg-[#EAF6F5]',
-    subcategories: ['Gym Equipment', 'Sports Shoes', 'Fitness Tracker', 'Yoga Mat', 'Sports Accessories', 'Bicycles']
-  },
-  {
-    name: 'Kids & Baby Products',
-    img: 'toy',
-    color: 'bg-[#FFF0F5]',
-    subcategories: ['Baby Clothes', 'Toys', 'School Bags', 'Baby Care Products', 'Kids Accessories']
-  },
-  {
-    name: 'Automotive',
-    img: 'car',
-    color: 'bg-[#F0F5F9]',
-    subcategories: ['Car Accessories', 'Bike Accessories', 'Helmet', 'Car Electronics', 'Cleaning Products']
-  },
-  {
-    name: 'Pet Supplies',
-    img: 'pet',
-    color: 'bg-[#FDF4E5]',
-    subcategories: ['Pet Food', 'Pet Toys', 'Pet Accessories', 'Pet Care Products']
-  },
-  {
-    name: 'Grocery & Food',
-    img: 'food',
-    color: 'bg-[#F4F1EA]',
-    subcategories: ['Snacks', 'Beverages', 'Dry Food', 'Fresh Food', 'Cooking Ingredients']
-  },
-  {
-    name: 'Digital Products',
-    img: 'laptop',
-    color: 'bg-[#F4F4F8]',
-    subcategories: ['Software', 'Online Courses', 'E-books', 'Subscriptions', 'Templates']
-  },
-  {
-    name: 'Others',
-    img: 'gift',
-    color: 'bg-[#F9F9F9]',
-    subcategories: ['Gifts', 'Jewelry', 'Watches', 'Handmade Products', 'Travel Accessories']
+import axios from './axios';
+
+export interface CategoryTree {
+  id: string;
+  name: string;
+  slug: string;
+  image_url: string | null;
+  children: CategoryTree[];
+}
+
+export async function fetchCategoryTree(): Promise<CategoryTree[]> {
+  try {
+    const res = await axios.get('/categories/tree');
+    return res.data.data;
+  } catch (error) {
+    console.error('Failed to fetch category tree:', error);
+    return [];
   }
-];
+}
+
+export async function fetchCategories(): Promise<CategoryTree[]> {
+  try {
+    const res = await axios.get('/categories');
+    return res.data.data;
+  } catch (error) {
+    console.error('Failed to fetch categories:', error);
+    return [];
+  }
+}
 
 export function generateCategorySlug(name: string) {
   return name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-').replace(/'/g, '');
 }
 
-export function getCategoryNameFromSlug(slug: string) {
-  const cat = CATEGORIES.find(c => generateCategorySlug(c.name) === slug);
-  return cat ? cat.name : slug; // fallback to slug if not found
+export async function getCategoryNameFromSlug(slug: string) {
+  try {
+    const categories = await fetchCategories();
+    const cat = categories.find(c => c.slug === slug || generateCategorySlug(c.name) === slug);
+    return cat ? cat.name : slug; // fallback to slug if not found
+  } catch {
+    return slug;
+  }
+}
+
+export interface FlatCategory {
+  id: string;
+  name: string;
+  displayName: string;
+  slug: string;
+  image_url: string | null;
+  parent_id: string | null;
+  created_at: string;
+}
+
+export function flattenCategoryTree(tree: CategoryTree[], prefix = ''): FlatCategory[] {
+  let result: FlatCategory[] = [];
+  for (const node of tree) {
+    result.push({
+      id: node.id,
+      name: node.name,
+      displayName: `${prefix}${node.name}`,
+      slug: node.slug,
+      image_url: node.image_url,
+      parent_id: (node as any).parent_id || null,
+      created_at: (node as any).created_at || new Date().toISOString(),
+    });
+    if (node.children && node.children.length > 0) {
+      result = result.concat(flattenCategoryTree(node.children, prefix + '— '));
+    }
+  }
+  return result;
 }

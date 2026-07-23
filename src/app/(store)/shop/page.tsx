@@ -7,12 +7,18 @@ import { Truck, ShieldCheck, RefreshCw, Headset, Star, Filter } from "lucide-rea
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { ShopSidebar } from "@/components/shop/ShopSidebar";
 
+import { fetchCategoryTree } from "@/lib/categories";
+
 export const metadata = {
   title: "Shop All | Velora",
   description: "Browse our extensive collection of premium lifestyle products.",
 };
 
-export default function ShopPage() {
+const COLORS = ['bg-[#E8F0FA]', 'bg-[#FBEBEB]', 'bg-[#F4EAFC]', 'bg-[#FCF5EA]', 'bg-[#F5F5F5]', 'bg-[#EBF5EE]'];
+
+export default async function ShopPage() {
+  const categories = await fetchCategoryTree();
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -110,17 +116,10 @@ export default function ShopPage() {
         </div>
         
         <div className="flex overflow-x-auto pb-8 gap-8 snap-x hide-scrollbar">
-          {[
-            { name: "Electronics", color: "bg-blue-50", img: "headphone" },
-            { name: "Fashion", color: "bg-pink-50", img: "tshirt" },
-            { name: "Home & Kitchen", color: "bg-orange-50", img: "sofa" },
-            { name: "Beauty", color: "bg-purple-50", img: "cosmetic" },
-            { name: "Sports", color: "bg-teal-50", img: "shoe" },
-            { name: "Accessories", color: "bg-yellow-50", img: "watch" }
-          ].map((cat, i) => (
-            <Link key={i} href={`/category/${cat.name.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-').replace(/'/g, '')}`} className="flex flex-col items-center gap-4 snap-center shrink-0 group">
-              <div className={`w-40 h-40 rounded-full ${cat.color} flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-105`}>
-                <Image src={`https://picsum.photos/seed/${cat.img}/300/300`} alt={cat.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover mix-blend-multiply" />
+          {categories.slice(0, 10).map((cat, i) => (
+            <Link key={cat.id} href={`/category/${cat.slug}`} className="flex flex-col items-center gap-4 snap-center shrink-0 group">
+              <div className={`w-40 h-40 rounded-full ${COLORS[i % COLORS.length]} flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-105`}>
+                <Image src={cat.image_url || `https://picsum.photos/seed/${cat.slug}/300/300`} alt={cat.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover mix-blend-multiply" />
               </div>
               <span className="font-bold text-gray-900 text-sm">{cat.name}</span>
             </Link>

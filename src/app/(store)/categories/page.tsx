@@ -2,14 +2,18 @@ import Link from "next/link";
 import Image from "next/image";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { CATEGORIES, generateCategorySlug } from "@/lib/categories";
+import { fetchCategoryTree } from "@/lib/categories";
 
 export const metadata = {
   title: "All Categories | Velora",
   description: "Browse all product categories on Velora",
 };
 
-export default function CategoriesPage() {
+const COLORS = ['bg-[#E8F0FA]', 'bg-[#FBEBEB]', 'bg-[#F4EAFC]', 'bg-[#FCF5EA]', 'bg-[#F5F5F5]', 'bg-[#EBF5EE]'];
+
+export default async function CategoriesPage() {
+  const categories = await fetchCategoryTree();
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -25,15 +29,15 @@ export default function CategoriesPage() {
 
       <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-8">
-          {CATEGORIES.map((cat, i) => (
+          {categories.map((cat, i) => (
             <Link 
-              key={i} 
-              href={`/category/${generateCategorySlug(cat.name)}`} 
+              key={cat.id} 
+              href={`/category/${cat.slug}`} 
               className="flex flex-col items-center gap-4 group"
             >
-              <div className={`w-full aspect-square rounded-3xl ${cat.color} flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-105 shadow-sm`}>
+              <div className={`w-full aspect-square rounded-3xl ${COLORS[i % COLORS.length]} flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-105 shadow-sm`}>
                 <Image 
-                  src={`https://picsum.photos/seed/${cat.img}/300/300`} 
+                  src={cat.image_url || `https://picsum.photos/seed/${cat.slug}/300/300`} 
                   alt={cat.name} 
                   fill 
                   className="object-cover mix-blend-multiply opacity-80" 
