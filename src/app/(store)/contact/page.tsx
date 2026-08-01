@@ -81,9 +81,9 @@ export default function ContactPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               {[
-                { icon: MapPin, title: "Our Location", details: "123 Velora Street, Suite 100, New York, NY 10001" },
-                { icon: Phone, title: "Phone Number", details: "+1 (800) 123-4567\nMon - Fri, 8am - 9pm EST" },
-                { icon: Mail, title: "Email Address", details: "support@velora.com\nhello@velora.com" },
+                { icon: MapPin, title: "Our Location", details: "Agargoan, Dhaka, 1229" },
+                { icon: Phone, title: "Phone Number", details: "+8801925-251125\n+8801577-5914121" },
+                { icon: Mail, title: "Email Address", details: "support@gmail.com" },
                 { icon: Clock, title: "Working Hours", details: "Monday - Friday: 9 AM - 6 PM\nWeekend: 10 AM - 4 PM" }
               ].map((item, i) => (
                 <div key={i} className="flex gap-4">

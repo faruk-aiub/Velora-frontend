@@ -87,14 +87,14 @@ export default function AboutPage() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
           {[
-            { name: "Alex Morgan", role: "Founder & CEO", img: "11" },
-            { name: "Sarah Chen", role: "Head of Product", img: "21" },
-            { name: "David Miller", role: "Lead Designer", img: "32" }
+            { name: "Md. Abid Hasan", role: "Founder and CEO", img: "/abid.jpg" },
+            { name: "Mushfiqur Rahman", role: "Developer", img: "/mushfiqur.jpg" },
+            { name: "Md. Omar Faruk", role: "Developer", img: "/omar.jpg" }
           ].map((member, i) => (
             <div key={i} className="flex flex-col items-center group">
               <div className="w-48 h-48 rounded-full overflow-hidden mb-6 relative group-hover:-translate-y-2 transition-transform duration-300 shadow-lg">
                 <Image 
-                  src={`https://i.pravatar.cc/300?img=${member.img}`} 
+                  src={member.img} 
                   alt={member.name} 
                   fill 
                   className="object-cover"
