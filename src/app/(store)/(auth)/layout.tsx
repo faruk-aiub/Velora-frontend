@@ -3,13 +3,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Cormorant_Garamond } from 'next/font/google';
-import { Package, ShieldCheck, Star } from 'lucide-react';
+import { Plus_Jakarta_Sans } from 'next/font/google';
+import { Truck, ShieldCheck, Tag, ShoppingBag, Smartphone, Shirt, Home, Sparkles, Gamepad2 } from 'lucide-react';
 
-const cormorant = Cormorant_Garamond({ 
+const plusJakarta = Plus_Jakarta_Sans({ 
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  variable: "--font-cormorant",
+  variable: "--font-plus-jakarta",
 });
 
 export default function AuthLayout({
@@ -18,80 +17,107 @@ export default function AuthLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isLogin = pathname === '/login';
 
   return (
-    <div className={`min-h-screen flex w-full relative bg-[#F9FAFB] ${cormorant.variable}`}>
-      {/* Background Image (subtle) */}
-      <div className="absolute inset-0 z-0">
-        <Image
-          src="/auth-hero.jpg"
-          alt="Premium Fashion"
-          fill
-          priority
-          className="object-cover object-center opacity-20 mix-blend-multiply"
-          sizes="100vw"
-        />
-        <div className="absolute inset-0 bg-[#F5F2F0]/60 backdrop-blur-[2px]" />
-      </div>
+    <div className={`min-h-screen flex w-full relative bg-[#F8F5F1] overflow-hidden ${plusJakarta.variable}`} style={{ fontFamily: 'var(--font-plus-jakarta), sans-serif' }}>
+      {/* Background Arch Shape */}
+      <div className="absolute top-0 left-0 w-full lg:w-[50%] h-full bg-white rounded-tr-[250px] rounded-br-[150px] z-0" />
 
-      <div className="relative z-10 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-center p-6 lg:p-12 gap-12 lg:gap-24">
+      <div className="relative z-10 w-full max-w-[1600px] mx-auto flex flex-col lg:flex-row items-center justify-between p-6 lg:p-12 gap-8 h-full min-h-screen">
         
         {/* ── Left Content Panel ── */}
-        <div className="flex-1 w-full max-w-lg lg:max-w-none pt-12 lg:pt-0">
-          <Link href="/" className="inline-block mb-16 lg:mb-24">
-            <span className="font-serif tracking-[0.2em] text-gray-900 text-xl uppercase font-bold">Velora</span>
-          </Link>
-
-          <h2 className="font-serif font-bold text-5xl md:text-6xl text-gray-900 mb-6 tracking-tight leading-[1.1]">
-            {isLogin ? (
-              <>Welcome <br /> Back to <span className="italic text-[#BC8477]">Velora</span></>
-            ) : (
-              <>Join Velora <br /><span className="italic text-[#BC8477]">Today</span></>
-            )}
-          </h2>
+        <div className="flex-1 w-full h-full flex flex-col justify-between pt-4 lg:pt-8 pb-4">
           
-          <p className="text-gray-600 text-base font-medium max-w-md mb-12 leading-relaxed">
-            {isLogin 
-              ? "Sign in to access your exclusive offers, fast checkout, and personalized shopping experience."
-              : "Create your account and enjoy exclusive offers, fast checkout, and personalized shopping."}
-          </p>
+          {/* Header */}
+          <div>
+            <Link href="/" className="flex flex-col w-fit group mb-2">
+              <div className="flex items-center gap-1.5 mb-1 text-gray-900">
+                <ShoppingBag size={24} strokeWidth={2} />
+              </div>
+              <span className="tracking-[0.1em] text-gray-900 text-[22px] uppercase font-bold leading-none">VELORA</span>
+            </Link>
+            <p className="text-[13px] text-gray-500 font-medium">Everything you need, in one place.</p>
+          </div>
 
-          <div className="space-y-8">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#EAF0E2] flex items-center justify-center text-[#7A915C] shrink-0">
-                <Package size={20} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Free Shipping</h4>
-                <p className="text-sm text-gray-500 font-medium">On all orders over $50</p>
-              </div>
-            </div>
+          {/* Middle Section: Text/Features on Left, Image on Right */}
+          <div className="flex flex-col xl:flex-row items-center w-full my-auto py-12">
             
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#F5E6E3] flex items-center justify-center text-[#BC8477] shrink-0">
-                <ShieldCheck size={20} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Secure Payment</h4>
-                <p className="text-sm text-gray-500 font-medium">100% secure & protected</p>
+            {/* Text & Features */}
+            <div className="w-full xl:w-[45%] z-10 relative pr-4">
+              <h2 className="font-bold text-5xl xl:text-[56px] text-gray-900 mb-6 tracking-tight leading-[1.05]">
+                Shop Everything.<br />
+                <span className="text-[#B58A63]">Live Better.</span>
+              </h2>
+              
+              <p className="text-gray-600 text-sm font-medium max-w-[340px] mb-10 leading-relaxed">
+                Create your account and enjoy a seamless shopping experience with exclusive benefits.
+              </p>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#FDF8F5] flex items-center justify-center text-[#B58A63] shrink-0 border border-[#F5EDE6]">
+                    <Truck size={20} strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-gray-900 mb-0.5">Free Delivery</h4>
+                    <p className="text-[12px] text-gray-500 font-medium">On orders over ৳500</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#FDF8F5] flex items-center justify-center text-[#B58A63] shrink-0 border border-[#F5EDE6]">
+                    <ShieldCheck size={20} strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-gray-900 mb-0.5">Secure Payment</h4>
+                    <p className="text-[12px] text-gray-500 font-medium">100% secure & protected</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-[#FDF8F5] flex items-center justify-center text-[#B58A63] shrink-0 border border-[#F5EDE6]">
+                    <Tag size={20} strokeWidth={1.5} />
+                  </div>
+                  <div>
+                    <h4 className="text-[14px] font-bold text-gray-900 mb-0.5">Top Quality</h4>
+                    <p className="text-[12px] text-gray-500 font-medium">Premium products & brands</p>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-full bg-[#FFF4E5] flex items-center justify-center text-[#E89E34] shrink-0">
-                <Star size={20} />
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Trusted by 50K+</h4>
-                <p className="text-sm text-gray-500 font-medium">Happy customers</p>
-              </div>
+
+            {/* Product Image */}
+            <div className="w-full xl:w-[55%] h-[400px] xl:h-[550px] relative mt-12 xl:mt-0 right-0 xl:-right-12 pointer-events-none">
+              <Image
+                src="/auth-hero-products.png"
+                alt="Velora Products"
+                fill
+                className="object-contain object-bottom xl:object-right-bottom scale-[1.15] origin-bottom xl:origin-bottom-right"
+                priority
+              />
             </div>
+          </div>
+          
+          {/* Categories Bar */}
+          <div className="bg-white rounded-3xl p-4 px-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] flex items-center justify-between w-full max-w-[700px] relative z-20 mx-auto xl:mx-0">
+            {[
+              { icon: ShoppingBag, label: "Grocery" },
+              { icon: Smartphone, label: "Electronics" },
+              { icon: Shirt, label: "Clothing" },
+              { icon: Home, label: "Home & Living" },
+              { icon: Sparkles, label: "Beauty" },
+              { icon: Gamepad2, label: "Toys & More" },
+            ].map((Cat, i) => (
+              <div key={i} className="flex flex-col items-center gap-2 text-gray-500 hover:text-[#B58A63] cursor-pointer transition-colors">
+                <Cat.icon size={22} strokeWidth={1.5} className="text-[#8B7F7A]" />
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-800">{Cat.label}</span>
+              </div>
+            ))}
           </div>
         </div>
 
         {/* ── Right Form Panel (White Card) ── */}
-        <div className="w-full max-w-md lg:max-w-[480px] bg-white rounded-[32px] p-8 md:p-12 shadow-[0_8px_40px_rgba(0,0,0,0.04)]">
+        <div className="w-full max-w-md lg:max-w-[500px] bg-white rounded-[40px] p-8 md:p-12 shadow-[0_12px_60px_rgba(0,0,0,0.06)] relative z-20 mt-12 lg:mt-0 shrink-0">
           {children}
         </div>
       </div>

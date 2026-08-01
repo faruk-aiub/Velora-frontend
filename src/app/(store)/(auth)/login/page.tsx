@@ -102,20 +102,20 @@ export default function LoginPage() {
           Welcome Back
         </h1>
         <p className="text-sm text-gray-500 font-medium">
-          Sign in to Velora 👋
+          Sign in to Velora
         </p>
       </motion.div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <motion.div {...item(0.1)} className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-            <Mail size={18} />
+            <Mail size={18} strokeWidth={1.5} />
           </div>
           <input
             id="email"
             type="email"
             placeholder="Email Address"
-            className="w-full h-12 bg-white rounded-xl pl-12 pr-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-sm"
+            className="w-full h-14 bg-white rounded-2xl pl-12 pr-4 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#B58A63]/20 focus:border-[#B58A63] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
             style={{ borderColor: errors.email ? '#E46962' : undefined }}
             {...register('email')}
           />
@@ -126,14 +126,14 @@ export default function LoginPage() {
 
         <motion.div {...item(0.2)} className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
-            <Lock size={18} />
+            <Lock size={18} strokeWidth={1.5} />
           </div>
           <div className="relative">
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
-              className="w-full h-12 bg-white rounded-xl pl-12 pr-12 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-sm"
+              className="w-full h-14 bg-white rounded-2xl pl-12 pr-12 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#B58A63]/20 focus:border-[#B58A63] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
               style={{ borderColor: errors.password ? '#E46962' : undefined }}
               {...register('password')}
             />
@@ -155,7 +155,7 @@ export default function LoginPage() {
             <input
               type="checkbox"
               id="remember"
-              className="w-3.5 h-3.5 rounded-sm border-[#D5CFCD] text-[#BC8477] focus:ring-[#BC8477] transition-colors"
+              className="w-3.5 h-3.5 rounded-sm border-[#D5CFCD] text-[#B58A63] focus:ring-[#B58A63] transition-colors"
             />
             <label htmlFor="remember" className="text-xs text-[#7A7371] cursor-pointer select-none">
               Remember me
@@ -163,7 +163,7 @@ export default function LoginPage() {
           </div>
           <Link 
             href="/forgot-password" 
-            className="text-xs text-[#BC8477] hover:text-[#9A6B60] transition-colors"
+            className="text-xs text-[#B58A63] hover:text-[#9A6B60] transition-colors"
           >
             Forgot password?
           </Link>
@@ -173,12 +173,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full h-12 bg-[#BC8477] text-white text-sm font-semibold rounded-xl hover:bg-[#9A6B60] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#BC8477]/20"
+            className="w-full h-14 bg-[#B58A63] text-white text-[15px] font-semibold rounded-2xl hover:bg-[#A37B55] transition-all duration-300 relative flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#B58A63]/20 mt-4"
           >
-            {isPending ? <Loader2 size={16} className="animate-spin" /> : (
+            {isPending ? <Loader2 size={18} className="animate-spin" /> : (
               <>
                 Sign In
-                <ArrowRight size={18} />
+                <div className="absolute right-6">
+                  <ArrowRight size={20} strokeWidth={2} />
+                </div>
               </>
             )}
           </button>
@@ -189,8 +191,8 @@ export default function LoginPage() {
         <div className="absolute inset-0 flex items-center">
           <div className="w-full border-t border-[#E8E1DE]" />
         </div>
-        <div className="relative flex justify-center text-[10px] uppercase tracking-widest font-bold">
-          <span className="px-4 bg-white text-[#B5AFAD]">Or</span>
+        <div className="relative flex justify-center text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
+          <span className="px-4 bg-white">or continue with</span>
         </div>
       </motion.div>
 
@@ -198,8 +200,7 @@ export default function LoginPage() {
         <button
           onClick={handleGoogleLogin}
           type="button"
-          disabled={isPending}
-          className="w-full h-12 bg-white border border-[#E8E1DE] rounded-xl text-[#3A3331] text-sm font-semibold hover:bg-[#F5F2F0] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
+          className="w-full h-14 bg-white border border-[#EBE8E6] rounded-2xl text-[14px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
@@ -211,9 +212,9 @@ export default function LoginPage() {
         </button>
       </motion.div>
 
-      <motion.p {...item(0.7)} className="text-center text-xs text-[#7A7371] mt-8">
+      <motion.p {...item(0.7)} className="text-center text-xs text-gray-500 mt-8 font-medium">
         Don&apos;t have an account?{' '}
-        <Link href="/register" className="text-[#BC8477] hover:text-[#9A6B60] transition-colors underline underline-offset-4">
+        <Link href="/register" className="text-[#B58A63] font-semibold hover:text-[#9A6B60] transition-colors ml-1">
           Create one
         </Link>
       </motion.p>
