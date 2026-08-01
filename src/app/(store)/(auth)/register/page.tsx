@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
+import { Eye, EyeOff, Loader2, ArrowRight, User, Mail, Lock } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { registerSchema, type RegisterFormValues } from '@/lib/validators/auth.schema';
 import { auth } from '@/lib/firebase';
@@ -100,48 +100,38 @@ export default function RegisterPage() {
   return (
     <div className="w-full max-w-[420px] mx-auto">
       <motion.div {...item(0)} className="text-center mb-8">
-        <h3 className="text-sm font-bold text-[#BC8477] mb-4">
-          New Member
-        </h3>
-        <h1 className="font-bold text-4xl text-gray-900 tracking-tight mb-4">
-          Create your <span className="text-[#BC8477] italic">account</span>
+        <h1 className="font-bold text-3xl text-gray-900 tracking-tight mb-2">
+          Create Account
         </h1>
         <p className="text-sm text-gray-500 font-medium">
-          Join thousands of women who trust Velora.
+          Welcome to Velora 👋
         </p>
-        
-        {/* Divider */}
-        <div className="flex items-center justify-center gap-4 mt-8">
-          <div className="w-16 h-[1px] bg-gray-100" />
-          <div className="w-1 h-1 rounded-full bg-[#BC8477]" />
-          <div className="w-16 h-[1px] bg-gray-100" />
-        </div>
       </motion.div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         
-        <div className="grid grid-cols-2 gap-6">
-          <motion.div {...item(0.1)} className="space-y-1 relative group">
-            <label htmlFor="first_name" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
-              First Name
-            </label>
+        <div className="grid grid-cols-2 gap-4">
+          <motion.div {...item(0.1)} className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <User size={18} />
+            </div>
             <input
               id="first_name"
-              placeholder="Jane"
-              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400"
+              placeholder="First Name"
+              className="w-full h-12 bg-white rounded-xl pl-12 pr-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-sm"
               style={{ borderColor: errors.first_name ? '#E46962' : undefined }}
               {...register('first_name')}
             />
             {errors.first_name && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.first_name.message}</p>}
           </motion.div>
-          <motion.div {...item(0.2)} className="space-y-1 relative group">
-            <label htmlFor="last_name" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
-              Last Name
-            </label>
+          <motion.div {...item(0.2)} className="relative group">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+              <User size={18} />
+            </div>
             <input
               id="last_name"
-              placeholder="Smith"
-              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400"
+              placeholder="Last Name"
+              className="w-full h-12 bg-white rounded-xl pl-12 pr-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-sm"
               style={{ borderColor: errors.last_name ? '#E46962' : undefined }}
               {...register('last_name')}
             />
@@ -149,64 +139,64 @@ export default function RegisterPage() {
           </motion.div>
         </div>
 
-        <motion.div {...item(0.3)} className="space-y-1 relative group pt-2">
-          <label htmlFor="email" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
-            Email Address
-          </label>
+        <motion.div {...item(0.3)} className="relative group pt-2">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+            <Mail size={18} />
+          </div>
           <input
             id="email"
             type="email"
-            placeholder="your@email.com"
-            className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400"
+            placeholder="Email Address"
+            className="w-full h-12 bg-white rounded-xl pl-12 pr-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-sm"
             style={{ borderColor: errors.email ? '#E46962' : undefined }}
             {...register('email')}
           />
           {errors.email && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.email.message}</p>}
         </motion.div>
 
-        <motion.div {...item(0.4)} className="space-y-1 relative group pt-2">
-          <label htmlFor="password" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
-            Password
-          </label>
+        <motion.div {...item(0.4)} className="relative group pt-2">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
+            <Lock size={18} />
+          </div>
           <div className="relative">
             <input
               id="password"
               type={showPassword ? 'text' : 'password'}
-              placeholder="Create a strong password"
-              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 pr-10"
+              placeholder="Password"
+              className="w-full h-12 bg-white rounded-xl pl-12 pr-12 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-sm"
               style={{ borderColor: errors.password ? '#E46962' : undefined }}
               {...register('password')}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 text-[#B5AFAD] hover:text-[#3A3331] transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           {errors.password && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.password.message}</p>}
         </motion.div>
 
-        <motion.div {...item(0.5)} className="space-y-1 relative group pt-2">
-          <label htmlFor="confirmPassword" className="block text-xs font-bold text-gray-500 uppercase tracking-widest">
-            Confirm Password
-          </label>
+        <motion.div {...item(0.5)} className="relative group pt-2">
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
+            <Lock size={18} />
+          </div>
           <div className="relative">
             <input
               id="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
-              placeholder="Repeat your password"
-              className="w-full h-12 bg-gray-50 rounded-xl px-4 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 pr-10"
+              placeholder="Confirm Password"
+              className="w-full h-12 bg-white rounded-xl pl-12 pr-12 text-sm text-gray-900 border border-gray-200 transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-sm"
               style={{ borderColor: errors.confirmPassword ? '#E46962' : undefined }}
               {...register('confirmPassword')}
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-              className="absolute right-0 top-1/2 -translate-y-1/2 text-[#B5AFAD] hover:text-[#3A3331] transition-colors"
+              className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
             >
-              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
           </div>
           {errors.confirmPassword && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.confirmPassword.message}</p>}
@@ -229,12 +219,12 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full h-12 bg-[#BC8477] text-white text-[11px] font-bold tracking-[0.2em] uppercase hover:bg-[#9A6B60] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:pointer-events-none"
+            className="w-full h-12 bg-[#BC8477] text-white text-sm font-semibold rounded-xl hover:bg-[#9A6B60] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#BC8477]/20"
           >
             {isPending ? <Loader2 size={16} className="animate-spin" /> : (
               <>
-                CREATE ACCOUNT
-                <ArrowRight size={14} />
+                Create Account
+                <ArrowRight size={18} />
               </>
             )}
           </button>
@@ -255,7 +245,7 @@ export default function RegisterPage() {
           onClick={handleGoogleLogin}
           type="button"
           disabled={isPending}
-          className="w-full h-12 bg-white border border-[#E8E1DE] text-[#3A3331] text-[11px] font-bold tracking-wider hover:bg-[#F5F2F0] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
+          className="w-full h-12 bg-white border border-[#E8E1DE] rounded-xl text-[#3A3331] text-sm font-semibold hover:bg-[#F5F2F0] transition-all duration-300 flex items-center justify-center gap-3 disabled:opacity-70"
         >
           <svg className="w-4 h-4" viewBox="0 0 24 24">
             <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />

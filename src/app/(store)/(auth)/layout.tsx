@@ -1,6 +1,10 @@
+'use client';
+
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Cormorant_Garamond } from 'next/font/google';
+import { Package, ShieldCheck, Star } from 'lucide-react';
 
 const cormorant = Cormorant_Garamond({ 
   subsets: ["latin"],
@@ -13,69 +17,81 @@ export default function AuthLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const pathname = usePathname();
+  const isLogin = pathname === '/login';
+
   return (
-    <div className={`min-h-screen flex w-full bg-white ${cormorant.variable}`}>
-      {/* ── Left Hero Panel (Hidden on Mobile) ── */}
-      <div className="hidden lg:flex lg:w-1/2 relative flex-col justify-between overflow-hidden bg-gray-900">
-        {/* Editorial Fashion Image */}
+    <div className={`min-h-screen flex w-full relative bg-[#F9FAFB] ${cormorant.variable}`}>
+      {/* Background Image (subtle) */}
+      <div className="absolute inset-0 z-0">
         <Image
-          src="/auth-hero.png"
+          src="/auth-hero.jpg"
           alt="Premium Fashion"
           fill
           priority
-          className="object-cover object-center"
-          sizes="50vw"
+          className="object-cover object-center opacity-20 mix-blend-multiply"
+          sizes="100vw"
         />
-
-        {/* Soft overlay gradient for subtle contrast */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-black/40 mix-blend-multiply opacity-60" />
-
-        {/* Top left Brand */}
-        <div className="relative z-10 p-12">
-          <Link href="/" className="flex items-center gap-3 w-fit group">
-            <div className="w-10 h-10 rounded-full border-[1.5px] border-white/20 flex items-center justify-center backdrop-blur-sm group-hover:bg-white/10 transition-colors">
-              <span className="text-white font-bold text-xl font-light">V</span>
-            </div>
-            <span className="font-sans tracking-[0.2em] text-white text-sm uppercase">Velora</span>
-          </Link>
-        </div>
-
-        {/* Bottom Text Content */}
-        <div className="relative z-10 p-12">
-          <div className="w-12 h-[1px] bg-white/40 mb-8" />
-          <h2 className="font-bold text-5xl md:text-6xl text-white mb-6 tracking-tight leading-[1.1]">
-            Where Style Meets <br />
-            <span className="italic">Sophistication</span>
-          </h2>
-          <p className="text-white/80 text-sm md:text-base font-medium max-w-md mb-12 leading-relaxed">
-            Discover curated collections of premium fashion and lifestyle pieces, crafted for the modern woman who knows her worth.
-          </p>
-
-          <div className="flex gap-10">
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-1 bg-white/60" />
-              <span className="text-white/80 text-[10px] uppercase tracking-widest font-semibold">Free<br/>Shipping</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-1 bg-white/60" />
-              <span className="text-white/80 text-[10px] uppercase tracking-widest font-semibold">Easy<br/>Returns</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <div className="w-1 h-1 bg-white/60" />
-              <span className="text-white/80 text-[10px] uppercase tracking-widest font-semibold">Premium<br/>Quality</span>
-            </div>
-          </div>
-          
-          <div className="w-full h-[1px] bg-white/20 mt-12 mb-4" />
-          <p className="text-[10px] text-white/50 uppercase tracking-widest">
-            © 2026 Velora · Premium Fashion
-          </p>
-        </div>
+        <div className="absolute inset-0 bg-[#F5F2F0]/60 backdrop-blur-[2px]" />
       </div>
 
-      {/* ── Right Form Panel ── */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 md:p-24 overflow-y-auto bg-white">
-        <div className="w-full max-w-md">
+      <div className="relative z-10 w-full max-w-[1400px] mx-auto flex flex-col lg:flex-row items-center justify-center p-6 lg:p-12 gap-12 lg:gap-24">
+        
+        {/* ── Left Content Panel ── */}
+        <div className="flex-1 w-full max-w-lg lg:max-w-none pt-12 lg:pt-0">
+          <Link href="/" className="inline-block mb-16 lg:mb-24">
+            <span className="font-serif tracking-[0.2em] text-gray-900 text-xl uppercase font-bold">Velora</span>
+          </Link>
+
+          <h2 className="font-serif font-bold text-5xl md:text-6xl text-gray-900 mb-6 tracking-tight leading-[1.1]">
+            {isLogin ? (
+              <>Welcome <br /> Back to <span className="italic text-[#BC8477]">Velora</span></>
+            ) : (
+              <>Join Velora <br /><span className="italic text-[#BC8477]">Today</span></>
+            )}
+          </h2>
+          
+          <p className="text-gray-600 text-base font-medium max-w-md mb-12 leading-relaxed">
+            {isLogin 
+              ? "Sign in to access your exclusive offers, fast checkout, and personalized shopping experience."
+              : "Create your account and enjoy exclusive offers, fast checkout, and personalized shopping."}
+          </p>
+
+          <div className="space-y-8">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#EAF0E2] flex items-center justify-center text-[#7A915C] shrink-0">
+                <Package size={20} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Free Shipping</h4>
+                <p className="text-sm text-gray-500 font-medium">On all orders over $50</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#F5E6E3] flex items-center justify-center text-[#BC8477] shrink-0">
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Secure Payment</h4>
+                <p className="text-sm text-gray-500 font-medium">100% secure & protected</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-full bg-[#FFF4E5] flex items-center justify-center text-[#E89E34] shrink-0">
+                <Star size={20} />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">Trusted by 50K+</h4>
+                <p className="text-sm text-gray-500 font-medium">Happy customers</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Right Form Panel (White Card) ── */}
+        <div className="w-full max-w-md lg:max-w-[480px] bg-white rounded-[32px] p-8 md:p-12 shadow-[0_8px_40px_rgba(0,0,0,0.04)]">
           {children}
         </div>
       </div>
