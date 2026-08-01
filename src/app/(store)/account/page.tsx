@@ -474,8 +474,8 @@ export default function AccountPage() {
             </div>
           ) : (
             <div className="space-y-3">
-              {recentOrders.map(order => (
-                <div key={order.id} className="bg-[#F9FAFB] rounded-2xl p-4 flex items-center justify-between border border-gray-100 hover:border-gray-200 transition-colors">
+              {recentOrders.map((order, i) => (
+                <div key={order.id || i} className="bg-[#F9FAFB] rounded-2xl p-4 flex items-center justify-between border border-gray-100 hover:border-gray-200 transition-colors">
                   <div className="flex items-center gap-4">
                     <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm">
                       <Package size={18} className="text-gray-400" />
@@ -639,8 +639,8 @@ export default function AccountPage() {
         />
       ) : (
         <div className="space-y-4 mt-6">
-          {orders.map(order => (
-            <div key={order.id} className="bg-[#F9FAFB] rounded-2xl overflow-hidden border border-gray-100 transition-all hover:border-gray-200 hover:shadow-sm">
+          {orders.map((order, i) => (
+            <div key={order.id || i} className="bg-[#F9FAFB] rounded-2xl overflow-hidden border border-gray-100 transition-all hover:border-gray-200 hover:shadow-sm">
               {/* Order Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between p-5 border-b border-gray-100 gap-3">
                 <div className="flex items-center gap-4">
@@ -662,8 +662,8 @@ export default function AccountPage() {
               </div>
               {/* Order Items */}
               <div className="p-5 space-y-3 bg-white">
-                {order.items?.map(item => (
-                  <div key={item.id} className="flex gap-4 items-center">
+                {order.items?.map((item, i) => (
+                  <div key={item.id || i} className="flex gap-4 items-center">
                     <div className="relative w-14 h-14 min-w-[56px] rounded-xl bg-[#F9FAFB] overflow-hidden">
                       {item.image_url ? (
                         <Image src={item.image_url} alt={item.product_name || 'Product'} fill sizes="48px" className="object-cover" />
@@ -705,11 +705,11 @@ export default function AccountPage() {
         />
       ) : (
         <div className="space-y-6 mt-6">
-          {pendingOrders.map(order => {
+          {pendingOrders.map((order, i) => {
             const steps = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
             const currentStep = steps.indexOf(order.status);
             return (
-              <div key={order.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+              <div key={order.id || i} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                 <div className="flex justify-between items-start mb-8">
                   <div>
                     <p className="text-sm font-bold text-gray-900 mb-0.5">{getOrderDisplayName(order)}</p>
@@ -775,8 +775,8 @@ export default function AccountPage() {
         />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {wishlistItems.map(item => (
-            <div key={item.id} className="bg-white border border-gray-100 rounded-2xl group overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+          {wishlistItems.map((item, i) => (
+            <div key={item.id || i} className="bg-white border border-gray-100 rounded-2xl group overflow-hidden shadow-sm hover:shadow-md transition-shadow">
               <Link href={`/product/${item.product.slug}`} className="block relative aspect-[4/5] bg-gray-50 overflow-hidden">
                 <Image
                   src={item.product.images?.[0]?.url || '/placeholder.jpg'}
@@ -834,8 +834,8 @@ export default function AccountPage() {
         />
       ) : (
         <div className="space-y-4 mt-6">
-          {cartItems.map(item => (
-            <div key={item.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-center shadow-sm">
+          {cartItems.map((item, i) => (
+            <div key={item.id || i} className="bg-white border border-gray-100 rounded-2xl p-4 flex flex-col sm:flex-row gap-4 items-center shadow-sm">
               <div className="relative w-20 h-24 min-w-[80px] rounded-xl bg-gray-50 overflow-hidden">
                 <Image
                   src={item.product.images?.[0]?.url || '/placeholder.jpg'}
@@ -926,8 +926,8 @@ export default function AccountPage() {
         <EmptyState icon={MapPin} message="No saved addresses yet." />
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-          {addresses.map(addr => (
-            <div key={addr.id} className={cn(
+          {addresses.map((addr, i) => (
+            <div key={addr.id || i} className={cn(
               'relative p-6 rounded-2xl border transition-colors',
               addr.is_default ? 'border-[#BC8477] bg-[#FDF9F8] shadow-sm' : 'border-gray-100 bg-white hover:border-gray-200'
             )}>
@@ -982,8 +982,8 @@ export default function AccountPage() {
           </div>
         ) : (
           <div className="space-y-3">
-            {orders.slice(0, 10).map(order => (
-              <div key={order.id} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between hover:shadow-sm transition-shadow">
+            {orders.slice(0, 10).map((order, i) => (
+              <div key={order.id || i} className="bg-white border border-gray-100 rounded-2xl p-4 flex items-center justify-between hover:shadow-sm transition-shadow">
                 <div>
                   <p className="text-sm font-bold text-gray-900 mb-0.5">{getOrderDisplayName(order)}</p>
                   <p className="text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
@@ -1020,8 +1020,8 @@ export default function AccountPage() {
         <div className="flex justify-center py-8"><Loader2 className="animate-spin text-[#BC8477]" /></div>
       ) : myReviewsData?.data && myReviewsData.data.length > 0 ? (
         <div className="space-y-4">
-          {myReviewsData.data.map((review: any) => (
-            <div key={review.id} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
+          {myReviewsData.data.map((review: any, i: number) => (
+            <div key={review.id || i} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition-shadow">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-4">
                   <div className="relative w-16 h-16 rounded-xl bg-gray-50 overflow-hidden shrink-0">
@@ -1197,8 +1197,8 @@ export default function AccountPage() {
               onChange={e => setReturnForm(f => ({ ...f, orderId: e.target.value }))}
             >
               <option value="">Choose an order...</option>
-              {orders.map(order => (
-                <option key={order.id} value={order.id}>
+              {orders.map((order, i) => (
+                <option key={order.id || i} value={order.id}>
                   {getOrderDisplayName(order)} — ৳{Number(order.total_amount).toFixed(2)}
                 </option>
               ))}
@@ -1451,9 +1451,9 @@ export default function AccountPage() {
                 </div>
               </div>
 
-              {NAV_ITEMS.map(item => (
+              {NAV_ITEMS.map((item, i) => (
                 <button
-                  key={item.id}
+                  key={item.id || i}
                   onClick={() => { setActiveTab(item.id as TabType); setSidebarOpen(false); }}
                   className={cn(
                     'flex items-center gap-4 w-full text-left px-5 py-3.5 transition-all text-sm rounded-2xl',
