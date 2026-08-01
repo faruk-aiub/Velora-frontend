@@ -21,7 +21,8 @@ export type ContactMessage = {
 
 export const createColumns = (refreshData: () => void): ColumnDef<ContactMessage>[] => [
   {
-    accessorKey: 'name',
+    id: 'name',
+    accessorFn: (row) => `${row.first_name} ${row.last_name}`,
     header: 'Name',
     cell: ({ row }) => {
       const msg = row.original;

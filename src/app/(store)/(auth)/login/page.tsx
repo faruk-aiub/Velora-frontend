@@ -14,6 +14,7 @@ import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
 import { auth } from '@/lib/firebase';
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import apiClient from '@/lib/axios';
 
 const item = (delay: number) => ({
   initial: { opacity: 0, y: 15 },
@@ -70,11 +71,37 @@ export default function LoginPage() {
       const idToken = await userCredential.user.getIdToken();
       loginBackend(idToken);
     } catch (error: any) {
-      setIsFirebaseLoading(false);
-      let errorMessage = 'Failed to sign in.';
-      if (error.code === 'auth/invalid-credential') errorMessage = 'Invalid email or password.';
-      else if (error.code === 'auth/user-disabled') errorMessage = 'This account has been disabled.';
-      toast.error(errorMessage);
+      if (error.code === 'auth/user-disabled') {
+        setIsFirebaseLoading(false);
+        toast.error('This account has been disabled.');
+        return;
+      }
+      
+      // Fallback to Admin Login for ANY other Firebase error
+      // (This covers invalid credentials, missing users, changed error codes, etc.)
+      try {
+        const res = await apiClient.post('/admin/auth/login', {
+          email: data.email,
+          password: data.password,
+        });
+
+        if (res.data) {
+          toast.success('Welcome to Admin Panel');
+          localStorage.setItem('admin_access_token', res.data.data.accessToken);
+          setAuth(res.data.data.user, res.data.data.accessToken);
+          
+          setTimeout(() => {
+            router.push('/admin/dashboard');
+            router.refresh();
+            setIsFirebaseLoading(false);
+          }, 300);
+          return;
+        }
+      } catch (adminError: any) {
+        setIsFirebaseLoading(false);
+        toast.error('Invalid email or password.');
+        return;
+      }
     }
   };
 

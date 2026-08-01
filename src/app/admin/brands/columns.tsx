@@ -30,14 +30,16 @@ export const createColumns = (
  header: 'Logo',
  cell: ({ row }) => {
  const logoUrl = row.getValue('logo_url') as string | null;
- return logoUrl ? (
- <div className="relative w-10 h-10 rounded overflow-hidden border border-zinc-200">
- <Image src={logoUrl} alt={row.getValue('name')} fill sizes="40px" className="object-cover"/>
- </div>
- ) : (
- <div className="w-10 h-10 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-500 font-medium">
- N/A
- </div>
+ return (
+   <div className="relative w-10 h-10 rounded overflow-hidden border border-zinc-200">
+     {logoUrl ? (
+       <Image src={logoUrl} alt={(row.getValue('name') as string) || 'Brand'} fill sizes="40px" className="object-cover"/>
+     ) : (
+       <div className="w-10 h-10 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-500 font-medium">
+         N/A
+       </div>
+     )}
+   </div>
  );
  },
  },

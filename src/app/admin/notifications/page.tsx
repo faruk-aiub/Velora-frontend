@@ -19,13 +19,13 @@ export default function NotificationsPage() {
   const { data: notifications, isLoading } = useQuery({
     queryKey: ['adminNotifications'],
     queryFn: async () => {
-      const res = await api.get('/admin/all'); // From notifications controller
+      const res = await api.get('/notifications/admin/all'); // From notifications controller
       return res.data.data;
     }
   });
 
   const createMutation = useMutation({
-    mutationFn: (newNotification: any) => api.post('/admin/send', newNotification),
+    mutationFn: (newNotification: any) => api.post('/notifications/admin/send', newNotification),
     onSuccess: () => { 
       queryClient.invalidateQueries({ queryKey: ['adminNotifications'] }); 
       setIsDialogOpen(false); 

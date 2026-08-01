@@ -24,14 +24,16 @@ export const createColumns = (
  header: 'Image',
  cell: ({ row }) => {
  const imageUrl = row.getValue('image_url') as string | null;
- return imageUrl ? (
- <div className="relative w-10 h-10 rounded overflow-hidden border border-zinc-200">
- <Image src={imageUrl} alt={row.getValue('name')} fill sizes="40px" className="object-cover"/>
- </div>
- ) : (
- <div className="w-10 h-10 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-500 font-medium">
- N/A
- </div>
+ return (
+   <div className="relative w-10 h-10 rounded overflow-hidden border border-zinc-200">
+     {imageUrl ? (
+       <Image src={imageUrl} alt={(row.getValue('displayName') as string) || 'Category'} fill sizes="40px" className="object-cover"/>
+     ) : (
+       <div className="w-10 h-10 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-500 font-medium">
+         N/A
+       </div>
+     )}
+   </div>
  );
  },
  },

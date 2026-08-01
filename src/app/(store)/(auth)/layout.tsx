@@ -92,6 +92,7 @@ export default function AuthLayout({
                 src="/auth-hero-products.png"
                 alt="Velora Products"
                 fill
+                sizes="(max-width: 1280px) 100vw, 50vw"
                 className="object-contain object-bottom xl:object-right-bottom scale-[1.15] origin-bottom xl:origin-bottom-right"
                 priority
               />
