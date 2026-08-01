@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import axios from "@/lib/axios";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { cn } from "@/lib/utils";
+import { ShopSidebar } from "@/components/shop/ShopSidebar";
 
 interface Category {
   id: string;
@@ -55,9 +56,15 @@ export function BestSellingProducts() {
   }, [activeCategoryId]);
 
   return (
-    <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto">
-      <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Best Selling Products</h2>
+    <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto w-full">
+      <div className="flex flex-col lg:flex-row gap-12 lg:gap-24 relative">
+        <Suspense fallback={<div>Loading filters...</div>}>
+          <ShopSidebar />
+        </Suspense>
+        
+        <div className="flex-1 w-full">
+          <div className="flex flex-col md:flex-row items-center justify-between mb-12 gap-6">
+            <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Best Selling Products</h2>
         
         {/* Category Filter */}
         <div className="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto hide-scrollbar snap-x">
@@ -111,6 +118,8 @@ export function BestSellingProducts() {
           <p className="text-gray-500 font-medium">No products found in this category.</p>
         </div>
       )}
+        </div>
+      </div>
     </section>
   );
 }

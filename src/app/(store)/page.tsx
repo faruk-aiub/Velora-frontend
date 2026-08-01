@@ -4,12 +4,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Truck, ShieldCheck, RefreshCw, Headset, Star } from "lucide-react";
 import { BestSellingProducts } from "@/components/home/BestSellingProducts";
-import { fetchCategoryTree } from "@/lib/categories";
-
-const COLORS = ['bg-[#E8F0FA]', 'bg-[#FBEBEB]', 'bg-[#F4EAFC]', 'bg-[#FCF5EA]', 'bg-[#F5F5F5]', 'bg-[#EBF5EE]'];
 
 export default async function HomePage() {
-  const categories = await fetchCategoryTree();
 
   return (
     <div className="min-h-screen bg-white">
@@ -98,26 +94,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── Shop by Categories ── */}
-      <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto">
-        <div className="flex items-center justify-between mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 tracking-tight">Shop by Categories</h2>
-          <Link href="/categories" className="text-sm font-bold text-gray-900 hover:text-[#BC8477] transition-colors flex items-center">
-            View All Categories <span className="ml-1">→</span>
-          </Link>
-        </div>
-        
-        <div className="flex overflow-x-auto pb-8 gap-8 snap-x hide-scrollbar">
-          {categories.slice(0, 10).map((cat, i) => (
-            <Link key={cat.id} href={`/category/${cat.slug}`} className="flex flex-col items-center gap-4 snap-center shrink-0 group">
-              <div className={`w-40 h-40 rounded-full ${COLORS[i % COLORS.length]} flex items-center justify-center relative overflow-hidden transition-transform duration-300 group-hover:scale-105`}>
-                <Image src={cat.image_url || `https://picsum.photos/seed/${cat.slug}/300/300`} alt={cat.name} fill sizes="(max-width: 768px) 100vw, 33vw" className="object-cover mix-blend-multiply" />
-              </div>
-              <span className="font-bold text-gray-900 text-sm">{cat.name}</span>
-            </Link>
-          ))}
-        </div>
-      </section>
+
 
       <BestSellingProducts />
 
@@ -151,7 +128,7 @@ export default async function HomePage() {
             { name: "Michael T.", text: "Very happy with my purchase. Highly recommend Velora to everyone!" }
           ].map((review, i) => (
             <div key={i} className="bg-[#F9FAFB] rounded-3xl p-8 text-left relative">
-              <div className="text-[#BC8477] font-serif text-6xl absolute top-6 left-6 opacity-20">"</div>
+              <div className="text-[#BC8477] font-serif text-6xl absolute top-6 left-6 opacity-20">&quot;</div>
               <p className="text-gray-900 font-medium leading-relaxed mb-8 relative z-10 pt-4">
                 {review.text}
               </p>

@@ -42,7 +42,8 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
     if (maxPrice) params.set('max_price', maxPrice);
     else params.delete('max_price');
     
-    router.push(`${pathname}?${params.toString()}#products`, { scroll: true });
+    const targetPath = pathname === '/' ? '/shop' : pathname;
+    router.push(`${targetPath}?${params.toString()}#products`, { scroll: true });
   };
 
   const [openCategory, setOpenCategory] = useState<string | null>(currentCategory || 'Agricultural Products');
@@ -60,7 +61,8 @@ export function ShopSidebar({ categoryOverride }: { categoryOverride?: string })
     const params = new URLSearchParams(searchParams.toString());
     params.set('category', categoryName);
     params.set('subcategory', subName);
-    router.push(`${pathname}?${params.toString()}#products`, { scroll: true });
+    const targetPath = pathname === '/' ? '/shop' : pathname;
+    router.push(`${targetPath}?${params.toString()}#products`, { scroll: true });
   };
 
   return (
