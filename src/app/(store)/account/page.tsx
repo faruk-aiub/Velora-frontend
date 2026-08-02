@@ -148,7 +148,7 @@ export default function AccountPage() {
   useEffect(() => {
     if (!mounted) return;
     if (!user) router.push('/login');
-    else setProfileForm({ first_name: user.first_name, last_name: user.last_name, phone: user.phone || '' });
+    else setProfileForm({ first_name: user?.first_name || user?.profile?.first_name || '', last_name: user?.last_name || user?.profile?.last_name || '', phone: user?.phone || user?.profile?.phone || '' });
   }, [user, router, mounted]);
   useEffect(() => {
     if (!user) return;
@@ -506,11 +506,11 @@ export default function AccountPage() {
       <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 mb-8 p-6 bg-[#F9FAFB] rounded-2xl border border-gray-100">
         <div className="relative">
           <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] flex items-center justify-center text-white font-bold text-4xl shadow-sm border-4 border-white">
-            {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+            {(user?.first_name || user?.profile?.first_name || 'U').charAt(0)}{(user?.last_name || user?.profile?.last_name || '').charAt(0)}
           </div>
         </div>
         <div className="flex-1 text-center sm:text-left">
-          <h3 className="font-bold text-2xl text-gray-900">{user.first_name} {user.last_name}</h3>
+          <h3 className="font-bold text-2xl text-gray-900">{user?.first_name || user?.profile?.first_name} {user?.last_name || user?.profile?.last_name}</h3>
           <p className="text-sm text-gray-500 mt-1">{user.email}</p>
           <p className="text-xs font-bold text-gray-400 mt-2 bg-white px-3 py-1 rounded-full w-fit mx-auto sm:mx-0 border border-gray-100 shadow-sm">
             Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
@@ -1443,10 +1443,10 @@ export default function AccountPage() {
               {/* Logo / Header Area */}
               <div className="flex items-center gap-3 px-4 py-4 mb-4">
                 <div className="w-10 h-10 rounded-full bg-[#BC8477] text-white flex items-center justify-center font-bold text-lg shrink-0">
-                  {user.first_name.charAt(0)}{user.last_name.charAt(0)}
+                  {(user?.first_name || user?.profile?.first_name || 'U').charAt(0)}{(user?.last_name || user?.profile?.last_name || '').charAt(0)}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-base font-bold text-gray-900 truncate">{user.first_name} {user.last_name}</p>
+                  <p className="text-base font-bold text-gray-900 truncate">{user?.first_name || user?.profile?.first_name} {user?.last_name || user?.profile?.last_name}</p>
                   <p className="text-xs text-gray-500 truncate">{user.email}</p>
                 </div>
               </div>
