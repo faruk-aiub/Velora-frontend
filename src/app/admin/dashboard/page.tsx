@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   ArrowUpRight, 
   ArrowDownRight, 
-  DollarSign, 
+  Banknote, 
   Users, 
   CreditCard, 
   Activity,
@@ -93,10 +93,10 @@ export default function AdminDashboard() {
         <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-bold text-gray-500">Total Revenue</CardTitle>
-            <DollarSign className="h-5 w-5 text-[#BC8477]" />
+            <Banknote className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-gray-900">${(stats.totalSales || 45231.89).toLocaleString()}</div>
+            <div className="text-4xl font-bold text-gray-900">৳{(stats.totalSales || 45231.89).toLocaleString()}</div>
             <p className="text-sm font-bold text-green-500 flex items-center mt-2">
               <ArrowUpRight className="w-4 h-4 mr-1" /> +20.1% <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
@@ -152,7 +152,7 @@ export default function AdminDashboard() {
                 <BarChart data={salesData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
                   <XAxis dataKey="name" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                  <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
                   <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111827', fontWeight: 'bold' }} />
                   <Bar dataKey="total" fill="#BC8477" radius={[6, 6, 0, 0]} />
                 </BarChart>
