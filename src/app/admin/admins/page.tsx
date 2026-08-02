@@ -9,14 +9,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, Shield, ShieldCheck, UserCheck, RefreshCw } from 'lucide-react';
+import { Plus, Shield, ShieldCheck, UserCheck, RefreshCw, MoreHorizontal, Power, Trash } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
+import { ConfirmDeleteModal } from '@/components/admin/ConfirmDeleteModal';
 
 export default function AdminsPage() {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '', first_name: '', last_name: '' });
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  
+  const [adminToDelete, setAdminToDelete] = useState<any | null>(null);
 
   const { data: admins = [], isLoading, isFetching } = useQuery({
     queryKey: ['adminUsers'],
@@ -25,7 +29,7 @@ export default function AdminsPage() {
       setLastUpdated(new Date());
       return res.data.data;
     },
-    refetchInterval: 10000, // Real-time polling
+    refetchInterval: 10000,
   });
 
   const createMutation = useMutation({
@@ -38,13 +42,40 @@ export default function AdminsPage() {
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to create admin.');
-      console.error(error);
+    }
+  });
+
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, is_active }: { id: string, is_active: boolean }) => api.patch(`/admin/admins/${id}/status`, { is_active }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
+      toast.success('Admin status updated');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to update status');
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => api.delete(`/admin/admins/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['adminUsers'] });
+      setAdminToDelete(null);
+      toast.success('Admin deleted successfully');
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || 'Failed to delete admin');
+      setAdminToDelete(null);
     }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createMutation.mutate(formData);
+  };
+
+  const handleToggleStatus = (admin: any) => {
+    updateStatusMutation.mutate({ id: admin.id, is_active: !admin.is_active });
   };
 
   const activeAdmins = admins.filter((a: any) => a.is_active).length;
@@ -159,12 +190,13 @@ export default function AdminsPage() {
                   <TableHead className="font-semibold text-gray-600">Role</TableHead>
                   <TableHead className="font-semibold text-gray-600">Status</TableHead>
                   <TableHead className="font-semibold text-gray-600 text-right">Joined</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-center w-12">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading && !admins.length ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center h-48">
+                    <TableCell colSpan={6} className="text-center h-48">
                       <div className="flex flex-col items-center justify-center text-gray-400 gap-2">
                         <RefreshCw className="w-6 h-6 animate-spin text-gray-300" />
                         <span>Loading admins...</span>
@@ -172,7 +204,7 @@ export default function AdminsPage() {
                     </TableCell>
                   </TableRow>
                 ) : admins.length === 0 ? (
-                  <TableRow><TableCell colSpan={5} className="text-center h-48 text-gray-500 font-medium">No admins found.</TableCell></TableRow>
+                  <TableRow><TableCell colSpan={6} className="text-center h-48 text-gray-500 font-medium">No admins found.</TableCell></TableRow>
                 ) : (
                   admins.map((admin: any) => (
                     <TableRow key={admin.id} className="border-gray-50 transition-colors hover:bg-gray-50/50">
@@ -195,6 +227,29 @@ export default function AdminsPage() {
                           year: 'numeric', month: 'short', day: 'numeric'
                         })}
                       </TableCell>
+                      <TableCell className="text-center">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger className="h-8 w-8 p-0 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-100">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuItem onClick={() => handleToggleStatus(admin)}>
+                              <Power className="mr-2 h-4 w-4" />
+                              {admin.is_active ? 'Deactivate' : 'Activate'}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem 
+                              className="text-red-600 focus:bg-red-50 focus:text-red-600"
+                              onClick={() => setAdminToDelete(admin)}
+                            >
+                              <Trash className="mr-2 h-4 w-4" />
+                              Delete Admin
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
                     </TableRow>
                   ))
                 )}
@@ -203,6 +258,15 @@ export default function AdminsPage() {
           </div>
         </CardContent>
       </Card>
+
+      <ConfirmDeleteModal
+        isOpen={!!adminToDelete}
+        onClose={() => setAdminToDelete(null)}
+        onConfirm={() => adminToDelete && deleteMutation.mutate(adminToDelete.id)}
+        title="Delete Admin"
+        description={`Are you sure you want to delete ${adminToDelete?.profile?.first_name || 'this admin'}? This action cannot be undone.`}
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }
