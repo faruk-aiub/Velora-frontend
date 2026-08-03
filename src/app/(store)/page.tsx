@@ -124,9 +124,9 @@ export default async function HomePage() {
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
-            { name: "John D.", text: "Amazing products and fast delivery! Velora is my go-to store for all my needs." },
-            { name: "Sarah M.", text: "Great quality at affordable prices. The customer support is also very responsive." },
-            { name: "Michael T.", text: "Very happy with my purchase. Highly recommend Velora to everyone!" }
+            { name: "Rakib H.", text: "Amazing products and extremely fast delivery! Velora is my go-to store for all my tech needs in Dhaka." },
+            { name: "Sadia I.", text: "Great quality at affordable prices. The customer support team was very polite and responsive." },
+            { name: "Mehedi H.", text: "Very happy with my purchase. The packaging was top-notch. Highly recommend Velora to everyone!" }
           ].map((review, i) => (
             <div key={i} className="bg-[#F9FAFB] rounded-3xl p-8 text-left relative testimonial-item">
               <div className="text-[#BC8477] font-serif text-6xl absolute top-6 left-6 opacity-20">&quot;</div>
