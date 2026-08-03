@@ -54,7 +54,7 @@ export function CategoryFormDialog({ open, onOpenChange, categoryToEdit }: Categ
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: categories } = useQuery({
-    queryKey: ['admin-categories'],
+    queryKey: ['admin-categories-flat'],
     queryFn: async () => {
       const res = await api.get('/categories/tree');
       return flattenCategoryTree(res.data.data) as Category[];
