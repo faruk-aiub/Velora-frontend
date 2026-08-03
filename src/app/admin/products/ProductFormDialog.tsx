@@ -42,6 +42,7 @@ const formSchema = z.object({
  title: z.string().min(3, 'Title must be at least 3 characters'),
  description: z.string().optional(),
  base_price: z.coerce.number().min(0, 'Price must be 0 or greater'),
+ discount_percent: z.coerce.number().min(0).max(100).optional(),
  category_id: z.string().min(1, 'Category is required'),
  brand_id: z.string().optional().or(z.literal('none')),
  is_active: z.boolean(),
@@ -84,6 +85,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  title: '',
  description: '',
  base_price: 0,
+ discount_percent: 0,
  category_id: '',
  brand_id: 'none',
  is_active: true,
@@ -96,6 +98,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  title: productToEdit.title,
  description: (productToEdit as any).description || '',
  base_price: (productToEdit as any).base_price || 0,
+ discount_percent: (productToEdit as any).discount_percent || 0,
  category_id: productToEdit.category?.id || '',
  brand_id: productToEdit.brand?.id || 'none',
  is_active: productToEdit.is_active,
@@ -106,12 +109,16 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  if (res.data.data.base_price !== undefined) {
    form.setValue('base_price', res.data.data.base_price);
  }
+ if (res.data.data.discount_percent !== undefined) {
+   form.setValue('discount_percent', res.data.data.discount_percent);
+ }
  });
  } else {
  form.reset({
  title: '',
  description: '',
  base_price: 0,
+ discount_percent: 0,
  category_id: '',
  brand_id: 'none',
  is_active: true,
@@ -126,6 +133,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  title: values.title,
  description: values.description || undefined,
  base_price: values.base_price !== undefined ? Number(values.base_price) : 0,
+ discount_percent: values.discount_percent !== undefined ? Number(values.discount_percent) : 0,
  category_id: values.category_id,
  brand_id: values.brand_id === 'none' ? undefined : values.brand_id,
  is_active: values.is_active,
@@ -193,7 +201,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
 
  return (
  <Dialog open={open} onOpenChange={onOpenChange}>
- <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+ <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
  <DialogHeader>
  <DialogTitle>{productToEdit ? 'Edit Product' : 'Create Product'}</DialogTitle>
  <DialogDescription>
@@ -201,9 +209,10 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  </DialogDescription>
  </DialogHeader>
 
- <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+ <div className="overflow-y-auto flex-1 pr-2 pb-2">
+ <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-2">
  <Form {...form}>
- <form id="product-form"onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+ <form id="product-form"onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pb-4">
  <FormField
  control={form.control as any}
  name="title"
@@ -232,6 +241,7 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  )}
  />
 
+ <div className="grid grid-cols-2 gap-4">
  <FormField
  control={form.control as any}
  name="base_price"
@@ -245,6 +255,21 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  </FormItem>
  )}
  />
+
+ <FormField
+ control={form.control as any}
+ name="discount_percent"
+ render={({ field }) => (
+ <FormItem>
+ <FormLabel>Discount (%)</FormLabel>
+ <FormControl>
+ <Input type="number" step="1" min="0" max="100" placeholder="0" {...field} />
+ </FormControl>
+ <FormMessage />
+ </FormItem>
+ )}
+ />
+ </div>
  
  <div className="grid grid-cols-2 gap-4">
  <FormField
@@ -352,13 +377,14 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
  </div>
  </div>
 
- <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 mt-6">
+ <div className="flex justify-end gap-3 pt-4 border-t border-zinc-200 mt-2">
  <Button type="button"variant="outline"onClick={() => onOpenChange(false)}>
  Cancel
  </Button>
  <Button type="submit"form="product-form"disabled={isSubmitting}>
  {isSubmitting ? 'Saving...' : 'Save Product'}
  </Button>
+ </div>
  </div>
  </DialogContent>
  </Dialog>

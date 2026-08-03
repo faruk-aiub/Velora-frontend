@@ -2,7 +2,7 @@
 
 import { ColumnDef } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
-import { ArrowUpDown, Edit, MoreHorizontal, Trash } from 'lucide-react';
+import { ArrowUpDown, Edit, MoreHorizontal, Trash, ChevronDown, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import {
  DropdownMenu,
@@ -13,7 +13,7 @@ import {
  DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-import { FlatCategory as Category } from '@/lib/categories';
+import { CategoryTree as Category } from '@/lib/categories';
 
 export const createColumns = (
  onEdit: (category: Category) => void,
@@ -27,7 +27,7 @@ export const createColumns = (
  return (
    <div className="relative w-10 h-10 rounded overflow-hidden border border-zinc-200">
      {imageUrl ? (
-       <Image src={imageUrl} alt={(row.getValue('displayName') as string) || 'Category'} fill sizes="40px" className="object-cover"/>
+       <Image src={imageUrl} alt={(row.getValue('name') as string) || 'Category'} fill sizes="40px" className="object-cover"/>
      ) : (
        <div className="w-10 h-10 rounded bg-zinc-100 flex items-center justify-center text-xs text-zinc-500 font-medium">
          N/A
@@ -38,7 +38,7 @@ export const createColumns = (
  },
  },
  {
- accessorKey: 'displayName',
+ accessorKey: 'name',
  header: ({ column }) => {
  return (
  <Button
@@ -50,6 +50,23 @@ export const createColumns = (
  </Button>
  );
  },
+ cell: ({ row }) => {
+ return (
+ <div
+ style={{ paddingLeft: `${row.depth * 2}rem` }}
+ className="flex items-center gap-2"
+ >
+ {row.getCanExpand() ? (
+ <button onClick={row.getToggleExpandedHandler()} className="p-1 hover:bg-zinc-100 rounded text-zinc-500">
+ {row.getIsExpanded() ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+ </button>
+ ) : (
+ <span className="w-6" />
+ )}
+ <span className="font-medium">{row.getValue('name')}</span>
+ </div>
+ );
+ }
  },
  {
  accessorKey: 'slug',

@@ -12,6 +12,8 @@ import {
  ColumnFiltersState,
  getFilteredRowModel,
  VisibilityState,
+ getExpandedRowModel,
+ ExpandedState,
 } from '@tanstack/react-table';
 
 import {
@@ -37,6 +39,7 @@ interface DataTableProps<TData, TValue> {
  data: TData[];
  searchKey?: string;
  isLoading?: boolean;
+ getSubRows?: (originalRow: TData) => TData[] | undefined;
 }
 
 export function DataTable<TData, TValue>({
@@ -44,11 +47,13 @@ export function DataTable<TData, TValue>({
  data,
  searchKey,
  isLoading,
+ getSubRows,
 }: DataTableProps<TData, TValue>) {
  const [sorting, setSorting] = useState<SortingState>([]);
  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
  const [rowSelection, setRowSelection] = useState({});
+ const [expanded, setExpanded] = useState<ExpandedState>({});
 
  const table = useReactTable({
  data,
@@ -61,11 +66,15 @@ export function DataTable<TData, TValue>({
  getFilteredRowModel: getFilteredRowModel(),
  onColumnVisibilityChange: setColumnVisibility,
  onRowSelectionChange: setRowSelection,
+ onExpandedChange: setExpanded,
+ getExpandedRowModel: getExpandedRowModel(),
+ getSubRows,
  state: {
  sorting,
  columnFilters,
  columnVisibility,
  rowSelection,
+ expanded,
  },
  });
 

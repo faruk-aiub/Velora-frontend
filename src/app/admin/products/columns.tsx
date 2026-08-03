@@ -19,6 +19,7 @@ export type Product = {
  slug: string;
  is_active: boolean;
  base_price?: number;
+ discount_percent?: number;
  category: { id: string; name: string } | null;
  brand: { id: string; name: string } | null;
  images?: { id: string; url: string; sort_order: number }[];
@@ -77,6 +78,14 @@ export const createColumns = (
  return <div>৳{price !== undefined ? price.toFixed(2) : '0.00'}</div>;
  }
  },
+ {
+  accessorKey: 'discount_percent',
+  header: 'Discount',
+  cell: ({ row }) => {
+  const discount = row.getValue('discount_percent') as number;
+  return <div>{discount ? `${discount}%` : 'None'}</div>;
+  }
+  },
  {
  accessorKey: 'brand',
  header: 'Brand',

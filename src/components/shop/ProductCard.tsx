@@ -19,17 +19,26 @@ export interface ProductCardProps {
   variants: { id: string; price: number; compare_price?: number | null }[];
   images: { url: string; alt_text?: string | null }[];
   base_price?: number;
+  discount_percent?: number;
 }
 
-export function ProductCard({ id, title, slug, brand, variants, images, base_price }: ProductCardProps) {
-  const price = variants?.[0]?.price ?? (base_price || 0);
-  const comparePrice = variants?.[0]?.compare_price;
+export function ProductCard({ id, title, slug, brand, variants, images, base_price, discount_percent = 0 }: ProductCardProps) {
+  let basePriceToUse = variants?.[0]?.price ?? (base_price || 0);
+  
+  let price = basePriceToUse;
+  let comparePrice = variants?.[0]?.compare_price;
+
+  if (discount_percent > 0) {
+    comparePrice = basePriceToUse;
+    price = basePriceToUse - (basePriceToUse * (discount_percent / 100));
+  }
+
   const primaryImage = images?.[0]?.url || '/placeholder.jpg';
   const isNew = false;
   
-  const discountPercent = comparePrice && comparePrice > price 
-    ? Math.round(((comparePrice - price) / comparePrice) * 100) 
-    : 0;
+  const calculatedDiscountPercent = discount_percent > 0 
+    ? discount_percent 
+    : (comparePrice && comparePrice > price ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0);
   
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
@@ -115,9 +124,9 @@ export function ProductCard({ id, title, slug, brand, variants, images, base_pri
               New
             </div>
           )}
-          {discountPercent > 0 && (
+          {calculatedDiscountPercent > 0 && (
             <div className="bg-red-500 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded-full shadow-sm">
-              -{discountPercent}%
+              -{calculatedDiscountPercent}%
             </div>
           )}
         </div>
