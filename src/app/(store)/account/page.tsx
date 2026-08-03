@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
@@ -80,7 +80,7 @@ const OrderStatusBadge = ({ status }: { status: string }) => {
   );
 };
 
-export default function AccountPage() {
+function AccountPageContent() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { user, logout, setUser } = useAuthStore();
@@ -1539,5 +1539,13 @@ export default function AccountPage() {
         </div>
       </main>
     </>
+  );
+}
+
+export default function AccountPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-400" /></div>}>
+      <AccountPageContent />
+    </Suspense>
   );
 }
