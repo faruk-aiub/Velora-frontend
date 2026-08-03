@@ -27,17 +27,7 @@ import { columns, Order } from './columns';
 
 // removed static salesData
 
-const revenueData = [
-  { name: 'Mon', revenue: 4000 },
-  { name: 'Tue', revenue: 3000 },
-  { name: 'Wed', revenue: 2000 },
-  { name: 'Thu', revenue: 2780 },
-  { name: 'Fri', revenue: 1890 },
-  { name: 'Sat', revenue: 2390 },
-  { name: 'Sun', revenue: 3490 },
-];
-
-
+// Static mock data removed
 export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState({
@@ -45,9 +35,11 @@ export default function AdminDashboard() {
     totalOrders: 0,
     totalCustomers: 0,
     totalProducts: 0,
-    recentOrders: []
+    recentOrders: [],
+    topProducts: []
   });
   const [salesData, setSalesData] = useState<any[]>([]);
+  const [weeklyData, setWeeklyData] = useState<any[]>([]);
 
   useEffect(() => {
     setMounted(true);
@@ -71,6 +63,9 @@ export default function AdminDashboard() {
           const salesDataRaw = await salesRes.json();
           if (salesDataRaw.data?.monthly) {
             setSalesData(salesDataRaw.data.monthly);
+          }
+          if (salesDataRaw.data?.weekly) {
+            setWeeklyData(salesDataRaw.data.weekly);
           }
         }
       } catch (e) {
@@ -96,7 +91,7 @@ export default function AdminDashboard() {
             <Banknote className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-gray-900">৳{(stats.totalSales || 45231.89).toLocaleString()}</div>
+            <div className="text-4xl font-bold text-gray-900">৳{(stats.totalSales || 0).toLocaleString()}</div>
             <p className="text-sm font-bold text-green-500 flex items-center mt-2">
               <ArrowUpRight className="w-4 h-4 mr-1" /> +20.1% <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
@@ -108,7 +103,7 @@ export default function AdminDashboard() {
             <CreditCard className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-gray-900">+{stats.totalOrders || 2350}</div>
+            <div className="text-4xl font-bold text-gray-900">+{stats.totalOrders || 0}</div>
             <p className="text-sm font-bold text-green-500 flex items-center mt-2">
               <ArrowUpRight className="w-4 h-4 mr-1" /> +15% <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
@@ -120,7 +115,7 @@ export default function AdminDashboard() {
             <Users className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-gray-900">+{stats.totalCustomers || 12234}</div>
+            <div className="text-4xl font-bold text-gray-900">+{stats.totalCustomers || 0}</div>
             <p className="text-sm font-bold text-green-500 flex items-center mt-2">
               <ArrowUpRight className="w-4 h-4 mr-1" /> +7% <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
@@ -132,7 +127,7 @@ export default function AdminDashboard() {
             <Package className="h-5 w-5 text-[#BC8477]" />
           </CardHeader>
           <CardContent>
-            <div className="text-4xl font-bold text-gray-900">{stats.totalProducts || 573}</div>
+            <div className="text-4xl font-bold text-gray-900">{stats.totalProducts || 0}</div>
             <p className="text-sm font-bold text-red-500 flex items-center mt-2">
               <ArrowDownRight className="w-4 h-4 mr-1" /> -2 <span className="text-gray-400 font-medium ml-1">from last month</span>
             </p>
@@ -168,7 +163,7 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="h-[300px]">
               <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={revenueData}>
+                <LineChart data={weeklyData}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
                   <XAxis dataKey="name" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
                   <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
@@ -196,13 +191,7 @@ export default function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              {[
-                { name: 'Wireless Headphones', sales: 245, price: '৳120' },
-                { name: 'Smart Watch Series 7', sales: 190, price: '৳299' },
-                { name: 'Mechanical Keyboard', sales: 154, price: '৳150' },
-                { name: 'Gaming Mouse', sales: 121, price: '৳80' },
-                { name: 'USB-C Hub', sales: 98, price: '৳45' },
-              ].map((product, i) => (
+              {(stats.topProducts || []).map((product: any, i: number) => (
                 <div key={i} className="flex items-center">
                   <div className="w-12 h-12 rounded-[20px] bg-gray-50 flex items-center justify-center mr-4">
                     <Package className="w-5 h-5 text-[#BC8477]" />

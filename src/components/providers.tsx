@@ -1,5 +1,7 @@
 'use client';
 
+import { usePathname } from 'next/navigation';
+
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useState } from 'react';
@@ -20,11 +22,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
       })
   );
 
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith('/admin');
+
   return (
     <QueryClientProvider client={queryClient}>
-      <GSAPLenisProvider>
-        {children}
-      </GSAPLenisProvider>
+      {isAdmin ? (
+        children
+      ) : (
+        <GSAPLenisProvider>
+          {children}
+        </GSAPLenisProvider>
+      )}
       <Toaster
         position="top-right"
         richColors
