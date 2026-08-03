@@ -77,7 +77,7 @@ export default async function HomePage() {
       <section className="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-10 relative z-20 features-strip">
         <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
-            { icon: Truck, title: "Free Shipping", desc: "On orders over ৳50" },
+            { icon: Truck, title: "Free Shipping", desc: "On orders over ৳500" },
             { icon: ShieldCheck, title: "Secure Payment", desc: "100% secure payment" },
             { icon: RefreshCw, title: "Easy Returns", desc: "30 days return policy" },
             { icon: Headset, title: "24/7 Support", desc: "Dedicated support" }
