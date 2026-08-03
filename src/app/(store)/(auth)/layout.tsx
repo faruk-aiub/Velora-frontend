@@ -100,7 +100,7 @@ export default function AuthLayout({
           </div>
           
           {/* Categories Bar */}
-          <div className="bg-white rounded-3xl p-4 px-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] flex items-center justify-between w-full max-w-[700px] relative z-20 mx-auto xl:mx-0">
+          <div className="bg-white rounded-3xl p-4 px-6 md:px-8 shadow-[0_8px_30px_rgba(0,0,0,0.04)] flex items-center justify-start md:justify-between overflow-x-auto gap-6 w-full max-w-[700px] relative z-20 mx-auto xl:mx-0 hide-scrollbar">
             {[
               { icon: ShoppingBag, label: "Grocery" },
               { icon: Smartphone, label: "Electronics" },
@@ -109,9 +109,9 @@ export default function AuthLayout({
               { icon: Sparkles, label: "Beauty" },
               { icon: Gamepad2, label: "Toys & More" },
             ].map((Cat, i) => (
-              <div key={i} className="flex flex-col items-center gap-2 text-gray-500 hover:text-[#B58A63] cursor-pointer transition-colors">
+              <div key={i} className="flex flex-col items-center gap-2 text-gray-500 hover:text-[#B58A63] cursor-pointer transition-colors shrink-0">
                 <Cat.icon size={22} strokeWidth={1.5} className="text-[#8B7F7A]" />
-                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-800">{Cat.label}</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-gray-800 whitespace-nowrap">{Cat.label}</span>
               </div>
             ))}
           </div>

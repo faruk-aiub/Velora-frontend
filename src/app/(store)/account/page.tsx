@@ -1428,7 +1428,7 @@ export default function AccountPage() {
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Sidebar */}
             <aside className={cn(
-              'w-64 shrink-0 flex-col gap-2 bg-white rounded-[32px] p-4 shadow-sm h-fit sticky top-12',
+              'w-64 shrink-0 flex-col gap-2 bg-white rounded-[32px] p-4 shadow-sm h-fit lg:max-h-[calc(100vh-6rem)] sticky top-12 lg:overflow-y-auto',
               sidebarOpen ? 'flex fixed inset-0 z-50 rounded-none w-full h-full pt-8 px-6 pb-8 overflow-y-auto' : 'hidden lg:flex'
             )}>
               {sidebarOpen && (
