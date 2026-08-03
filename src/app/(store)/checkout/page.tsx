@@ -90,6 +90,7 @@ export default function CheckoutPage() {
     mutationFn: paymentService.initiate,
     onSuccess: (res) => {
       clearCart();
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       if (res.data?.paymentUrl) {
         window.location.href = res.data.paymentUrl;
       } else {
@@ -106,6 +107,7 @@ export default function CheckoutPage() {
   const placeOrderMutation = useMutation({
     mutationFn: orderService.create,
     onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
       // Order created, now initiate payment
       if (res.data?.id) {
         initiatePaymentMutation.mutate({

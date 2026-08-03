@@ -311,7 +311,7 @@ export default function AccountPage() {
   const cartItems = cartStore.items;
 
   const recentOrders = orders.slice(0, 3);
-  const pendingOrders = orders.filter((o: any) => o.status === 'PENDING' || o.status === 'PROCESSING');
+  const pendingOrders = orders.filter((o: any) => o.status !== 'DELIVERED' && o.status !== 'CANCELLED');
 
   // ─── Shared Components ────────────────────────────────────────────────────
   const renderAddressForm = () => (

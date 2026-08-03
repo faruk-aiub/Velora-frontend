@@ -25,8 +25,10 @@ export function BestSellingProducts() {
         const res = await axios.get("/categories");
         // Assuming the response data array is in res.data.data
         const fetchedCats = res.data.data || res.data;
+        // Filter to only show root categories (parent_id is null/empty)
+        const rootCats = fetchedCats.filter((c: any) => !c.parent_id);
         // Limit to 5 or 6 categories for the filter UI to not overflow
-        setCategories(fetchedCats.slice(0, 6)); 
+        setCategories(rootCats.slice(0, 6)); 
       } catch (error) {
         console.error("Failed to fetch categories:", error);
       }
@@ -41,7 +43,7 @@ export function BestSellingProducts() {
       try {
         const url = activeCategoryId === "ALL" 
           ? "/products?limit=8" 
-          : `/products?categoryId=${activeCategoryId}&limit=8`;
+          : `/products?category_id=${activeCategoryId}&limit=8`;
           
         const res = await axios.get(url);
         setProducts(res.data.data || res.data);
