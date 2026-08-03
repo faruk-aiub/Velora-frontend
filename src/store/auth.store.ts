@@ -27,8 +27,10 @@ export const useAuthStore = create<AuthState>()(
       setAccessToken: (token) =>
         set({ accessToken: token }),
 
-      logout: () =>
-        set({ user: null, accessToken: null, isAuthenticated: false }),
+      logout: () => {
+        localStorage.removeItem('velora-auth');
+        set({ user: null, accessToken: null, isAuthenticated: false });
+      },
     }),
     {
       name: 'velora-auth',
@@ -37,7 +39,7 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
-        accessToken: state.accessToken, // Persisted for session continuity; refresh interceptor handles expiry
+        accessToken: state.accessToken,
       }),
     }
   )

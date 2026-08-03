@@ -27,6 +27,8 @@ import { columns, Order } from './columns';
 
 // removed static salesData
 
+import apiClient from '@/lib/axios';
+
 // Static mock data removed
 export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false);
@@ -45,22 +47,14 @@ export default function AdminDashboard() {
     setMounted(true);
     const fetchStats = async () => {
       try {
-        const token = localStorage.getItem('admin_access_token');
-        const res = await fetch('http://localhost:3000/api/v1/admin/dashboard', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data.success) {
-            setStats(data.data);
-          }
+        const res = await apiClient.get('/admin/dashboard');
+        if (res.data?.success) {
+          setStats(res.data.data);
         }
         
-        const salesRes = await fetch('http://localhost:3000/api/v1/admin/sales-report', {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        if (salesRes.ok) {
-          const salesDataRaw = await salesRes.json();
+        const salesRes = await apiClient.get('/admin/sales-report');
+        if (salesRes.data?.data) {
+          const salesDataRaw = salesRes.data;
           if (salesDataRaw.data?.monthly) {
             setSalesData(salesDataRaw.data.monthly);
           }

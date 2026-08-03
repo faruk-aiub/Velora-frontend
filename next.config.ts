@@ -34,19 +34,7 @@ const nextConfig: NextConfig = {
       }
     ],
   },
-  async headers() {
-    return [
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'Cross-Origin-Opener-Policy',
-            value: 'same-origin-allow-popups', // Allows Firebase popup to communicate with the main window
-          },
-        ],
-      },
-    ];
-  },
+
   eslint: {
     ignoreDuringBuilds: true,
   },

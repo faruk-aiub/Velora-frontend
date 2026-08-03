@@ -9,8 +9,7 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 
 import { forgotPasswordSchema, type ForgotPasswordFormValues } from '@/lib/validators/auth.schema';
-import { auth } from '@/lib/firebase';
-import { sendPasswordResetEmail } from 'firebase/auth';
+import { authService } from '@/services/auth.service';
 
 const item = (delay: number) => ({
   initial: { opacity: 0, y: 16 },
@@ -29,18 +28,13 @@ export default function ForgotPasswordPage() {
   const onSubmit = async (data: ForgotPasswordFormValues) => {
     setIsPending(true);
     try {
-      await sendPasswordResetEmail(auth, data.email);
+      await authService.forgotPassword({ email: data.email });
       setSentTo(data.email);
       setEmailSent(true);
     } catch (error: any) {
       setIsPending(false);
-      let errorMessage = 'Failed to send reset email.';
-      if (error.code === 'auth/user-not-found') {
-        errorMessage = 'No user found with this email.';
-      } else if (error.code === 'auth/invalid-email') {
-        errorMessage = 'Invalid email address.';
-      }
-      toast.error(errorMessage);
+      const msg = error.response?.data?.message || 'Failed to send reset email.';
+      toast.error(msg);
     } finally {
       setIsPending(false);
     }

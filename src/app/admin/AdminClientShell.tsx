@@ -88,33 +88,56 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [unreadMessages, setUnreadMessages] = React.useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
+  const { isAuthenticated, user, logout } = useAuthStore();
 
   React.useEffect(() => {
-    // Only fetch if logged in (token exists)
-    if (localStorage.getItem('admin_access_token')) {
+    // Parse auth state directly from localStorage to avoid Zustand hydration delays
+    let isAuth = false;
+    let userRole = '';
+    try {
+      const authStorage = localStorage.getItem('velora-auth');
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage);
+        isAuth = parsed?.state?.isAuthenticated;
+        userRole = parsed?.state?.user?.role || '';
+      }
+    } catch (e) {}
+
+    if (!isAuth || !['ADMIN', 'SUPER_ADMIN'].includes(userRole)) {
+      router.replace('/login');
+      return;
+    }
+
+    // Only fetch if logged in
+    if (isAuth) {
       contactService.getUnreadCount()
         .then(res => setUnreadMessages(res.count))
         .catch(() => {});
     }
-  }, [pathname]); // Refresh count on navigation
+  }, [pathname, router, isAuthenticated, user]); // Refresh count on navigation
 
-
-  // If we are on the login page, render clean layout without sidebar
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
-  }
 
   const handleLogout = async () => {
     try {
-      const token = localStorage.getItem('admin_access_token');
-      await fetch('http://localhost:3000/api/v1/admin/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      localStorage.removeItem('admin_access_token');
-      useAuthStore.getState().logout();
+      const authStorage = localStorage.getItem('velora-auth');
+      let token = null;
+      if (authStorage) {
+        try {
+          const parsed = JSON.parse(authStorage);
+          token = parsed?.state?.accessToken;
+        } catch {}
+      }
+
+      if (token) {
+        await fetch('http://localhost:3000/api/v1/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+      }
+      
+      logout();
       toast.success('Logged out successfully');
       router.push('/');
     } catch (error) {

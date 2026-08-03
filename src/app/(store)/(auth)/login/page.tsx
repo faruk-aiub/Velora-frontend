@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
@@ -12,8 +12,6 @@ import { motion } from 'framer-motion';
 import { loginSchema, type LoginFormValues } from '@/lib/validators/auth.schema';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
-import { auth } from '@/lib/firebase';
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import apiClient from '@/lib/axios';
 
 const item = (delay: number) => ({
@@ -24,8 +22,31 @@ const item = (delay: number) => ({
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [isFirebaseLoading, setIsFirebaseLoading] = useState(false);
+
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const setAuth = useAuthStore((state) => state.setAuth);
+
+  useEffect(() => {
+    let isAuth = false;
+    let userRole = '';
+    
+    try {
+      const authStorage = localStorage.getItem('velora-auth');
+      if (authStorage) {
+        const parsed = JSON.parse(authStorage);
+        isAuth = parsed?.state?.isAuthenticated;
+        userRole = parsed?.state?.user?.role || '';
+      }
+    } catch (e) {}
+
+    if (isAuth) {
+      if (['ADMIN', 'SUPER_ADMIN'].includes(userRole)) {
+        router.replace('/admin/dashboard');
+      } else {
+        router.replace('/account');
+      }
+    }
+  }, [router]);
 
   const {
     register,
@@ -35,13 +56,13 @@ export default function LoginPage() {
     resolver: zodResolver(loginSchema),
   });
 
-  const { mutate: loginBackend, isPending: isBackendPending } = useMutation({
-    mutationFn: authService.firebaseLogin,
+  const { mutate: loginBackend, isPending } = useMutation({
+    mutationFn: authService.login,
     onSuccess: (data) => {
       const user = data.data.user;
       setAuth(user, data.data.accessToken);
       
-      if (user.role === 'ADMIN') {
+      if (['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
         toast.success('Welcome to Admin Panel');
         router.push('/admin/dashboard');
       } else {
@@ -52,75 +73,12 @@ export default function LoginPage() {
     onError: (error: unknown) => {
       const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Login failed. Please try again.';
       toast.error(msg);
-      auth.signOut(); // Ensure Firebase state is cleared if backend fails
     },
   });
 
   const onSubmit = async (data: LoginFormValues) => {
-    setIsFirebaseLoading(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
-      
-      if (!userCredential.user.emailVerified) {
-        toast.error('Please verify your email address before logging in.');
-        await auth.signOut();
-        setIsFirebaseLoading(false);
-        return;
-      }
-
-      const idToken = await userCredential.user.getIdToken();
-      loginBackend(idToken);
-    } catch (error: any) {
-      if (error.code === 'auth/user-disabled') {
-        setIsFirebaseLoading(false);
-        toast.error('This account has been disabled.');
-        return;
-      }
-      
-      // Fallback to Admin Login for ANY other Firebase error
-      // (This covers invalid credentials, missing users, changed error codes, etc.)
-      try {
-        const res = await apiClient.post('/admin/auth/login', {
-          email: data.email,
-          password: data.password,
-        });
-
-        if (res.data) {
-          toast.success('Welcome to Admin Panel');
-          localStorage.setItem('admin_access_token', res.data.data.accessToken);
-          setAuth(res.data.data.user, res.data.data.accessToken);
-          
-          setTimeout(() => {
-            router.push('/admin/dashboard');
-            router.refresh();
-            setIsFirebaseLoading(false);
-          }, 300);
-          return;
-        }
-      } catch (adminError: any) {
-        setIsFirebaseLoading(false);
-        toast.error('Invalid email or password.');
-        return;
-      }
-    }
+    loginBackend({ email: data.email, password: data.password });
   };
-
-  const handleGoogleLogin = async () => {
-    setIsFirebaseLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      const userCredential = await signInWithPopup(auth, provider);
-      const idToken = await userCredential.user.getIdToken();
-      loginBackend(idToken);
-    } catch (error: any) {
-      setIsFirebaseLoading(false);
-      if (error.code !== 'auth/popup-closed-by-user') {
-        toast.error('Google sign in failed.');
-      }
-    }
-  };
-
-  const isPending = isFirebaseLoading || isBackendPending;
 
   return (
     <div className="w-full max-w-[420px] mx-auto">
@@ -214,30 +172,6 @@ export default function LoginPage() {
         </motion.div>
       </form>
 
-      <motion.div {...item(0.5)} className="relative my-8">
-        <div className="absolute inset-0 flex items-center">
-          <div className="w-full border-t border-[#E8E1DE]" />
-        </div>
-        <div className="relative flex justify-center text-[10px] text-gray-400 uppercase tracking-widest font-semibold">
-          <span className="px-4 bg-white">or continue with</span>
-        </div>
-      </motion.div>
-
-      <motion.div {...item(0.6)}>
-        <button
-          onClick={handleGoogleLogin}
-          type="button"
-          className="w-full h-14 bg-white border border-[#EBE8E6] rounded-2xl text-[14px] font-semibold text-gray-700 hover:bg-gray-50 transition-colors flex items-center justify-center gap-3 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
-        >
-          <svg className="w-4 h-4" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-          </svg>
-          Continue with Google
-        </button>
-      </motion.div>
 
       <motion.p {...item(0.7)} className="text-center text-xs text-gray-500 mt-8 font-medium">
         Don&apos;t have an account?{' '}
