@@ -28,6 +28,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { contactService } from '@/services/contact.service';
+import { useAuthStore } from '@/store/auth.store';
 
 const navigationGroups = [
   {
@@ -110,8 +111,9 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
         }
       });
       localStorage.removeItem('admin_access_token');
+      useAuthStore.getState().logout();
       toast.success('Logged out successfully');
-      router.push('/admin/login');
+      router.push('/');
     } catch (error) {
       toast.error('Logout failed');
     }

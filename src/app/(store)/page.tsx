@@ -4,17 +4,18 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { Truck, ShieldCheck, RefreshCw, Headset, Star } from "lucide-react";
 import { BestSellingProducts } from "@/components/home/BestSellingProducts";
+import { GSAPPageAnimator } from "@/components/animations/GSAPPageAnimator";
 
 export default async function HomePage() {
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar variant="solid" />
-
+      <GSAPPageAnimator>
       {/* ── Hero Section ── */}
       <section className="relative w-full pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 lg:px-12 max-w-[1600px] mx-auto bg-[#F9FAFB] rounded-b-[40px]">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 z-10 relative">
+          <div className="space-y-8 z-10 relative hero-text">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-100 shadow-sm">
               <span className="w-2 h-2 rounded-full bg-[#BC8477]"></span>
               <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">New Arrivals</span>
@@ -59,7 +60,7 @@ export default async function HomePage() {
             </div>
           </div>
           
-          <div className="relative h-[300px] lg:h-[500px] w-full hidden md:block">
+          <div className="relative h-[300px] lg:h-[500px] w-full hidden md:block hero-image">
             <Image
               src="/hero-products.png"
               alt="Hero Products"
@@ -73,7 +74,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Features Strip ── */}
-      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-10 relative z-20">
+      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-10 relative z-20 features-strip">
         <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
           {[
             { icon: Truck, title: "Free Shipping", desc: "On orders over ৳50" },
@@ -81,7 +82,7 @@ export default async function HomePage() {
             { icon: RefreshCw, title: "Easy Returns", desc: "30 days return policy" },
             { icon: Headset, title: "24/7 Support", desc: "Dedicated support" }
           ].map((feature, i) => (
-            <div key={i} className="flex items-center gap-4">
+            <div key={i} className="flex items-center gap-4 feature-item">
               <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-[#BC8477]">
                 <feature.icon size={24} strokeWidth={2} />
               </div>
@@ -118,7 +119,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto text-center">
+      <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto text-center testimonials-section">
         <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-16">What Our Customers Say</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -127,7 +128,7 @@ export default async function HomePage() {
             { name: "Sarah M.", text: "Great quality at affordable prices. The customer support is also very responsive." },
             { name: "Michael T.", text: "Very happy with my purchase. Highly recommend Velora to everyone!" }
           ].map((review, i) => (
-            <div key={i} className="bg-[#F9FAFB] rounded-3xl p-8 text-left relative">
+            <div key={i} className="bg-[#F9FAFB] rounded-3xl p-8 text-left relative testimonial-item">
               <div className="text-[#BC8477] font-serif text-6xl absolute top-6 left-6 opacity-20">&quot;</div>
               <p className="text-gray-900 font-medium leading-relaxed mb-8 relative z-10 pt-4">
                 {review.text}
@@ -148,6 +149,7 @@ export default async function HomePage() {
         </div>
       </section>
       
+      </GSAPPageAnimator>
       <Footer />
     </div>
   );

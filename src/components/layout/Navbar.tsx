@@ -100,25 +100,32 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
       </Link>
 
       <div className="hidden lg:flex items-center gap-8">
-        <Link href="/" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Home</Link>
-        <Link href="/shop" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/shop" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Shop</Link>
-        <Link href="/categories" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/categories" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Categories</Link>
-        <Link href="/about" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/about" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>About</Link>
-        <Link href="/contact" className={cn("text-sm font-bold transition-colors", isTransparent ? "text-white/90 hover:text-white" : pathname === "/contact" ? "text-[#BC8477]" : "text-gray-600 hover:text-[#BC8477]")}>Contact</Link>
+        {[
+          { name: 'Home', path: '/' },
+          { name: 'Shop', path: '/shop' },
+          { name: 'Categories', path: '/categories' },
+          { name: 'About', path: '/about' },
+          { name: 'Contact', path: '/contact' },
+        ].map((link) => (
+          <Link key={link.name} href={link.path} className={cn("relative text-sm font-bold transition-colors group py-1", isTransparent ? "text-white/90 hover:text-white" : pathname === link.path ? "text-[#BC8477]" : "text-gray-600 hover:text-gray-900")}>
+            {link.name}
+            <span className={cn("absolute bottom-0 left-0 h-[2px] bg-[#BC8477] transition-all duration-300 ease-out", pathname === link.path ? "w-full" : "w-0 group-hover:w-full")} />
+          </Link>
+        ))}
       </div>
 
       <div className="flex items-center gap-5">
         <button 
           onClick={() => setIsSearchOpen(!isSearchOpen)}
-          className={cn("hover:text-[#BC8477] transition-colors hidden sm:block", isTransparent ? "text-white" : "text-gray-900")}
+          className={cn("transition-all duration-300 hover:scale-110 hidden sm:block", isTransparent ? "text-white hover:text-gray-200" : "text-gray-900 hover:text-[#BC8477]")}
         >
           <Search size={20} />
         </button>
-        <Link href={mounted && isAuthenticated ? "/account" : "/login"} className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-gray-900")}>
+        <Link href={mounted && isAuthenticated ? "/account" : "/login"} className={cn("transition-all duration-300 hover:scale-110", isTransparent ? "text-white hover:text-gray-200" : "text-gray-900 hover:text-[#BC8477]")}>
           <User size={20} />
         </Link>
         {mounted && isAuthenticated && (
-          <Link href="/account?tab=messages" className={cn("hover:text-[#BC8477] transition-colors relative", isTransparent ? "text-white" : "text-gray-900")}>
+          <Link href="/account?tab=messages" className={cn("transition-all duration-300 hover:scale-110 relative", isTransparent ? "text-white hover:text-gray-200" : "text-gray-900 hover:text-[#BC8477]")}>
             <Bell size={20} />
             {unreadCount > 0 && (
               <span className="absolute -top-2 -right-2 bg-[#BC8477] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
@@ -127,10 +134,10 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
             )}
           </Link>
         )}
-        <Link href={mounted && isAuthenticated ? "/account?tab=wishlist" : "/login"} className={cn("hover:text-[#BC8477] transition-colors", isTransparent ? "text-white" : "text-gray-900")}>
+        <Link href={mounted && isAuthenticated ? "/account?tab=wishlist" : "/login"} className={cn("transition-all duration-300 hover:scale-110", isTransparent ? "text-white hover:text-gray-200" : "text-gray-900 hover:text-[#BC8477]")}>
           <Heart size={20} />
         </Link>
-        <button onClick={openCart} className={cn("hover:text-[#BC8477] transition-colors relative", isTransparent ? "text-white" : "text-gray-900")}>
+        <button onClick={openCart} className={cn("transition-all duration-300 hover:scale-110 relative", isTransparent ? "text-white hover:text-gray-200" : "text-gray-900 hover:text-[#BC8477]")}>
           <ShoppingBag size={20} />
           {mounted && getTotalItems() > 0 && (
             <span className="absolute -top-2 -right-2 bg-[#BC8477] text-white text-[10px] w-4 h-4 flex items-center justify-center rounded-full">
