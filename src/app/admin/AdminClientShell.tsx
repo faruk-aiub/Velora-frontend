@@ -23,7 +23,9 @@ import {
   LogOut,
   Moon,
   Sun,
-  MessageSquare
+  MessageSquare,
+  Menu,
+  X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -85,6 +87,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [unreadMessages, setUnreadMessages] = React.useState(0);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
 
   React.useEffect(() => {
     // Only fetch if logged in (token exists)
@@ -126,13 +129,24 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex h-screen bg-[#F3F4F6] text-[#3A3331] font-sans selection:bg-[#BC8477] selection:text-white p-4 gap-6">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-white rounded-[32px] flex flex-col hidden md:flex shadow-sm z-10 h-full overflow-hidden shrink-0">
-        <div className="flex h-20 items-center px-8 border-b border-gray-100 shrink-0">
-          <Link href="/admin/dashboard" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900">
+      <aside className={`w-64 bg-white rounded-[32px] flex flex-col shadow-sm z-50 h-[calc(100vh-2rem)] shrink-0 fixed md:relative transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[150%] md:translate-x-0'}`}>
+        <div className="flex h-20 items-center justify-between px-8 border-b border-gray-100 shrink-0">
+          <Link href="/admin/dashboard" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>
             <span className="bg-[#BC8477] text-white w-10 h-10 flex items-center justify-center rounded-2xl font-sans font-bold text-lg">V</span>
             Velora Admin
           </Link>
+          <button className="md:hidden text-gray-500 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>
+            <X size={24} />
+          </button>
         </div>
         
         <nav className="flex-1 overflow-y-auto py-6 px-6 space-y-8">
@@ -149,6 +163,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
                     <Link
                       key={item.name}
                       href={item.href}
+                      onClick={() => setIsMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
                         isActive
                           ? 'bg-[#F3F4F6] text-gray-900'
@@ -181,9 +196,14 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         {/* Top Header Row */}
-        <header className="h-16 bg-white rounded-full flex items-center justify-between px-8 shrink-0 shadow-sm mb-6 mt-2 mr-2">
-          <div className="font-bold text-2xl tracking-tight text-gray-900">
-            {currentItem?.name || 'Admin Panel'}
+        <header className="h-16 bg-white rounded-full flex items-center justify-between px-4 sm:px-8 shrink-0 shadow-sm mb-6 mt-2 mr-2 ml-2 md:ml-0">
+          <div className="flex items-center gap-3">
+            <button className="md:hidden text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu size={24} />
+            </button>
+            <div className="font-bold text-xl sm:text-2xl tracking-tight text-gray-900 truncate max-w-[150px] sm:max-w-none">
+              {currentItem?.name || 'Admin Panel'}
+            </div>
           </div>
           <div className="flex items-center gap-4">
             <button className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">

@@ -79,8 +79,8 @@ export function DataTable<TData, TValue>({
  });
 
  return (
- <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm">
- <div className="flex items-center pb-6 justify-between">
+ <div className="bg-white rounded-[32px] p-4 lg:p-8 shadow-sm overflow-hidden">
+ <div className="flex items-center pb-6 justify-between flex-wrap gap-4">
  {searchKey && (
  <Input
  placeholder={`Filter ${searchKey}...`}

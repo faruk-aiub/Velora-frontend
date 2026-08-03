@@ -137,7 +137,7 @@ export default function AdminDashboard() {
 
       {/* Charts */}
       <div className="grid gap-6 md:grid-cols-7">
-        <Card className="col-span-4 rounded-3xl border-0 bg-white shadow-sm ring-0">
+        <Card className="md:col-span-4 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900">Sales Overview</CardTitle>
           </CardHeader>
@@ -156,7 +156,7 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-3 rounded-3xl border-0 bg-white shadow-sm ring-0">
+        <Card className="md:col-span-3 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900">Weekly Revenue</CardTitle>
           </CardHeader>
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-7 mt-6">
-        <Card className="col-span-5 rounded-3xl border-0 bg-white shadow-sm ring-0">
+        <Card className="md:col-span-5 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900">Recent Orders</CardTitle>
           </CardHeader>
@@ -185,7 +185,7 @@ export default function AdminDashboard() {
             <DataTable columns={columns} data={stats.recentOrders as Order[]} searchKey="customer" />
           </CardContent>
         </Card>
-        <Card className="col-span-2 rounded-3xl border-0 bg-white shadow-sm ring-0">
+        <Card className="md:col-span-2 rounded-3xl border-0 bg-white shadow-sm ring-0">
           <CardHeader>
             <CardTitle className="text-xl font-bold text-gray-900">Top Selling Products</CardTitle>
           </CardHeader>
