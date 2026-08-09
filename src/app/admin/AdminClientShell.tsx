@@ -31,6 +31,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { contactService } from '@/services/contact.service';
 import { useAuthStore } from '@/store/auth.store';
+import { authService } from '@/services/auth.service';
 
 const navigationGroups = [
   {
@@ -119,22 +120,10 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
 
   const handleLogout = async () => {
     try {
-      const authStorage = localStorage.getItem('velora-auth');
-      let token = null;
-      if (authStorage) {
-        try {
-          const parsed = JSON.parse(authStorage);
-          token = parsed?.state?.accessToken;
-        } catch {}
-      }
-
-      if (token) {
-        await fetch('http://localhost:3000/api/v1/auth/logout', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
+      try {
+        await authService.logout();
+      } catch (e) {
+        console.error('API logout failed, clearing local state anyway', e);
       }
       
       logout();
