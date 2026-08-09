@@ -161,7 +161,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Sidebar */}
-      <aside className={`w-64 bg-white rounded-[32px] flex flex-col shadow-sm z-50 h-[calc(100dvh-2rem)] md:h-[calc(100vh-2rem)] shrink-0 fixed top-4 left-4 md:relative md:top-auto md:left-auto transition-transform duration-300 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[150%] md:translate-x-0'}`}>
+      <aside className={`w-64 bg-white rounded-[32px] flex flex-col shadow-sm z-50 h-[calc(100dvh-2rem)] md:h-[calc(100vh-2rem)] shrink-0 fixed top-4 left-4 md:relative md:top-auto md:left-auto transition-transform duration-75 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[150%] md:translate-x-0'}`}>
         <div className="flex h-20 items-center justify-between px-8 border-b border-gray-100 shrink-0">
           <Link href="/admin/dashboard" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>
             <span className="bg-[#BC8477] text-white w-10 h-10 flex items-center justify-center rounded-2xl font-sans font-bold text-lg">V</span>
@@ -187,7 +187,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
                       key={item.name}
                       href={item.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-300 ${
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-75 ${
                         isActive
                           ? 'bg-[#F3F4F6] text-gray-900'
                           : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'

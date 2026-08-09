@@ -6,6 +6,8 @@ import { Truck, ShieldCheck, RefreshCw, Headset, Star } from "lucide-react";
 import { BestSellingProducts } from "@/components/home/BestSellingProducts";
 import { GSAPPageAnimator } from "@/components/animations/GSAPPageAnimator";
 
+export const revalidate = 60; // Cache SSR route for 60 seconds
+
 export default async function HomePage() {
 
   return (

@@ -17,7 +17,7 @@ export default function AdminSettingsPage() {
   const [activeTab, setActiveTab] = useState<'general' | 'security'>('general');
 
   return (
-    <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-75">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-gray-900">Settings</h1>

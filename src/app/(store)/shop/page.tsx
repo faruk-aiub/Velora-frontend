@@ -9,6 +9,8 @@ import { ShopSidebar } from "@/components/shop/ShopSidebar";
 
 import { fetchCategoryTree } from "@/lib/categories";
 
+export const revalidate = 60; // Cache SSR route for 60 seconds
+
 export const metadata = {
   title: "Shop All | Velora",
   description: "Browse our extensive collection of premium lifestyle products.",
