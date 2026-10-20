@@ -8,21 +8,52 @@ export interface CategoryTree {
   children: CategoryTree[];
 }
 
+const API_BASE_URL = typeof window === 'undefined'
+  ? (process.env.INTERNAL_API_URL || 'http://127.0.0.1:3000/api/v1')
+  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1');
+
+let memoryCachedTree: { data: CategoryTree[]; expiry: number } | null = null;
+let memoryCachedCategories: { data: CategoryTree[]; expiry: number } | null = null;
+
 export async function fetchCategoryTree(): Promise<CategoryTree[]> {
+  const now = Date.now();
+  if (memoryCachedTree && now < memoryCachedTree.expiry) {
+    return memoryCachedTree.data;
+  }
   try {
-    const res = await axios.get('/categories/tree');
-    return res.data.data;
+    const res = await fetch(`${API_BASE_URL}/categories/tree`, {
+      next: { revalidate: 300, tags: ['categories'] },
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const data = json.data || [];
+    memoryCachedTree = { data, expiry: now + 300 * 1000 };
+    return data;
   } catch (error) {
+    if (memoryCachedTree) return memoryCachedTree.data;
     console.error('Failed to fetch category tree:', error);
     return [];
   }
 }
 
 export async function fetchCategories(): Promise<CategoryTree[]> {
+  const now = Date.now();
+  if (memoryCachedCategories && now < memoryCachedCategories.expiry) {
+    return memoryCachedCategories.data;
+  }
   try {
-    const res = await axios.get('/categories');
-    return res.data.data;
+    const res = await fetch(`${API_BASE_URL}/categories`, {
+      next: { revalidate: 300, tags: ['categories'] },
+      headers: { 'Accept': 'application/json' },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const json = await res.json();
+    const data = json.data || [];
+    memoryCachedCategories = { data, expiry: now + 300 * 1000 };
+    return data;
   } catch (error) {
+    if (memoryCachedCategories) return memoryCachedCategories.data;
     console.error('Failed to fetch categories:', error);
     return [];
   }

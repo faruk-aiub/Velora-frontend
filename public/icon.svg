@@ -1,0 +1,59 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Liquid 18K Rose Gold Metallic Gradient -->
+    <linearGradient id="favRoseGold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="20%" stop-color="#FCECE6" />
+      <stop offset="45%" stop-color="#E2A597" />
+      <stop offset="70%" stop-color="#BC8477" />
+      <stop offset="90%" stop-color="#8B483A" />
+      <stop offset="100%" stop-color="#542016" />
+    </linearGradient>
+
+    <!-- Champagne specular highlight -->
+    <linearGradient id="favChampagne" x1="100%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="30%" stop-color="#FCEFEA" />
+      <stop offset="70%" stop-color="#D69B8F" />
+      <stop offset="100%" stop-color="#995647" />
+    </linearGradient>
+
+    <!-- Deep Luxury Obsidian Coin Base -->
+    <linearGradient id="favObsidian" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1B1E26" />
+      <stop offset="100%" stop-color="#0A0C10" />
+    </linearGradient>
+
+    <!-- Coin Rim Gradient -->
+    <linearGradient id="favRim" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.9" />
+      <stop offset="50%" stop-color="#BC8477" />
+      <stop offset="100%" stop-color="#6E3529" />
+    </linearGradient>
+  </defs>
+
+  <!-- Polished Luxury Medallion Base -->
+  <circle cx="32" cy="32" r="30.5" fill="url(#favObsidian)" stroke="url(#favRim)" stroke-width="1.5" />
+  <circle cx="32" cy="32" r="27.5" stroke="url(#favRim)" stroke-width="0.5" stroke-dasharray="2 2.5" opacity="0.4" fill="none" />
+
+  <!-- Cardinal Diamond Markers -->
+  <path d="M32 3 L33.2 4.5 L32 6 L30.8 4.5 Z" fill="url(#favRoseGold)" />
+  <path d="M32 58 L33.2 59.5 L32 61 L30.8 59.5 Z" fill="url(#favRoseGold)" />
+  <path d="M3 32 L4.5 33.2 L6 32 L4.5 30.8 Z" fill="url(#favRoseGold)" />
+  <path d="M58 32 L59.5 33.2 L61 32 L59.5 30.8 Z" fill="url(#favRoseGold)" />
+
+  <!-- Maison V Centerpiece -->
+  <!-- Left Bold Stem -->
+  <path d="M14 17 H27 C25.5 18.5 25.5 19.5 26.5 21 L34 50 L31.5 50 L16 21 C15 19.5 15 18.5 14 17 Z" fill="url(#favRoseGold)" />
+  <path d="M19 19 H24 L34 50 L31.5 50 Z" fill="url(#favChampagne)" opacity="0.75" />
+
+  <!-- Right Hairline Stem -->
+  <path d="M50 17 H41 C42 18.5 42 19.5 41 21 L33 50 L35 50 L48 21 C49 19.5 49 18.5 50 17 Z" fill="url(#favChampagne)" />
+
+  <!-- Apex Diamond Anchor -->
+  <path d="M32 47.5 L34 50.5 L32 53.5 L30 50.5 Z" fill="url(#favRoseGold)" />
+
+  <!-- Celestial Solitaire Star -->
+  <path d="M32 8 C32 11.5 33.6 13 37 13 C33.6 13 32 14.5 32 18 C32 14.5 30.4 13 27 13 C30.4 13 32 11.5 32 8 Z" fill="url(#favChampagne)" />
+  <circle cx="32" cy="13" r="1.2" fill="#FFFFFF" />
+</svg>

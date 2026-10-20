@@ -1,25 +1,15 @@
-'use client';
-
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Truck, ShieldCheck, Tag, ShoppingBag, Smartphone, Shirt, Home, Sparkles, Gamepad2 } from 'lucide-react';
-
-const plusJakarta = Plus_Jakarta_Sans({ 
-  subsets: ["latin"],
-  variable: "--font-plus-jakarta",
-});
+import { VeloraLogo } from "@/components/layout/VeloraLogo";
 
 export default function AuthLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-
   return (
-    <div className={`min-h-screen flex w-full relative bg-[#F8F5F1] overflow-hidden ${plusJakarta.variable}`} style={{ fontFamily: 'var(--font-plus-jakarta), sans-serif' }}>
+    <div className="min-h-screen flex w-full relative bg-[#F8F5F1] overflow-hidden font-sans">
       {/* Background Arch Shape */}
       <div className="absolute top-0 left-0 w-full lg:w-[50%] h-full bg-white rounded-tr-[250px] rounded-br-[150px] z-0" />
 
@@ -29,14 +19,9 @@ export default function AuthLayout({
         <div className="flex-1 w-full h-full flex flex-col justify-between pt-4 lg:pt-8 pb-4">
           
           {/* Header */}
-          <div>
-            <Link href="/" className="flex flex-col w-fit group mb-2">
-              <div className="flex items-center gap-1.5 mb-1 text-gray-900">
-                <ShoppingBag size={24} strokeWidth={2} />
-              </div>
-              <span className="tracking-[0.1em] text-gray-900 text-[22px] uppercase font-bold leading-none">VELORA</span>
-            </Link>
-            <p className="text-[13px] text-gray-500 font-medium">Everything you need, in one place.</p>
+          <div className="mb-2">
+            <VeloraLogo variant="dark" />
+            <p className="text-[13px] text-gray-500 font-medium mt-2">Everything you need, in one place.</p>
           </div>
 
           {/* Middle Section: Text/Features on Left, Image on Right */}

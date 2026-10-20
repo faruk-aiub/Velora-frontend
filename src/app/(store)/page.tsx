@@ -1,155 +1,83 @@
-import Image from "next/image";
-import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Truck, ShieldCheck, RefreshCw, Headset, Star } from "lucide-react";
+import { Truck, ShieldCheck, RefreshCw, Headset } from "lucide-react";
 import { BestSellingProducts } from "@/components/home/BestSellingProducts";
 import { GSAPPageAnimator } from "@/components/animations/GSAPPageAnimator";
+import { HeroSlider } from "@/components/home/HeroSlider";
+import { CuratedLifestyleBento } from "@/components/home/CuratedLifestyleBento";
+import { FlashDealSpotlight } from "@/components/home/FlashDealSpotlight";
+import { VeloraStandard } from "@/components/home/VeloraStandard";
+import { CustomerStories } from "@/components/home/CustomerStories";
+import { CommunityGallery } from "@/components/home/CommunityGallery";
+import { VeloraNewsletter } from "@/components/home/VeloraNewsletter";
+
+import { fetchCategoryTree } from "@/lib/categories";
 
 export const revalidate = 60; // Cache SSR route for 60 seconds
 
 export default async function HomePage() {
+  const apiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:3000/api/v1';
+
+  // Parallel server fetch with fast fallback
+  const [productsRes, categories] = await Promise.all([
+    fetch(`${apiUrl}/products?limit=10`, {
+      next: { revalidate: 60 },
+    }).then(r => r.ok ? r.json() : { data: [] }).catch(() => ({ data: [] })),
+    fetchCategoryTree(),
+  ]);
+
+  const initialProducts = productsRes.data || [];
 
   return (
     <div className="min-h-screen bg-white">
       <Navbar variant="solid" />
       <GSAPPageAnimator>
-      {/* ── Hero Section ── */}
-      <section className="relative w-full pt-32 pb-20 lg:pt-48 lg:pb-32 px-6 lg:px-12 max-w-[1600px] mx-auto bg-[#F9FAFB] rounded-b-[40px]">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8 z-10 relative hero-text">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-gray-100 shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-[#BC8477]"></span>
-              <span className="text-xs font-bold text-gray-600 uppercase tracking-wide">New Arrivals</span>
-            </div>
-            
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-[1.2] tracking-tight">
-              Discover The Best Products for You
-            </h1>
-            
-            <p className="text-base text-gray-600 max-w-md leading-relaxed font-normal">
-              Explore our wide range of high-quality products at affordable prices. Shop now and enjoy the best deals!
-            </p>
-            
-            <div className="flex items-center gap-4 pt-4">
-              <Link 
-                href="/shop"
-                style={{ fontFamily: 'Arial, sans-serif' }}
-                className="bg-[#FFFFFF] text-gray-900 px-8 py-3 rounded-full font-bold shadow-sm hover:bg-gray-50 transition-all flex items-center gap-2"
-              >
-                Shop Now <span className="ml-1">→</span>
-              </Link>
-              <Link 
-                href="/shop?deals=true#products"
-                style={{ fontFamily: 'Arial, sans-serif' }}
-                className="bg-transparent text-gray-900 border border-gray-900 px-8 py-3 rounded-full font-bold hover:bg-gray-900 hover:text-white transition-all"
-              >
-                Explore Deals
-              </Link>
-            </div>
-            
-            <div className="flex items-center gap-4 pt-6">
-              <div className="flex -space-x-3">
-                {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
-                    <Image src={`https://i.pravatar.cc/100?img=${i+10}`} alt="Customer" fill sizes="32px" className="object-cover" />
-                  </div>
-                ))}
-              </div>
-              <p className="text-xs font-medium text-gray-500">
-                Trusted by <span className="font-bold text-gray-900">10,000+</span> Happy Customers
-              </p>
-            </div>
-          </div>
-          
-          <div className="relative h-[300px] lg:h-[500px] w-full hidden md:block hero-image">
-            <Image
-              src="/hero-products.png"
-              alt="Hero Products"
-              fill
-              sizes="(max-width: 768px) 100vw, 50vw"
-              className="object-contain drop-shadow-xl z-10"
-              priority
-            />
-          </div>
-        </div>
-      </section>
+      {/* ── Dynamic Hero Slider Section ── */}
+      <HeroSlider />
 
       {/* ── Features Strip ── */}
-      <section className="max-w-[1600px] mx-auto px-6 lg:px-12 -mt-10 relative z-20 features-strip">
-        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 grid grid-cols-2 md:grid-cols-4 gap-8">
+      <section className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-12 mt-4 sm:mt-6 relative z-20 features-strip">
+        <div className="bg-white rounded-2xl sm:rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-4 sm:p-6 lg:p-8 grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {[
             { icon: Truck, title: "Free Shipping", desc: "On orders over ৳500" },
             { icon: ShieldCheck, title: "Secure Payment", desc: "100% secure payment" },
             { icon: RefreshCw, title: "Easy Returns", desc: "30 days return policy" },
             { icon: Headset, title: "24/7 Support", desc: "Dedicated support" }
           ].map((feature, i) => (
-            <div key={i} className="flex items-center gap-4 feature-item">
-              <div className="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-[#BC8477]">
-                <feature.icon size={24} strokeWidth={2} />
+            <div key={i} className="flex items-center gap-3 sm:gap-4 feature-item min-w-0">
+              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-gray-50 flex items-center justify-center text-[#BC8477] shrink-0">
+                <feature.icon className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
               </div>
-              <div>
-                <h3 className="font-bold text-gray-900 text-sm">{feature.title}</h3>
-                <p className="text-xs text-gray-500 font-medium">{feature.desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-
-
-      <BestSellingProducts />
-
-      {/* ── Special Offer ── */}
-      <section className="py-12 px-6 lg:px-12 max-w-[1600px] mx-auto">
-        <div className="bg-[#F9FAFB] rounded-[40px] overflow-hidden flex flex-col md:flex-row items-center justify-between p-12 lg:p-20 relative">
-          <div className="max-w-xl space-y-6 z-10">
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Special Offer</span>
-            <h2 className="text-5xl font-bold text-gray-900 leading-tight">Up to 50% Off</h2>
-            <p className="text-gray-500 font-medium leading-relaxed">
-              Limited time offer on selected items. Hurry up and grab the best deals before they are gone!
-            </p>
-            <Link href="/shop?sale=true#products" className="inline-block bg-[#BC8477] text-white px-8 py-4 rounded-full font-bold shadow-md hover:bg-[#A87569] transition-colors mt-4">
-              Shop the Sale →
-            </Link>
-          </div>
-          <div className="w-full md:w-1/2 h-[300px] md:h-[400px] relative mt-12 md:mt-0">
-             <Image src="https://picsum.photos/seed/bags/800/800" alt="Special Offer" fill sizes="(max-width: 768px) 100vw, 50vw" className="object-contain" />
-          </div>
-        </div>
-      </section>
-
-      {/* ── Testimonials ── */}
-      <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto text-center testimonials-section">
-        <h2 className="text-3xl font-bold text-gray-900 tracking-tight mb-16">What Our Customers Say</h2>
-        
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {[
-            { name: "Rakib H.", text: "Amazing products and extremely fast delivery! Velora is my go-to store for all my tech needs in Dhaka." },
-            { name: "Sadia I.", text: "Great quality at affordable prices. The customer support team was very polite and responsive." },
-            { name: "Mehedi H.", text: "Very happy with my purchase. The packaging was top-notch. Highly recommend Velora to everyone!" }
-          ].map((review, i) => (
-            <div key={i} className="bg-[#F9FAFB] rounded-3xl p-8 text-left relative testimonial-item">
-              <div className="text-[#BC8477] font-serif text-6xl absolute top-6 left-6 opacity-20">&quot;</div>
-              <p className="text-gray-900 font-medium leading-relaxed mb-8 relative z-10 pt-4">
-                {review.text}
-              </p>
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden relative">
-                   <Image src={`https://i.pravatar.cc/100?img=${i+40}`} alt={review.name} fill sizes="48px" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-gray-900 text-sm">{review.name}</h4>
-                  <div className="flex text-yellow-400 mt-1">
-                    {[1,2,3,4,5].map(s => <Star key={s} size={12} fill="currentColor" />)}
-                  </div>
-                </div>
+              <div className="min-w-0">
+                <h3 className="font-bold text-gray-900 text-xs sm:text-sm truncate">{feature.title}</h3>
+                <p className="text-[11px] sm:text-xs text-gray-500 font-medium truncate">{feature.desc}</p>
               </div>
             </div>
           ))}
         </div>
       </section>
+
+
+
+      <BestSellingProducts initialProducts={initialProducts} initialCategories={categories} />
+
+      {/* ── Curated Lifestyle Bento ── */}
+      <CuratedLifestyleBento />
+
+      {/* ── Flash Deal Spotlight ── */}
+      <FlashDealSpotlight />
+
+      {/* ── The Velora Standard (Trust Architecture) ── */}
+      <VeloraStandard />
+
+      {/* ── #StyledWithVelora Community Gallery ── */}
+      <CommunityGallery />
+
+      {/* ── Velora VIP Club & Voucher Newsletter ── */}
+      <VeloraNewsletter />
+
+      {/* ── Verified Customer Stories (Real Experiences from Real Shoppers) ── */}
+      <CustomerStories />
       
       </GSAPPageAnimator>
       <Footer />

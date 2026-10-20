@@ -3,23 +3,23 @@
 import * as React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { 
-  LayoutDashboard, 
-  BarChart, 
-  Package, 
-  ListTree, 
-  Tag, 
-  Warehouse, 
-  ShoppingCart, 
-  CreditCard, 
-  Ticket, 
-  Users, 
-  Star, 
-  Image as ImageIcon, 
-  Bell, 
-  ShieldAlert, 
-  History, 
-  Settings, 
+import {
+  LayoutDashboard,
+  BarChart,
+  Package,
+  ListTree,
+  Tag,
+  Warehouse,
+  ShoppingCart,
+  CreditCard,
+  Ticket,
+  Users,
+  Star,
+  Image as ImageIcon,
+  Bell,
+  ShieldAlert,
+  History,
+  Settings,
   LogOut,
   Moon,
   Sun,
@@ -28,6 +28,7 @@ import {
   X
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { VeloraIcon } from '@/components/layout/VeloraLogo';
 import { toast } from 'sonner';
 import { contactService } from '@/services/contact.service';
 import { useAuthStore } from '@/store/auth.store';
@@ -102,7 +103,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
         isAuth = parsed?.state?.isAuthenticated;
         userRole = parsed?.state?.user?.role || '';
       }
-    } catch (e) {}
+    } catch (e) { }
 
     if (!isAuth || !['ADMIN', 'SUPER_ADMIN'].includes(userRole)) {
       router.replace('/login');
@@ -113,7 +114,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
     if (isAuth) {
       contactService.getUnreadCount()
         .then(res => setUnreadMessages(res.count))
-        .catch(() => {});
+        .catch(() => { });
     }
   }, [pathname, router, isAuthenticated, user]); // Refresh count on navigation
 
@@ -125,7 +126,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
       } catch (e) {
         console.error('API logout failed, clearing local state anyway', e);
       }
-      
+
       logout();
       toast.success('Logged out successfully');
       router.push('/');
@@ -140,34 +141,34 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
     .find(item => pathname.startsWith(item.href));
 
   return (
-    <div className="flex h-screen bg-[#F3F4F6] text-[#3A3331] font-sans selection:bg-[#BC8477] selection:text-white p-4 gap-6">
+    <div className="flex h-full w-full bg-[#F4F5F7] text-[#2D2826] font-sans selection:bg-[#BC8477] selection:text-white p-3.5 gap-4 overflow-hidden box-border">
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden"
+          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-xs"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`w-64 bg-white rounded-[32px] flex flex-col shadow-sm z-50 h-[calc(100dvh-2rem)] md:h-[calc(100vh-2rem)] shrink-0 fixed top-4 left-4 md:relative md:top-auto md:left-auto transition-transform duration-75 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[150%] md:translate-x-0'}`}>
-        <div className="flex h-20 items-center justify-between px-8 border-b border-gray-100 shrink-0">
-          <Link href="/admin/dashboard" className="flex items-center gap-3 font-bold text-xl tracking-wide text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>
-            <span className="bg-[#BC8477] text-white w-10 h-10 flex items-center justify-center rounded-2xl font-sans font-bold text-lg">V</span>
-            Velora Admin
+      <aside className={`w-72 lg:w-[300px] bg-white rounded-2xl flex flex-col shadow-xs border border-stone-200/70 z-50 h-full shrink-0 fixed top-3.5 left-3.5 md:relative md:top-auto md:left-auto transition-transform duration-100 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[150%] md:translate-x-0'}`}>
+        <div className="flex h-16 items-center justify-between px-6 border-b border-stone-100 shrink-0">
+          <Link href="/admin/dashboard" className="flex items-center gap-3 font-bold text-lg tracking-wide text-stone-900" onClick={() => setIsMobileMenuOpen(false)}>
+            <VeloraIcon size={32} />
+            <span className="font-extrabold tracking-tight text-lg">Velora Admin</span>
           </Link>
-          <button className="md:hidden text-gray-500 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>
-            <X size={24} />
+          <button className="md:hidden text-stone-400 hover:text-stone-900" onClick={() => setIsMobileMenuOpen(false)}>
+            <X size={20} />
           </button>
         </div>
         
-        <nav className="flex-1 overflow-y-auto py-6 px-6 space-y-8">
+        <nav className="flex-1 overflow-y-auto py-4 px-3.5 space-y-4">
           {navigationGroups.map((group) => (
             <div key={group.label}>
-              <h3 className="px-2 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">
+              <h3 className="px-3 text-[10px] font-extrabold text-stone-400 uppercase tracking-widest mb-1.5">
                 {group.label}
               </h3>
-              <div className="space-y-1">
+              <div className="space-y-0.5">
                 {group.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = pathname.startsWith(item.href);
@@ -176,16 +177,16 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
                       key={item.name}
                       href={item.href}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all duration-75 ${
+                      className={`flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-semibold transition-colors ${
                         isActive
-                          ? 'bg-[#F3F4F6] text-gray-900'
-                          : 'text-gray-500 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-[#181514] text-white shadow-xs'
+                          : 'text-stone-600 hover:bg-stone-100/70 hover:text-stone-900'
                       }`}
                     >
-                      <Icon className={isActive ? "text-gray-900" : "text-gray-400"} size={20} strokeWidth={isActive ? 2.5 : 2} />
-                      <span className="flex-1">{item.name}</span>
+                      <Icon className={isActive ? "text-[#BC8477]" : "text-stone-400"} size={18} strokeWidth={isActive ? 2.5 : 2} />
+                      <span className="flex-1 truncate">{item.name}</span>
                       {item.name === 'Messages' && unreadMessages > 0 && (
-                        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                        <span className="bg-[#BC8477] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                           {unreadMessages}
                         </span>
                       )}
@@ -197,44 +198,44 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="p-6 border-t border-gray-100 shrink-0">
-          <Button variant="ghost" className="w-full justify-start text-red-500 hover:text-red-600 hover:bg-red-50 rounded-2xl py-6 font-bold" onClick={handleLogout}>
-            <LogOut size={20} className="mr-3" />
+        <div className="p-4 pb-6 border-t border-stone-100 shrink-0">
+          <Button variant="ghost" className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 rounded-xl py-2.5 px-3.5 text-sm font-bold" onClick={handleLogout}>
+            <LogOut size={18} className="mr-2.5" />
             Logout
           </Button>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative h-full">
         {/* Top Header Row */}
-        <header className="h-16 bg-white rounded-full flex items-center justify-between px-4 sm:px-8 shrink-0 shadow-sm mb-6 mt-2 mr-2 ml-2 md:ml-0">
+        <header className="h-16 bg-white rounded-2xl flex items-center justify-between px-6 shrink-0 shadow-xs border border-stone-200/70 mb-4">
           <div className="flex items-center gap-3">
-            <button className="md:hidden text-gray-600 hover:text-gray-900" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu size={24} />
+            <button className="md:hidden text-stone-600 hover:text-stone-900" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu size={22} />
             </button>
-            <div className="font-bold text-xl sm:text-2xl tracking-tight text-gray-900 truncate max-w-[150px] sm:max-w-none">
-              {currentItem?.name || 'Admin Panel'}
+            <div className="font-extrabold text-lg sm:text-xl tracking-tight text-stone-900 truncate max-w-[200px] sm:max-w-none">
+              {currentItem?.name || 'Dashboard'}
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <button className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center text-gray-600 hover:bg-gray-200 transition-colors">
-              <Bell size={18} />
+          <div className="flex items-center gap-3.5">
+            <button className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors">
+              <Bell size={17} />
             </button>
-            <div className="flex items-center gap-3 ml-2">
+            <div className="flex items-center gap-3 ml-1">
               <div className="text-right hidden sm:block">
-                <div className="text-sm font-bold text-gray-900">Super Admin</div>
-                <div className="text-[10px] uppercase tracking-wider font-bold text-gray-500">admin@velora.com</div>
+                <div className="text-sm font-bold text-stone-900 leading-tight">Super Admin</div>
+                <div className="text-[10px] uppercase tracking-wider font-semibold text-stone-400">admin@velora.com</div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center font-bold text-[#BC8477]">
+              <div className="w-9 h-9 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200/70 flex items-center justify-center font-bold text-xs text-[#BC8477]">
                 SA
               </div>
             </div>
           </div>
         </header>
-        
-        <div className="flex-1 overflow-y-auto">
-          <div className="max-w-7xl mx-auto pb-8 pr-2">
+
+        <div className="flex-1 overflow-y-auto pr-1">
+          <div className="max-w-7xl mx-auto pb-6">
             {children}
           </div>
         </div>

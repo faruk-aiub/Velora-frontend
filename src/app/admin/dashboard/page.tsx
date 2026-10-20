@@ -76,131 +76,138 @@ export default function AdminDashboard() {
   if (!mounted) return null;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* Overview Stats */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-gray-500">Total Revenue</CardTitle>
-            <Banknote className="h-5 w-5 text-[#BC8477]" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-gray-900">৳{(stats.totalSales || 0).toLocaleString()}</div>
-            <p className="text-sm font-bold text-green-500 flex items-center mt-2">
-              <ArrowUpRight className="w-4 h-4 mr-1" /> +20.1% <span className="text-gray-400 font-medium ml-1">from last month</span>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-stone-500">Total Revenue</span>
+            <div className="w-8 h-8 rounded-xl bg-[#BC8477]/10 flex items-center justify-center">
+              <Banknote className="h-4 w-4 text-[#BC8477]" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">৳{(stats.totalSales || 0).toLocaleString()}</div>
+            <p className="text-xs font-semibold text-emerald-600 flex items-center mt-1">
+              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +20.1% <span className="text-stone-400 font-normal ml-1">from last month</span>
             </p>
-          </CardContent>
+          </div>
         </Card>
-        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-gray-500">Total Orders</CardTitle>
-            <CreditCard className="h-5 w-5 text-[#BC8477]" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-gray-900">+{stats.totalOrders || 0}</div>
-            <p className="text-sm font-bold text-green-500 flex items-center mt-2">
-              <ArrowUpRight className="w-4 h-4 mr-1" /> +15% <span className="text-gray-400 font-medium ml-1">from last month</span>
+
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-stone-500">Total Orders</span>
+            <div className="w-8 h-8 rounded-xl bg-[#BC8477]/10 flex items-center justify-center">
+              <CreditCard className="h-4 w-4 text-[#BC8477]" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">+{stats.totalOrders || 0}</div>
+            <p className="text-xs font-semibold text-emerald-600 flex items-center mt-1">
+              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +15% <span className="text-stone-400 font-normal ml-1">from last month</span>
             </p>
-          </CardContent>
+          </div>
         </Card>
-        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-gray-500">Active Customers</CardTitle>
-            <Users className="h-5 w-5 text-[#BC8477]" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-gray-900">+{stats.totalCustomers || 0}</div>
-            <p className="text-sm font-bold text-green-500 flex items-center mt-2">
-              <ArrowUpRight className="w-4 h-4 mr-1" /> +7% <span className="text-gray-400 font-medium ml-1">from last month</span>
+
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-stone-500">Active Customers</span>
+            <div className="w-8 h-8 rounded-xl bg-[#BC8477]/10 flex items-center justify-center">
+              <Users className="h-4 w-4 text-[#BC8477]" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">+{stats.totalCustomers || 0}</div>
+            <p className="text-xs font-semibold text-emerald-600 flex items-center mt-1">
+              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +7% <span className="text-stone-400 font-normal ml-1">from last month</span>
             </p>
-          </CardContent>
+          </div>
         </Card>
-        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-gray-500">Total Products</CardTitle>
-            <Package className="h-5 w-5 text-[#BC8477]" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-gray-900">{stats.totalProducts || 0}</div>
-            <p className="text-sm font-bold text-red-500 flex items-center mt-2">
-              <ArrowDownRight className="w-4 h-4 mr-1" /> -2 <span className="text-gray-400 font-medium ml-1">from last month</span>
+
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-stone-500">Total Products</span>
+            <div className="w-8 h-8 rounded-xl bg-[#BC8477]/10 flex items-center justify-center">
+              <Package className="h-4 w-4 text-[#BC8477]" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">{stats.totalProducts || 0}</div>
+            <p className="text-xs font-semibold text-rose-500 flex items-center mt-1">
+              <ArrowDownRight className="w-3.5 h-3.5 mr-0.5" /> -2 <span className="text-stone-400 font-normal ml-1">from last month</span>
             </p>
-          </CardContent>
+          </div>
         </Card>
       </div>
 
       {/* Charts */}
-      <div className="grid gap-6 md:grid-cols-7">
-        <Card className="md:col-span-4 rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-gray-900">Sales Overview</CardTitle>
-          </CardHeader>
-          <CardContent className="pl-2">
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={salesData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
-                  <XAxis dataKey="name" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
-                  <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111827', fontWeight: 'bold' }} />
-                  <Bar dataKey="total" fill="#BC8477" radius={[6, 6, 0, 0]} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
+      <div className="grid gap-4 md:grid-cols-7">
+        <Card className="md:col-span-4 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="mb-3">
+            <h3 className="text-sm sm:text-base font-bold text-stone-900">Sales Overview</h3>
+            <p className="text-xs text-stone-400">Monthly revenue distribution</p>
+          </div>
+          <div className="h-[230px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={salesData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
+                <XAxis dataKey="name" stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(value) => `৳${value}`} />
+                <Tooltip cursor={{ fill: '#F3F4F6' }} contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '12px', fontSize: '12px', color: '#111827', fontWeight: 'bold' }} />
+                <Bar dataKey="total" fill="#BC8477" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </Card>
 
-        <Card className="md:col-span-3 rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-gray-900">Weekly Revenue</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={weeklyData}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
-                  <XAxis dataKey="name" stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
-                  <YAxis stroke="#6B7280" fontSize={12} tickLine={false} axisLine={false} />
-                  <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '16px', color: '#111827', fontWeight: 'bold' }} />
-                  <Line type="monotone" dataKey="revenue" stroke="#BC8477" strokeWidth={4} dot={{ r: 5, fill: '#BC8477' }} activeDot={{ r: 7, fill: '#BC8477', stroke: '#fff', strokeWidth: 3 }} />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-          </CardContent>
+        <Card className="md:col-span-3 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="mb-3">
+            <h3 className="text-sm sm:text-base font-bold text-stone-900">Weekly Revenue</h3>
+            <p className="text-xs text-stone-400">Past 7 days performance</p>
+          </div>
+          <div className="h-[230px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={weeklyData}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
+                <XAxis dataKey="name" stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="#6B7280" fontSize={11} tickLine={false} axisLine={false} />
+                <Tooltip contentStyle={{ backgroundColor: '#ffffff', border: '1px solid #E5E7EB', borderRadius: '12px', fontSize: '12px', color: '#111827', fontWeight: 'bold' }} />
+                <Line type="monotone" dataKey="revenue" stroke="#BC8477" strokeWidth={3} dot={{ r: 4, fill: '#BC8477' }} activeDot={{ r: 6, fill: '#BC8477', stroke: '#fff', strokeWidth: 2 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
         </Card>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-7 mt-6">
-        <Card className="md:col-span-5 rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-gray-900">Recent Orders</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <DataTable columns={columns} data={stats.recentOrders as Order[]} searchKey="customer" />
-          </CardContent>
+      <div className="grid gap-4 md:grid-cols-7">
+        <Card className="md:col-span-5 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="mb-3">
+            <h3 className="text-sm sm:text-base font-bold text-stone-900">Recent Orders</h3>
+            <p className="text-xs text-stone-400">Latest customer transactions</p>
+          </div>
+          <DataTable columns={columns} data={stats.recentOrders as Order[]} searchKey="customer" />
         </Card>
-        <Card className="md:col-span-2 rounded-3xl border-0 bg-white shadow-sm ring-0">
-          <CardHeader>
-            <CardTitle className="text-xl font-bold text-gray-900">Top Selling Products</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-              {(stats.topProducts || []).map((product: any, i: number) => (
-                <div key={i} className="flex items-center">
-                  <div className="w-12 h-12 rounded-[20px] bg-gray-50 flex items-center justify-center mr-4">
-                    <Package className="w-5 h-5 text-[#BC8477]" />
-                  </div>
-                  <div className="ml-2 space-y-1 flex-1">
-                    <p className="text-sm font-bold leading-none text-gray-900">{product.name}</p>
-                    <p className="text-xs text-gray-500 font-medium">
-                      {product.sales} sales
-                    </p>
-                  </div>
-                  <div className="font-bold text-sm text-gray-900">{product.price}</div>
+        <Card className="md:col-span-2 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+          <div className="mb-3">
+            <h3 className="text-sm sm:text-base font-bold text-stone-900">Top Selling Products</h3>
+            <p className="text-xs text-stone-400">Best performers by volume</p>
+          </div>
+          <div className="space-y-3">
+            {(stats.topProducts || []).map((product: any, i: number) => (
+              <div key={i} className="flex items-center">
+                <div className="w-8 h-8 rounded-lg bg-[#BC8477]/10 flex items-center justify-center shrink-0">
+                  <Package className="w-4 h-4 text-[#BC8477]" />
                 </div>
-              ))}
-            </div>
-          </CardContent>
+                <div className="ml-3 space-y-0.5 flex-1 min-w-0">
+                  <p className="text-xs font-bold leading-none text-stone-900 truncate">{product.name}</p>
+                  <p className="text-[11px] text-stone-400 font-medium">
+                    {product.sales} sales
+                  </p>
+                </div>
+                <div className="font-bold text-xs text-stone-900 ml-2">{product.price}</div>
+              </div>
+            ))}
+          </div>
         </Card>
       </div>
     </div>

@@ -2,13 +2,14 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { ShoppingBag, Heart } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { ShoppingBag, Heart, Star, Check } from 'lucide-react';
 import { useCartStore } from '@/store/cart.store';
 import { useAuthStore } from '@/store/auth.store';
 import { wishlistService } from '@/services/wishlist.service';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-
+import { useState } from 'react';
 import { Product, ProductVariant } from '@/types/product.types';
 
 export interface ProductCardProps {
@@ -16,34 +17,44 @@ export interface ProductCardProps {
   title: string;
   slug: string;
   brand?: { name: string };
+  category?: { name: string; slug: string };
   variants: { id: string; price: number; compare_price?: number | null }[];
   images: { url: string; alt_text?: string | null }[];
   base_price?: number;
   discount_percent?: number;
 }
 
-export function ProductCard({ id, title, slug, brand, variants, images, base_price, discount_percent = 0 }: ProductCardProps) {
-  let basePriceToUse = variants?.[0]?.price ?? (base_price || 0);
-  
-  let price = basePriceToUse;
-  let comparePrice = variants?.[0]?.compare_price;
+export function ProductCard({ 
+  id, 
+  title, 
+  slug, 
+  brand, 
+  category,
+  variants, 
+  images, 
+  base_price, 
+  discount_percent = 0 
+}: ProductCardProps) {
+  const [isAddedRecently, setIsAddedRecently] = useState(false);
+  const primaryVariant = variants?.[0];
+  const price = Number(primaryVariant?.price ?? base_price ?? 0);
+  const comparePrice = primaryVariant?.compare_price != null 
+    ? Number(primaryVariant.compare_price)
+    : (discount_percent > 0 ? Math.round(price / (1 - discount_percent / 100)) : undefined);
 
-  if (discount_percent > 0) {
-    comparePrice = basePriceToUse;
-    price = basePriceToUse - (basePriceToUse * (discount_percent / 100));
-  }
-
-  const primaryImage = images?.[0]?.url || '/placeholder.jpg';
-  const isNew = false;
+  const rawImage = images?.[0]?.url || '/placeholder.jpg';
+  // Use unoptimized if placeholder
+  const isPlaceholder = rawImage.includes('picsum.photos');
   
-  const calculatedDiscountPercent = discount_percent > 0 
-    ? discount_percent 
-    : (comparePrice && comparePrice > price ? Math.round(((comparePrice - price) / comparePrice) * 100) : 0);
+  const calculatedDiscountPercent = comparePrice && comparePrice > price 
+    ? Math.round(((comparePrice - price) / comparePrice) * 100) 
+    : (discount_percent || 0);
   
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
   const { user } = useAuthStore();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   // Wishlist Logic
   const { data: wishlistData } = useQuery({
@@ -57,7 +68,6 @@ export function ProductCard({ id, title, slug, brand, variants, images, base_pri
   const toggleWishlistMutation = useMutation({
     mutationFn: wishlistService.toggleWishlist,
     onMutate: async (productId) => {
-      // Optimistic update
       await queryClient.cancelQueries({ queryKey: ['wishlist'] });
       const previousWishlist = queryClient.getQueryData(['wishlist']);
       queryClient.setQueryData(['wishlist'], (old: { data: { product_id: string }[] } | undefined) => {
@@ -95,37 +105,37 @@ export function ProductCard({ id, title, slug, brand, variants, images, base_pri
     e.stopPropagation();
     
     if (variants && variants.length > 0) {
-      // Create full product shape to match store expectations
       const product = { id, title, slug, brand, images, variants } as unknown as Product;
       addItem(product, variants[0] as unknown as ProductVariant, 1);
-      toast.success(`Added ${title} to cart`);
+      toast.success(`Added "${title}" to cart`);
+      setIsAddedRecently(true);
+      setTimeout(() => setIsAddedRecently(false), 1500);
       openCart();
     }
   };
 
   return (
-    <div className="group flex flex-col bg-white rounded-2xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
-      <div className="relative aspect-square overflow-hidden bg-gray-100 rounded-2xl mb-4 shadow-sm">
-        {/* Actual Image */}
-        <Link href={`/product/${slug}`} className="absolute inset-0 z-0 block">
+    <div 
+      onMouseEnter={() => router.prefetch(`/product/${slug}`)}
+      className="group flex flex-col bg-white rounded-[24px] p-3 sm:p-4 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.03)] hover:shadow-[0_12px_35px_rgb(0,0,0,0.08)] hover:border-[#BC8477]/30 transition-all duration-300"
+    >
+      {/* Product Image Area */}
+      <div className="relative aspect-square overflow-hidden bg-gray-50 rounded-[18px] mb-3 shadow-inner">
+        <Link href={`/product/${slug}`} prefetch={true} className="absolute inset-0 z-0 block">
           <Image 
-            src={primaryImage} 
+            src={rawImage} 
             alt={title} 
             fill 
-            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
-            className="object-cover transition-transform duration-700 group-hover:scale-105" 
+            unoptimized={isPlaceholder}
+            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            className="object-cover transition-transform duration-700 group-hover:scale-108" 
           />
         </Link>
 
         {/* Badges container */}
-        <div className="absolute top-4 left-4 flex flex-col gap-2 z-10 pointer-events-none">
-          {isNew && (
-            <div className="bg-gray-900 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded-full shadow-sm">
-              New
-            </div>
-          )}
+        <div className="absolute top-2.5 left-2.5 flex flex-col gap-1.5 z-10 pointer-events-none">
           {calculatedDiscountPercent > 0 && (
-            <div className="bg-red-500 text-white text-[10px] font-bold uppercase px-3 py-1.5 rounded-full shadow-sm">
+            <div className="bg-[#BC8477] text-white text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full shadow-sm tracking-wider">
               -{calculatedDiscountPercent}%
             </div>
           )}
@@ -134,45 +144,68 @@ export function ProductCard({ id, title, slug, brand, variants, images, base_pri
         {/* Wishlist Button */}
         <button 
           onClick={handleToggleWishlist}
-          className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white transition-all z-10"
+          aria-label="Add to wishlist"
+          className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 backdrop-blur-sm shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white hover:scale-110 transition-all z-10"
         >
-          <Heart size={18} className={isWishlisted ? "fill-red-500 text-red-500" : ""} />
+          <Heart size={15} className={isWishlisted ? "fill-red-500 text-red-500" : ""} />
         </button>
-
       </div>
 
-      <div className="flex flex-col mt-2">
-        {brand && (
-          <span className="text-[10px] font-bold text-gray-500 uppercase mb-1 tracking-widest">{brand.name}</span>
-        )}
-        <Link href={`/product/${slug}`} className="font-bold text-[15px] text-gray-900 hover:text-[#7A915C] transition-colors line-clamp-1 mb-1">
-          {title}
-        </Link>
-        
-        <div className="flex items-center gap-1 mb-2">
-          <svg className="w-3.5 h-3.5 text-yellow-400 fill-yellow-400" viewBox="0 0 24 24">
-            <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-          </svg>
-          <span className="text-xs font-bold text-gray-700">4.8</span>
-          <span className="text-xs text-gray-400">(64)</span>
-        </div>
+      {/* Product Info & Actions */}
+      <div className="flex flex-col flex-1 justify-between space-y-3">
+        <div>
+          {/* Brand or Category tag */}
+          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">
+            <span>{brand?.name || category?.name || 'Verified Collection'}</span>
+            <div className="flex items-center gap-1 text-amber-500">
+              <Star size={11} className="fill-amber-400 text-amber-400" />
+              <span className="text-gray-700 font-bold">4.9</span>
+            </div>
+          </div>
 
-        <div className="flex items-center gap-2 mb-4">
-          <span className="font-bold text-[16px] text-gray-900">
-            ৳{Number(price).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
-          </span>
-          {comparePrice && Number(comparePrice) > Number(price) && (
-            <span className="font-medium text-xs text-gray-400 line-through">
-              ৳{Number(comparePrice).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+          {/* Product Title */}
+          <Link 
+            href={`/product/${slug}`} 
+            prefetch={true}
+            title={title}
+            className="font-bold text-sm text-gray-900 hover:text-[#BC8477] transition-colors line-clamp-2 leading-snug mb-2 block"
+          >
+            {title}
+          </Link>
+          
+          {/* Price Area */}
+          <div className="flex items-baseline gap-2">
+            <span className="font-extrabold text-base text-gray-900 tracking-tight">
+              ৳{Number(price).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
             </span>
-          )}
+            {comparePrice && Number(comparePrice) > Number(price) && (
+              <span className="font-medium text-xs text-gray-400 line-through">
+                ৳{Number(comparePrice).toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}
+              </span>
+            )}
+          </div>
         </div>
 
+        {/* Add to Cart Button */}
         <button 
           onClick={handleAddToCart}
-          className="w-full bg-[#7A915C] text-white text-sm font-bold rounded-lg py-3 hover:bg-[#687C4D] transition-colors flex items-center justify-center gap-2"
+          className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-xs ${
+            isAddedRecently
+              ? "bg-emerald-600 text-white"
+              : "bg-[#BC8477] text-white hover:bg-[#A87569] active:scale-[0.98]"
+          }`}
         >
-          <ShoppingBag size={16} /> Add to Cart
+          {isAddedRecently ? (
+            <>
+              <Check size={14} />
+              <span>Added!</span>
+            </>
+          ) : (
+            <>
+              <ShoppingBag size={14} />
+              <span>Add to Cart</span>
+            </>
+          )}
         </button>
       </div>
     </div>

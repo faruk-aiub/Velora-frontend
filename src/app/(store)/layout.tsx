@@ -16,8 +16,16 @@ const cormorant = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "Velora | Premium Fashion",
-  description: "Curated collections of premium fashion and lifestyle pieces.",
+  title: "Velora | Luxury Fashion & Modern Lifestyle",
+  description: "Curated collections of premium tech, luxury timepieces, and modern lifestyle essentials.",
+  icons: {
+    icon: [
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -27,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${inter.variable} ${cormorant.variable} font-sans antialiased bg-[#FAF8F5]`}>
+      <body suppressHydrationWarning className={`${inter.variable} ${cormorant.variable} font-sans antialiased bg-[#FAF8F5]`}>
         <Providers>
           {children}
           <CartDrawer />

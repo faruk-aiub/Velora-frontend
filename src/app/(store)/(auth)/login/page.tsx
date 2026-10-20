@@ -8,16 +8,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowRight, Mail, Lock } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { loginSchema, type LoginFormValues } from '@/lib/validators/auth.schema';
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
 import apiClient from '@/lib/axios';
-
-const item = (delay: number) => ({
-  initial: { opacity: 0, y: 15 },
-  animate: { opacity: 1, y: 0, transition: { delay, duration: 0.5 } },
-});
 
 export default function LoginPage() {
   const router = useRouter();
@@ -81,18 +75,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full max-w-[420px] mx-auto">
-      <motion.div {...item(0)} className="text-center mb-8">
+    <div className="w-full max-w-[420px] mx-auto animate-in fade-in duration-300">
+      <div className="text-center mb-8">
         <h1 className="font-bold text-3xl text-gray-900 tracking-tight mb-2">
           Welcome Back
         </h1>
         <p className="text-sm text-gray-500 font-medium">
           Sign in to Velora
         </p>
-      </motion.div>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        <motion.div {...item(0.1)} className="relative group pt-2">
+        <div className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             <Mail size={18} strokeWidth={1.5} />
           </div>
@@ -107,9 +101,9 @@ export default function LoginPage() {
           {errors.email && (
             <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.email.message}</p>
           )}
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.2)} className="relative group pt-2">
+        <div className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
             <Lock size={18} strokeWidth={1.5} />
           </div>
@@ -133,9 +127,9 @@ export default function LoginPage() {
           {errors.password && (
             <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.password.message}</p>
           )}
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.3)} className="flex items-center justify-between pt-4">
+        <div className="flex items-center justify-between pt-4">
           <div className="flex items-center gap-2">
             <input
               type="checkbox"
@@ -152,13 +146,13 @@ export default function LoginPage() {
           >
             Forgot password?
           </Link>
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.4)} className="pt-2">
+        <div className="pt-2">
           <button
             type="submit"
             disabled={isPending}
-            className="w-full h-14 bg-[#B58A63] text-white text-[15px] font-semibold rounded-2xl hover:bg-[#A37B55] transition-all duration-300 relative flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#B58A63]/20 mt-4"
+            className="w-full h-14 bg-[#B58A63] text-white text-[15px] font-semibold rounded-2xl hover:bg-[#A37B55] transition-all duration-300 relative flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#B58A63]/20 mt-4 cursor-pointer"
           >
             {isPending ? <Loader2 size={18} className="animate-spin" /> : (
               <>
@@ -169,16 +163,15 @@ export default function LoginPage() {
               </>
             )}
           </button>
-        </motion.div>
+        </div>
       </form>
 
-
-      <motion.p {...item(0.7)} className="text-center text-xs text-gray-500 mt-8 font-medium">
+      <p className="text-center text-xs text-gray-500 mt-8 font-medium">
         Don&apos;t have an account?{' '}
         <Link href="/register" className="text-[#B58A63] font-semibold hover:text-[#9A6B60] transition-colors ml-1">
           Create one
         </Link>
-      </motion.p>
+      </p>
     </div>
   );
 }

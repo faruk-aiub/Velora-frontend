@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ShoppingBag, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { VeloraLogo } from "./VeloraLogo";
 
 const Facebook = ({ size = 24 }: { size?: number }) => (
   <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
@@ -28,14 +29,7 @@ export function Footer() {
         
         {/* Left Section - Logo & Description */}
         <div className="md:col-span-4 lg:col-span-4">
-          <Link href="/" className="flex items-center gap-3 mb-6 group w-fit">
-            <div className="w-10 h-10 bg-[#BC8477] text-white rounded-xl flex items-center justify-center font-bold text-lg shadow-lg group-hover:scale-105 transition-transform duration-300">
-              <ShoppingBag size={20} />
-            </div>
-            <span className="font-bold text-2xl text-white tracking-tight">
-              Velora
-            </span>
-          </Link>
+          <VeloraLogo variant="white" className="mb-6" />
           <p className="text-gray-400 text-sm font-medium leading-relaxed mb-8 max-w-sm">
             Elevating your everyday style with premium quality products at unparalleled value. Discover the Velora difference.
           </p>
@@ -60,7 +54,7 @@ export function Footer() {
           <h3 className="font-bold text-white mb-6 tracking-tight text-lg">Quick Links</h3>
           <div className="flex flex-col gap-4 text-sm font-medium text-gray-400">
             {['Home', 'Shop', 'Categories', 'About Us', 'Contact'].map((link) => (
-              <Link key={link} href={link === 'Home' ? '/' : `/${link.toLowerCase().replace(' ', '-')}`} className="hover:text-[#BC8477] transition-all duration-300 w-fit hover:translate-x-2 flex items-center gap-2 group">
+              <Link key={link} href={link === 'Home' ? '/' : link === 'About Us' ? '/about' : `/${link.toLowerCase().replace(' ', '-')}`} className="hover:text-[#BC8477] transition-all duration-300 w-fit hover:translate-x-2 flex items-center gap-2 group">
                 <span className="w-0 h-[1px] bg-[#BC8477] group-hover:w-3 transition-all duration-300"></span>
                 {link}
               </Link>

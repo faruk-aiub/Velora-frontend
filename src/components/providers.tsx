@@ -3,12 +3,23 @@
 import { usePathname } from 'next/navigation';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { useState } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { Toaster } from 'sonner';
 import { GSAPLenisProvider } from './GSAPLenisProvider';
 
+const ReactQueryDevtools = lazy(() =>
+  import('@tanstack/react-query-devtools').then((d) => ({
+    default: d.ReactQueryDevtools,
+  }))
+);
+
 export function Providers({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [queryClient] = useState(
     () =>
       new QueryClient({
@@ -38,7 +49,11 @@ export function Providers({ children }: { children: React.ReactNode }) {
         position="top-right"
         richColors
       />
-      <ReactQueryDevtools initialIsOpen={false} />
+      {mounted && process.env.NODE_ENV === 'development' && (
+        <Suspense fallback={null}>
+          <ReactQueryDevtools initialIsOpen={false} />
+        </Suspense>
+      )}
     </QueryClientProvider>
   );
 }

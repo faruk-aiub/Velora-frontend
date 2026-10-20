@@ -7,16 +7,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Eye, EyeOff, Loader2, ArrowRight, User, Mail, Lock, Phone } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { registerSchema, type RegisterFormValues } from '@/lib/validators/auth.schema';
-
 import { authService } from '@/services/auth.service';
 import { useAuthStore } from '@/store/auth.store';
-
-const item = (delay: number) => ({
-  initial: { opacity: 0, y: 15 },
-  animate: { opacity: 1, y: 0, transition: { delay, duration: 0.5 } },
-});
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -63,19 +56,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="w-full max-w-[420px] mx-auto">
-      <motion.div {...item(0)} className="text-center mb-8">
+    <div className="w-full max-w-[420px] mx-auto animate-in fade-in duration-300">
+      <div className="text-center mb-8">
         <h1 className="font-bold text-3xl text-gray-900 tracking-tight mb-2">
           Create Your Account
         </h1>
         <p className="text-sm text-gray-500 font-medium">
           Welcome to Velora
         </p>
-      </motion.div>
+      </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         
-        <motion.div {...item(0.1)} className="relative group">
+        <div className="relative group">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             <User size={18} strokeWidth={1.5} />
           </div>
@@ -87,9 +80,9 @@ export default function RegisterPage() {
             {...register('fullName')}
           />
           {errors.fullName && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.fullName.message}</p>}
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.2)} className="relative group pt-2">
+        <div className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             <Mail size={18} strokeWidth={1.5} />
           </div>
@@ -102,9 +95,9 @@ export default function RegisterPage() {
             {...register('email')}
           />
           {errors.email && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.email.message}</p>}
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.3)} className="relative group pt-2">
+        <div className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             <Phone size={18} strokeWidth={1.5} />
           </div>
@@ -117,9 +110,9 @@ export default function RegisterPage() {
             {...register('phone')}
           />
           {errors.phone && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.phone.message}</p>}
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.4)} className="relative group pt-2">
+        <div className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
             <Lock size={18} strokeWidth={1.5} />
           </div>
@@ -141,9 +134,9 @@ export default function RegisterPage() {
             </button>
           </div>
           {errors.password && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.password.message}</p>}
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.5)} className="relative group pt-2">
+        <div className="relative group pt-2">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 z-10">
             <Lock size={18} strokeWidth={1.5} />
           </div>
@@ -165,9 +158,9 @@ export default function RegisterPage() {
             </button>
           </div>
           {errors.confirmPassword && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.confirmPassword.message}</p>}
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.6)} className="flex items-center gap-3 pt-4 pb-2">
+        <div className="flex items-center gap-3 pt-4 pb-2">
           <input
             type="checkbox"
             id="terms"
@@ -178,13 +171,13 @@ export default function RegisterPage() {
           <label htmlFor="terms" className="text-xs text-[#7A7371] cursor-pointer select-none">
             I agree to the <Link href="/terms" className="text-[#B58A63] hover:underline">Terms & Conditions</Link>
           </label>
-        </motion.div>
+        </div>
 
-        <motion.div {...item(0.7)} className="pt-2">
+        <div className="pt-2">
           <button
             type="submit"
             disabled={isPending}
-            className="w-full h-14 bg-[#B58A63] text-white text-[15px] font-semibold rounded-2xl hover:bg-[#A37B55] transition-all duration-300 relative flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#B58A63]/20 mt-4"
+            className="w-full h-14 bg-[#B58A63] text-white text-[15px] font-semibold rounded-2xl hover:bg-[#A37B55] transition-all duration-300 relative flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#B58A63]/20 mt-4 cursor-pointer"
           >
             {isPending ? <Loader2 size={18} className="animate-spin" /> : (
               <>
@@ -195,17 +188,15 @@ export default function RegisterPage() {
               </>
             )}
           </button>
-        </motion.div>
+        </div>
       </form>
 
-
-
-      <motion.p {...item(1.0)} className="text-center text-xs text-gray-500 mt-8 font-medium">
+      <p className="text-center text-xs text-gray-500 mt-8 font-medium">
         Already have an account?{' '}
         <Link href="/login" className="text-[#B58A63] font-semibold hover:text-[#9A6B60] transition-colors ml-1">
           Sign In
         </Link>
-      </motion.p>
+      </p>
     </div>
   );
 }
