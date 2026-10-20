@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ChevronLeft, ChevronRight, Sparkles, ArrowRight } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 
 interface SlideItem {
   id: string;
@@ -183,23 +183,7 @@ export function HeroSlider() {
           })}
         </div>
 
-        {/* Previous Navigation Arrow */}
-        <button
-          onClick={prevSlide}
-          aria-label="Previous slide"
-          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/85 hover:bg-white text-gray-800 flex items-center justify-center border border-gray-200/80 shadow-md hover:shadow-lg hover:scale-110 active:scale-90 transition-all opacity-85 group-hover:opacity-100"
-        >
-          <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
 
-        {/* Next Navigation Arrow */}
-        <button
-          onClick={nextSlide}
-          aria-label="Next slide"
-          className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-30 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white/85 hover:bg-white text-gray-800 flex items-center justify-center border border-gray-200/80 shadow-md hover:shadow-lg hover:scale-110 active:scale-90 transition-all opacity-85 group-hover:opacity-100"
-        >
-          <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-        </button>
 
         {/* Pagination Dots (Bottom Center) in Warm Neutral & Velora Terracotta */}
         <div className="absolute bottom-5 sm:bottom-7 left-1/2 -translate-x-1/2 z-30 flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/80 backdrop-blur-md border border-gray-200/70 shadow-sm">

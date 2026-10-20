@@ -19,7 +19,7 @@ const getProduct = cache(async (slug: string) => {
   }
 
   try {
-    const apiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:3000/api/v1';
+    const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api/v1';
     const res = await fetch(`${apiUrl}/products/${slug}`, {
       next: { revalidate: 60, tags: ['products', `product-${slug}`] },
       headers: { 'Accept': 'application/json' },
@@ -43,7 +43,7 @@ export const metadata = {
 
 export async function generateStaticParams() {
   try {
-    const apiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:3000/api/v1';
+    const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api/v1';
     const res = await fetch(`${apiUrl}/products?limit=20`, { next: { revalidate: 300 } });
     if (!res.ok) return [];
     const json = await res.json();
@@ -64,24 +64,7 @@ export default async function ProductPage({
   const renderTime = performance.now() - t0;
   console.log(`[PERF ProductPage /product/${slug}] Rendered in ${renderTime.toFixed(2)}ms`);
 
-  if (!product) {
-    return (
-      <div className="min-h-screen bg-[#FDFCFB]">
-        <Navbar variant="solid" />
-        <main className="w-full min-h-[60vh] flex flex-col items-center justify-center pt-28 px-6 text-center">
-          <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Product Not Found</h2>
-          <p className="text-gray-500 mb-8 max-w-md">The product you are looking for does not exist or has been updated.</p>
-          <Link
-            href="/shop"
-            className="bg-[#BC8477] text-white px-7 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#A87569] transition-colors shadow-sm"
-          >
-            Explore Catalog
-          </Link>
-        </main>
-        <Footer />
-      </div>
-    );
-  }
+
 
   return (
     <div className="min-h-screen bg-[#FDFCFB]">

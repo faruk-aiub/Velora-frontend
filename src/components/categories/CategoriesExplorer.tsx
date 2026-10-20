@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { 
@@ -15,7 +15,7 @@ import {
   SlidersHorizontal,
   X
 } from "lucide-react";
-import { CategoryTree } from "@/lib/categories";
+import { CategoryTree, fetchCategoryTree } from "@/lib/categories";
 
 export const CATEGORY_IMAGE_MAP: Record<string, string> = {
   'electronics-gadgets': '/hero-gadgets.jpg',
@@ -61,11 +61,36 @@ interface CategoriesExplorerProps {
 }
 
 export function CategoriesExplorer({ categories }: CategoriesExplorerProps) {
+  const [currentCategories, setCurrentCategories] = useState<CategoryTree[]>(categories || []);
+  const [isLoading, setIsLoading] = useState(!categories || categories.length === 0);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedFilter, setSelectedFilter] = useState("all");
 
+  useEffect(() => {
+    if (categories && categories.length > 0) {
+      setCurrentCategories(categories);
+      setIsLoading(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoading(true);
+    fetchCategoryTree()
+      .then((data) => {
+        if (isMounted && data && data.length > 0) {
+          setCurrentCategories(data);
+        }
+      })
+      .catch((err) => console.error("Client fallback category fetch failed:", err))
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
+      });
+
+    return () => { isMounted = false; };
+  }, [categories]);
+
   const filterTabs = [
-    { id: "all", label: "All Departments", count: categories.length },
+    { id: "all", label: "All Departments", count: currentCategories.length },
     { id: "tech", label: "Tech & Gadgets", slugs: ["electronics-gadgets", "automotive"] },
     { id: "lifestyle", label: "Fashion & Lifestyle", slugs: ["fashion-clothing", "beauty-personal-care", "others"] },
     { id: "home", label: "Home & Kitchen", slugs: ["home-living", "kitchen-appliances"] },
@@ -73,7 +98,7 @@ export function CategoriesExplorer({ categories }: CategoriesExplorerProps) {
   ];
 
   const filteredCategories = useMemo(() => {
-    let result = categories;
+    let result = currentCategories;
 
     // Filter by Tab
     if (selectedFilter !== "all") {
@@ -95,15 +120,15 @@ export function CategoriesExplorer({ categories }: CategoriesExplorerProps) {
     }
 
     return result;
-  }, [categories, selectedFilter, searchQuery]);
+  }, [currentCategories, selectedFilter, searchQuery]);
 
   // Featured Categories for Spotlight Banner (Electronics, Fashion, Home)
   const spotlightCategories = useMemo(() => {
     const slugs = ['electronics-gadgets', 'fashion-clothing', 'home-living'];
     return slugs
-      .map(s => categories.find(c => c.slug === s))
+      .map(s => currentCategories.find(c => c.slug === s))
       .filter(Boolean) as CategoryTree[];
-  }, [categories]);
+  }, [currentCategories]);
 
   const getImage = (cat: CategoryTree) => {
     if (cat.image_url && !cat.image_url.includes('picsum.photos')) {
@@ -305,7 +330,13 @@ export function CategoriesExplorer({ categories }: CategoriesExplorerProps) {
           </div>
         </div>
 
-        {filteredCategories.length === 0 ? (
+        {isLoading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
+              <div key={n} className="h-64 rounded-3xl bg-gray-100/80 animate-pulse border border-gray-200/60" />
+            ))}
+          </div>
+        ) : filteredCategories.length === 0 ? (
           <div className="text-center py-24 bg-white rounded-3xl border border-gray-100 p-8 max-w-md mx-auto">
             <div className="w-16 h-16 rounded-2xl bg-[#F7F5EE] text-[#BC8477] flex items-center justify-center mx-auto mb-4">
               <Search size={28} />

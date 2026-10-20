@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const baseURL = typeof window === 'undefined'
-  ? (process.env.INTERNAL_API_URL || 'http://127.0.0.1:3000/api/v1')
+  ? (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api/v1')
   : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1');
 
 const apiClient = axios.create({

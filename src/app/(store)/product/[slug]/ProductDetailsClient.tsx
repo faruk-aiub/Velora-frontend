@@ -29,7 +29,7 @@ import { useAuthStore } from '@/store/auth.store';
 import type { Product, ProductVariant } from '@/types/product.types';
 
 interface ProductDetailsClientProps {
-  initialProduct: Product;
+  initialProduct: Product | null;
   slug: string;
 }
 
@@ -50,16 +50,16 @@ export function ProductDetailsClient({ initialProduct, slug }: ProductDetailsCli
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartStore((state) => state.openCart);
 
-  // Use initialProduct as pre-loaded data so there is ZERO loading state/spinner
-  const { data: productData } = useQuery({
+  // Use initialProduct as pre-loaded data if available, otherwise fetch on client
+  const { data: productData, isLoading } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => productService.getBySlug(slug),
-    initialData: { success: true, message: '', data: initialProduct },
+    initialData: initialProduct ? { success: true, message: '', data: initialProduct } : undefined,
     staleTime: 60 * 1000,
     enabled: typeof window !== 'undefined' && !!slug,
   });
 
-  const product = (productData?.data || initialProduct) as Product;
+  const product = (productData?.data || initialProduct) as Product | null;
   const productId = product?.id;
 
   const { data: wishlistData } = useQuery({
@@ -97,6 +97,38 @@ export function ProductDetailsClient({ initialProduct, slug }: ProductDetailsCli
     },
     onError: () => toast.error('Failed to update wishlist'),
   });
+  if (isLoading && !product) {
+    return (
+      <main className="w-full pt-28 pb-20 bg-white">
+        <div className="max-w-[1400px] mx-auto px-6 animate-pulse">
+          <div className="h-4 w-32 bg-gray-200 rounded mb-8" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <div className="lg:col-span-7 h-[500px] bg-gray-100 rounded-3xl" />
+            <div className="lg:col-span-5 space-y-6">
+              <div className="h-8 bg-gray-200 rounded w-3/4" />
+              <div className="h-6 bg-gray-200 rounded w-1/3" />
+              <div className="h-24 bg-gray-100 rounded-2xl" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!product) {
+    return (
+      <main className="w-full min-h-[60vh] flex flex-col items-center justify-center pt-28 px-6 text-center">
+        <h2 className="text-3xl font-extrabold text-gray-900 mb-2">Product Not Found</h2>
+        <p className="text-gray-500 mb-8 max-w-md">The product you are looking for does not exist or has been updated.</p>
+        <Link
+          href="/shop"
+          className="bg-[#BC8477] text-white px-7 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#A87569] transition-colors shadow-sm"
+        >
+          Explore Catalog
+        </Link>
+      </main>
+    );
+  }
 
   const primaryVariant = product.variants?.[0];
   const price = Number(primaryVariant?.price || (product as any).base_price || 0);

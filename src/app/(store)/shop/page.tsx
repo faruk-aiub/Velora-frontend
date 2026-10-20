@@ -22,7 +22,7 @@ export const metadata = {
 };
 
 export default async function ShopPage() {
-  const apiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:3000/api/v1';
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api/v1';
 
   const [categories, initialProductsRes] = await Promise.all([
     fetchCategoryTree(),

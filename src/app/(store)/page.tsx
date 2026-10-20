@@ -16,7 +16,7 @@ import { fetchCategoryTree } from "@/lib/categories";
 export const revalidate = 60; // Cache SSR route for 60 seconds
 
 export default async function HomePage() {
-  const apiUrl = process.env.INTERNAL_API_URL || 'http://127.0.0.1:3000/api/v1';
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api/v1';
 
   // Parallel server fetch with fast fallback
   const [productsRes, categories] = await Promise.all([
