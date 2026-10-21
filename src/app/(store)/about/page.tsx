@@ -6,7 +6,6 @@ import { ProcessFlowchart } from "@/components/about/ProcessFlowchart";
 import { 
   ShieldCheck, 
   Target, 
-  Sparkles, 
   Award, 
   ArrowRight, 
   Clock, 
@@ -48,7 +47,7 @@ export default function AboutPage() {
       tag: "24/7 Priority Support"
     },
     {
-      icon: Sparkles,
+      icon: Award,
       title: "Curated Excellence",
       desc: "Instead of overwhelming you with endless catalogs, we handpick and curate only high-durability, stylish, and premium lifestyle items.",
       tag: "Handpicked Catalog"
@@ -91,7 +90,6 @@ export default function AboutPage() {
       {/* ── Hero Section ── */}
       <section className="bg-[#F7F5EE] pt-32 pb-20 px-6 lg:px-12 text-center rounded-b-[48px] max-w-[1600px] mx-auto border-b border-[#E8E1DE]">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#BC8477] font-bold text-xs uppercase tracking-wider mb-6 border border-gray-200/80 shadow-sm">
-          <Sparkles size={14} />
           <span>Curated Quality · Everyday Elegance</span>
         </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 tracking-tight mb-6 leading-tight max-w-4xl mx-auto">

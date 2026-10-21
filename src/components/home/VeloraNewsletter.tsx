@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Mail, ArrowRight, CheckCircle2, Sparkles, ShieldCheck } from "lucide-react";
+import { Mail, ArrowRight, CheckCircle2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
 
@@ -35,7 +35,6 @@ export function VeloraNewsletter() {
         <div className="max-w-2xl mx-auto text-center relative z-10 space-y-6">
           {/* Header Pill */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#BC8477]/15 text-[#E8C5BD] border border-[#BC8477]/30 text-xs font-bold uppercase tracking-wider">
-            <Sparkles size={14} className="text-[#BC8477]" />
             <span>Velora VIP Membership</span>
           </div>
 

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Sparkles, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 
 interface SlideItem {
   id: string;
@@ -20,12 +20,22 @@ const slides: SlideItem[] = [
   {
     id: 'laptops',
     badge: 'PREMIUM COMPUTING',
-    titleLine1: 'Next-Gen Laptops &',
+    titleLine1: 'Beyond the Ordinary',
     titleLine2: 'Ultra-Slim Tech',
     subtitle: 'Empower Your Productivity With High-Performance Computing & Elegant Minimalist Aesthetics',
     discountBadge: 'UP TO 30% OFF',
     image: '/hero-laptop.jpg',
     link: '/shop?category=electronics-gadgets',
+  },
+  {
+    id: 'grocery-food',
+    badge: 'ORGANIC & ARTISAN PANTRY',
+    titleLine1: 'Pure Kitchen Essentials,',
+    titleLine2: 'Fresh From The Source',
+    subtitle: "Raw Sundarban honey, single-estate tea, and cold-pressed cooking oils. Honest, unadulterated pantry staples for your family's table.",
+    discountBadge: 'UP TO 20% OFF',
+    image: '/hero-grocery.jpg',
+    link: '/shop?category=grocery-food',
   },
   {
     id: 'keyboards',
@@ -38,6 +48,26 @@ const slides: SlideItem[] = [
     link: '/shop?category=electronics-gadgets',
   },
   {
+    id: 'pet-supplies',
+    badge: 'THOUGHTFUL PET CARE',
+    titleLine1: 'Wholesome Food & Cozy Beds',
+    titleLine2: 'For Healthy, Happy Pets',
+    subtitle: 'Vet-checked organic nutrition, natural rope toys, and orthopedic snooze beds because your cats and dogs deserve genuine comfort.',
+    discountBadge: 'UP TO 25% OFF',
+    image: '/hero-pets.jpg',
+    link: '/shop?category=pet-supplies',
+  },
+  {
+    id: 'books-stationery',
+    badge: 'SLOW LIVING & DESK EDIT',
+    titleLine1: 'Fine Paper, Brass Pens &',
+    titleLine2: 'Books Worth Keeping',
+    subtitle: 'Heavyweight Smyth-sewn journals, smooth fountain inks, and handpicked reads for quiet mornings and thoughtful afternoon journaling.',
+    discountBadge: 'UP TO 30% OFF',
+    image: '/hero-stationery.jpg',
+    link: '/shop?category=books-stationery',
+  },
+  {
     id: 'appliances',
     badge: 'SMART HOME APPLIANCES',
     titleLine1: 'Aesthetic Kitchen &',
@@ -45,7 +75,7 @@ const slides: SlideItem[] = [
     subtitle: 'Elevate Everyday Living With Artisan Espresso Machines, Smart Kettles & Countertop Luxury',
     discountBadge: 'UP TO 40% OFF',
     image: '/hero-appliance.jpg',
-    link: '/shop?category=kitchen-dining',
+    link: '/shop?category=kitchen-appliances',
   },
   {
     id: 'home-decor',
@@ -110,9 +140,8 @@ export function HeroSlider() {
           return (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
-              }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
+                }`}
             >
               <Image
                 src={slide.image}
@@ -143,7 +172,6 @@ export function HeroSlider() {
               >
                 {/* Top Badge matching Velora brand */}
                 <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-[#BC8477]/30 text-[#BC8477] text-xs sm:text-sm font-bold tracking-wider uppercase backdrop-blur-md shadow-sm">
-                  <Sparkles className="w-3.5 h-3.5 text-[#BC8477]" />
                   <span>{slide.badge}</span>
                 </div>
 
@@ -192,11 +220,10 @@ export function HeroSlider() {
               key={i}
               onClick={() => goToSlide(i)}
               aria-label={`Go to slide ${i + 1}`}
-              className={`transition-all duration-300 rounded-full ${
-                i === current
-                  ? 'w-7 sm:w-8 h-2 sm:h-2.5 bg-[#BC8477] shadow-[0_0_12px_rgba(188,132,119,0.7)]'
-                  : 'w-2 sm:w-2.5 h-2 sm:h-2.5 bg-gray-300 hover:bg-gray-400'
-              }`}
+              className={`transition-all duration-300 rounded-full ${i === current
+                ? 'w-7 sm:w-8 h-2 sm:h-2.5 bg-[#BC8477] shadow-[0_0_12px_rgba(188,132,119,0.7)]'
+                : 'w-2 sm:w-2.5 h-2 sm:h-2.5 bg-gray-300 hover:bg-gray-400'
+                }`}
             />
           ))}
         </div>

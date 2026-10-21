@@ -12,49 +12,65 @@ export function GSAPPageAnimator({ children }: { children: React.ReactNode }) {
   const container = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
-    // Hero Section Animations
-    gsap.from('.hero-text > *', {
-      y: 40,
-      opacity: 0,
-      duration: 1.2,
-      stagger: 0.15,
-      ease: 'power3.out',
-      delay: 0.1,
-    });
+    if (!container.current) return;
+
+    // Hero Section Animations (only if elements exist)
+    const heroTexts = container.current.querySelectorAll('.hero-text > *');
+    if (heroTexts.length > 0) {
+      gsap.from(heroTexts, {
+        y: 40,
+        opacity: 0,
+        duration: 1.2,
+        stagger: 0.15,
+        ease: 'power3.out',
+        delay: 0.1,
+      });
+    }
     
-    gsap.from('.hero-image', {
-      x: 40,
-      opacity: 0,
-      duration: 1.2,
-      ease: 'power3.out',
-      delay: 0.3,
-    });
+    const heroImage = container.current.querySelector('.hero-image');
+    if (heroImage) {
+      gsap.from(heroImage, {
+        x: 40,
+        opacity: 0,
+        duration: 1.2,
+        ease: 'power3.out',
+        delay: 0.3,
+      });
+    }
 
-    // Features Strip Animation
-    gsap.from('.feature-item', {
-      scrollTrigger: {
-        trigger: '.features-strip',
-        start: 'top 90%',
-      },
-      y: 30,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.1,
-      ease: 'power2.out',
-    });
+    // Features Strip Animation (only if trigger and items exist)
+    const featuresStrip = container.current.querySelector('.features-strip');
+    const featureItems = container.current.querySelectorAll('.feature-item');
+    if (featuresStrip && featureItems.length > 0) {
+      gsap.from(featureItems, {
+        scrollTrigger: {
+          trigger: featuresStrip,
+          start: 'top 90%',
+        },
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: 'power2.out',
+      });
+    }
 
-    // Testimonials Animation
-    gsap.from('.testimonial-item', {
-      scrollTrigger: {
-        trigger: '.testimonials-section',
-        start: 'top 85%',
-      },
-      y: 40,
-      opacity: 0,
-      duration: 0.8,
-      stagger: 0.15,
-      ease: 'power3.out',
-    });
+    // Testimonials Animation (only if trigger and items exist)
+    const testimonialsSection = container.current.querySelector('.testimonials-section');
+    const testimonialItems = container.current.querySelectorAll('.testimonial-item');
+    if (testimonialsSection && testimonialItems.length > 0) {
+      gsap.from(testimonialItems, {
+        scrollTrigger: {
+          trigger: testimonialsSection,
+          start: 'top 85%',
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: 'power3.out',
+      });
+    }
 
   }, { scope: container });
 

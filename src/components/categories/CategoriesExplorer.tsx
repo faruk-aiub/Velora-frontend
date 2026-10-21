@@ -5,7 +5,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { 
   Search, 
-  Sparkles, 
   ArrowRight, 
   Layers, 
   ChevronRight, 
@@ -228,7 +227,6 @@ export function CategoriesExplorer({ categories }: CategoriesExplorerProps) {
 
               <div className="relative z-10 space-y-4">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-white/20 backdrop-blur-md text-white border border-white/20">
-                  <Sparkles size={12} />
                   {CATEGORY_BADGES[spotlightCategories[0].slug] || "Featured"}
                 </span>
 

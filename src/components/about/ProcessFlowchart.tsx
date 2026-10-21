@@ -12,7 +12,6 @@ import {
   ArrowDown, 
   CheckCircle2, 
   AlertCircle, 
-  Sparkles, 
   Clock, 
   RotateCcw,
   Check,
@@ -144,7 +143,6 @@ export function ProcessFlowchart() {
       {/* ── Section Header ── */}
       <div className="text-center max-w-3xl mx-auto mb-14">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#BC8477]/10 text-[#BC8477] font-bold text-xs uppercase tracking-wider mb-4 border border-[#BC8477]/20">
-          <Sparkles size={14} />
           <span>Transparent Operations</span>
         </div>
         <h2 className="text-3xl md:text-5xl font-extrabold text-gray-900 tracking-tight mb-5 leading-tight">

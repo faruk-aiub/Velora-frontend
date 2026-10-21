@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Truck, ShieldCheck, Tag, ShoppingBag, Smartphone, Shirt, Home, Sparkles, Gamepad2 } from 'lucide-react';
+import { Truck, ShieldCheck, Tag, ShoppingBag, Smartphone, Shirt, Home, Heart, Gamepad2 } from 'lucide-react';
 import { VeloraLogo } from "@/components/layout/VeloraLogo";
 
 export default function AuthLayout({
@@ -91,7 +91,7 @@ export default function AuthLayout({
               { icon: Smartphone, label: "Electronics" },
               { icon: Shirt, label: "Clothing" },
               { icon: Home, label: "Home & Living" },
-              { icon: Sparkles, label: "Beauty" },
+              { icon: Heart, label: "Beauty" },
               { icon: Gamepad2, label: "Toys & More" },
             ].map((Cat, i) => (
               <div key={i} className="flex flex-col items-center gap-2 text-gray-500 hover:text-[#B58A63] cursor-pointer transition-colors shrink-0">

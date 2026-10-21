@@ -9,7 +9,6 @@ import {
   X, 
   Heart, 
   Bell, 
-  Sparkles, 
   ChevronDown, 
   ArrowRight,
   Package,
@@ -162,7 +161,7 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
     searchDebounceRef.current = setTimeout(async () => {
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
-        const res = await fetch(`${apiUrl}/products?search=${encodeURIComponent(searchQuery.trim())}&limit=4`);
+        const res = await fetch(`${apiUrl}/products?q=${encodeURIComponent(searchQuery.trim())}&search=${encodeURIComponent(searchQuery.trim())}&limit=5`);
         if (res.ok) {
           const json = await res.json();
           setSearchResults(json.data || []);
@@ -172,7 +171,7 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
       } finally {
         setIsSearching(false);
       }
-    }, 220);
+    }, 200);
 
     return () => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
@@ -182,7 +181,7 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
       setIsSearchOpen(false);
       setSearchQuery("");
     }
@@ -287,7 +286,6 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
                         className="flex items-center justify-between text-xs font-semibold text-stone-800 hover:text-[#BC8477] p-2 rounded-xl hover:bg-stone-50 transition-colors"
                       >
                         <span>Best Selling Icons</span>
-                        <Sparkles size={12} className="text-[#BC8477]" />
                       </Link>
                       <Link 
                         href="/shop?sort=price:desc" 
@@ -630,11 +628,41 @@ export function Navbar({ variant = 'solid' }: NavbarProps) {
                       </div>
                     </Link>
                   ))}
+
+                  <div className="pt-3 border-t border-stone-100 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-stone-500">
+                      Top {searchResults.length} matches
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                        setIsSearchOpen(false);
+                        setSearchQuery("");
+                      }}
+                      className="text-xs font-bold text-[#BC8477] hover:underline flex items-center gap-1 cursor-pointer"
+                    >
+                      <span>View all results for &ldquo;{searchQuery.trim()}&rdquo;</span>
+                      <ArrowRight size={13} />
+                    </button>
+                  </div>
                 </div>
               ) : searchQuery.trim() ? (
-                <div className="py-8 text-center">
-                  <p className="text-sm font-bold text-stone-800">No products found</p>
-                  <p className="text-xs text-stone-400 mt-1">Try searching for &quot;bag&quot;, &quot;planter&quot;, or &quot;organic&quot;</p>
+                <div className="py-8 text-center space-y-3">
+                  <p className="text-sm font-bold text-stone-800">No instant matches found for &ldquo;{searchQuery}&rdquo;</p>
+                  <p className="text-xs text-stone-400">Try searching for generic terms or search the full catalog directly.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+                      setIsSearchOpen(false);
+                      setSearchQuery("");
+                    }}
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold bg-[#BC8477] text-white hover:bg-[#A87569] transition-colors shadow-xs cursor-pointer"
+                  >
+                    <span>Search full catalog</span>
+                    <ArrowRight size={13} />
+                  </button>
                 </div>
               ) : (
                 <div className="space-y-4">

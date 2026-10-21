@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { ProductCard } from './ProductCard';
 import { useProducts } from '@/hooks/useProducts';
@@ -13,7 +13,8 @@ import {
   RotateCcw, 
   PackageOpen, 
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Search
 } from 'lucide-react';
 import type { PaginatedResponse } from '@/types/auth.types';
 
@@ -35,7 +36,13 @@ export function ProductGrid({
   const minPrice = searchParams.get('min_price');
   const maxPrice = searchParams.get('max_price');
   const sort = searchParams.get('sort') || '';
-  const searchQuery = searchParams.get('q');
+  const searchQuery = searchParams.get('q') || searchParams.get('search') || '';
+
+  const [searchTermInput, setSearchTermInput] = useState(searchQuery);
+
+  useEffect(() => {
+    setSearchTermInput(searchQuery);
+  }, [searchQuery]);
 
   const pageParam = Number(searchParams.get('page')) || 1;
   const currentPage = Math.max(1, pageParam);
@@ -55,6 +62,19 @@ export function ProductGrid({
     search: searchQuery || undefined,
   }, isDefaultView ? initialData : undefined);
 
+  const handleSearchCommit = (term: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete('page'); // Reset to page 1 on search
+    if (term.trim()) {
+      params.set('q', term.trim());
+      params.delete('search');
+    } else {
+      params.delete('q');
+      params.delete('search');
+    }
+    router.push(`${pathname}?${params.toString()}#products`, { scroll: true });
+  };
+
   const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const params = new URLSearchParams(searchParams.toString());
     params.delete('page'); // Reset to page 1 on sort change
@@ -71,6 +91,10 @@ export function ProductGrid({
     params.delete('page'); // Reset to page 1 on filter remove
     params.delete(key);
     if (key === 'category') params.delete('subcategory');
+    if (key === 'q' || key === 'search') {
+      params.delete('q');
+      params.delete('search');
+    }
     router.push(`${pathname}?${params.toString()}#products`, { scroll: true });
   };
 
@@ -123,9 +147,9 @@ export function ProductGrid({
   return (
     <div className="flex-1 w-full space-y-6">
       {/* ── Filter & Sort Control Toolbar ── */}
-      <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-4 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.02)] flex flex-col md:flex-row md:items-center justify-between gap-4">
         {/* Results Info */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 shrink-0">
           <span className="text-sm font-extrabold text-gray-900 tracking-tight">
             {isLoading 
               ? 'Loading products...' 
@@ -139,8 +163,37 @@ export function ProductGrid({
           )}
         </div>
 
+        {/* Inline Search Bar */}
+        <div className="relative w-full md:w-64 lg:w-72">
+          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search products in catalog..."
+            value={searchTermInput}
+            onChange={(e) => setSearchTermInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                handleSearchCommit(searchTermInput);
+              }
+            }}
+            className="w-full pl-9 pr-8 py-2 rounded-xl bg-gray-50 border border-gray-200/80 text-xs font-medium text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#BC8477]/30 focus:border-[#BC8477] transition-all"
+          />
+          {searchTermInput && (
+            <button
+              type="button"
+              onClick={() => {
+                setSearchTermInput("");
+                handleSearchCommit("");
+              }}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5 cursor-pointer"
+            >
+              <X size={13} />
+            </button>
+          )}
+        </div>
+
         {/* View Density & Sort Dropdown */}
-        <div className="flex items-center gap-3 self-end sm:self-auto">
+        <div className="flex items-center gap-3 self-end md:self-auto shrink-0">
           {/* Column Toggle (Desktop only) */}
           <div className="hidden xl:flex items-center bg-gray-50 rounded-xl p-1 border border-gray-100">
             <button
@@ -213,7 +266,7 @@ export function ProductGrid({
               onClick={() => removeFilter('q')}
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-white border border-gray-200 text-gray-700 hover:border-red-300 hover:text-red-500 transition-colors shadow-xs"
             >
-              <span>Search: "{searchQuery}"</span>
+              <span>Search: &ldquo;{searchQuery}&rdquo;</span>
               <X size={12} />
             </button>
           )}

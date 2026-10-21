@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ChevronDown, SlidersHorizontal, RotateCcw, Check, Sparkles } from 'lucide-react';
+import { ChevronDown, SlidersHorizontal, RotateCcw, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';

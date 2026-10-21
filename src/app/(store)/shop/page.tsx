@@ -10,7 +10,6 @@ import {
   ShieldCheck, 
   Truck, 
   RefreshCw, 
-  Sparkles,
   Layers
 } from "lucide-react";
 

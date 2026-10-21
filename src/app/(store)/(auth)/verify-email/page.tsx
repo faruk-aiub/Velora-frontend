@@ -67,7 +67,7 @@ function VerifyEmailContent() {
       <div className="space-y-6 text-center">
         <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold">Email verified! 🎉</h1>
+          <h1 className="text-2xl font-bold">Email verified!</h1>
           <p className="text-muted-foreground text-sm">
             Your email has been successfully verified. Redirecting you to login...
           </p>

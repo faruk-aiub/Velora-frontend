@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowUpRight, Sparkles } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 
 const collections = [
@@ -55,7 +55,6 @@ export function CuratedLifestyleBento() {
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-4">
         <div>
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#BC8477]/10 text-[#BC8477] text-xs font-bold uppercase tracking-wider mb-3">
-            <Sparkles size={13} />
             <span>Curated Lifestyle</span>
           </div>
           <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">

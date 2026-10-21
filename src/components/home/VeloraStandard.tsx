@@ -114,7 +114,7 @@ export function VeloraStandard() {
               Cash on Delivery & Secure Digital Payments
             </h4>
             <p className="text-[11px] sm:text-xs text-gray-500 font-medium">
-              We accept bKash, Nagad, Visa, Mastercard, AMEX, and Cash on Delivery nationwide.
+              We accept bKash, Nagad, Visa, Mastercard and Cash on Delivery nationwide.
             </p>
           </div>
         </div>

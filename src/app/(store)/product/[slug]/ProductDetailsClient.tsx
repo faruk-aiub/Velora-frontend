@@ -17,7 +17,6 @@ import {
   Truck, 
   RotateCcw, 
   Clock,
-  Sparkles,
   Check
 } from 'lucide-react';
 
@@ -244,7 +243,6 @@ export function ProductDetailsClient({ initialProduct, slug }: ProductDetailsCli
           {/* ── Product Info ── */}
           <div className="flex flex-col pt-1 lg:pt-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#BC8477]/10 text-[#BC8477] text-xs font-bold uppercase tracking-widest mb-3.5 w-fit">
-              <Sparkles size={13} />
               <span>{product.brand?.name || product.category?.name || 'Verified Collection'}</span>
             </div>
             
