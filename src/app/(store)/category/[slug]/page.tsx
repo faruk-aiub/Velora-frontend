@@ -54,7 +54,7 @@ export default async function CategoryPage({ params }: Props) {
       {/* ── Main Content Area ── */}
       <section id="products" className="px-6 lg:px-12 max-w-[1600px] mx-auto w-full pb-24 -mt-12 relative z-20">
         <div className="bg-white rounded-[2rem] shadow-sm p-8 lg:p-12 border border-gray-100 flex flex-col lg:flex-row gap-12 lg:gap-16">
-          <Suspense fallback={<div className="w-64 animate-pulse bg-[#F9FAFB] rounded-2xl h-[500px]"></div>}>
+          <Suspense fallback={<div className="hidden lg:block w-64 animate-pulse bg-[#F9FAFB] rounded-2xl h-[500px]"></div>}>
             <ShopSidebar categoryOverride={categoryName} />
           </Suspense>
           

@@ -77,7 +77,7 @@ export default async function ShopPage() {
       <section id="products" className="px-6 lg:px-12 max-w-[1600px] mx-auto w-full py-12 scroll-mt-24">
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-10 items-start">
           {/* Sidebar Filters */}
-          <Suspense fallback={<div className="w-64 h-96 bg-gray-50 rounded-3xl animate-pulse" />}>
+          <Suspense fallback={<div className="hidden lg:block w-64 h-96 bg-gray-50 rounded-3xl animate-pulse" />}>
             <ShopSidebar initialCategories={categories} />
           </Suspense>
           
