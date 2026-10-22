@@ -8,14 +8,12 @@ import {
   Target, 
   Award, 
   ArrowRight, 
-  Clock, 
   CheckCircle2, 
   RefreshCw, 
   Headphones, 
-  Truck,
-  Heart,
-  Eye,
-  Check
+  Truck, 
+  Heart, 
+  Eye
 } from "lucide-react";
 
 export const metadata = {
@@ -119,58 +117,129 @@ export default function AboutPage() {
       </section>
 
       {/* ── Our Story & Mission/Vision ── */}
-      <section className="py-24 px-6 lg:px-12 max-w-[1600px] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
+      <section className="py-20 lg:py-28 px-6 lg:px-12 max-w-[1600px] mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+          
           {/* Story Text */}
-          <div className="lg:col-span-6 space-y-6">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#EAF0E2] text-[#7A915C] font-bold text-xs uppercase tracking-wider">
-              <span>Our Heritage</span>
+          <div className="lg:col-span-6 space-y-7">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#BC8477]/10 text-[#BC8477] font-bold text-xs uppercase tracking-wider">
+              <span>Our Heritage & Craftsmanship</span>
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight leading-tight">
-              Crafted With Passion, Built On Lasting Trust.
+            
+            <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight leading-[1.15]">
+              Crafted With Passion, <br className="hidden sm:block" />
+              <span className="text-[#BC8477]">Built On Lasting Trust.</span>
             </h2>
-            <p className="text-gray-600 font-medium leading-relaxed">
-              Founded with a burning passion for design, durability, and customer satisfaction, Velora started with a straightforward vision: to eliminate the guesswork from online shopping.
-            </p>
-            <p className="text-gray-600 font-medium leading-relaxed">
-              Over the years, we have evolved into a trusted marketplace connecting conscious shoppers with curated collections spanning fashion, gadgets, home decor, and lifestyle essentials. Every item on Velora passes strict quality benchmarks to ensure you receive nothing short of perfection.
+
+            <p className="text-gray-600 font-medium leading-relaxed text-base sm:text-lg">
+              Founded with a burning passion for design, durability, and customer satisfaction, Velora started with a straightforward vision: to eliminate the guesswork from online shopping in Bangladesh.
             </p>
 
+            <p className="text-gray-500 font-medium leading-relaxed text-sm sm:text-base">
+              Over the years, we have evolved into a trusted marketplace connecting conscious shoppers with curated collections spanning handcrafted leather, precision timepieces, modern computing, and artisanal home decor. Every piece passes strict quality benchmarks to ensure you receive nothing short of perfection.
+            </p>
+
+            {/* Key Trust Guarantees */}
+            <div className="pt-2 grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs font-bold text-gray-800">
+              <div className="flex items-center gap-2.5 bg-[#FAF8F5] p-3.5 rounded-2xl border border-[#E8E1DE]/70">
+                <CheckCircle2 size={16} className="text-[#BC8477] shrink-0" />
+                <span>100% Verified Authentic Sourcing</span>
+              </div>
+              <div className="flex items-center gap-2.5 bg-[#FAF8F5] p-3.5 rounded-2xl border border-[#E8E1DE]/70">
+                <CheckCircle2 size={16} className="text-[#BC8477] shrink-0" />
+                <span>Dual Inspection Before Dispatch</span>
+              </div>
+            </div>
+
             {/* Mission & Vision Bento Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-              <div className="bg-[#F7F5EE] p-6 rounded-2xl border border-[#E8E1DE]">
-                <div className="w-10 h-10 rounded-xl bg-white text-[#BC8477] flex items-center justify-center font-bold mb-3 shadow-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+              <div className="bg-[#FAF8F5] hover:bg-white p-6 rounded-3xl border border-[#E8E1DE] transition-all duration-300 shadow-sm hover:shadow-md hover:border-[#BC8477]/40 group">
+                <div className="w-11 h-11 rounded-2xl bg-white text-[#BC8477] flex items-center justify-center font-bold mb-4 shadow-sm border border-gray-100 group-hover:scale-105 group-hover:bg-[#BC8477] group-hover:text-white transition-all duration-300">
                   <Target size={20} />
                 </div>
-                <h3 className="font-bold text-gray-900 text-base mb-1">Our Mission</h3>
-                <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                <div className="flex items-center justify-between mb-1.5">
+                  <h3 className="font-extrabold text-gray-900 text-base tracking-tight">Our Mission</h3>
+                  <span className="text-[10px] font-bold text-[#BC8477] uppercase tracking-wider bg-[#BC8477]/10 px-2 py-0.5 rounded-full">Purpose</span>
+                </div>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed">
                   To democratize access to premium, authentic products with radical operational transparency and warm customer care.
                 </p>
               </div>
 
-              <div className="bg-[#EAF0E2]/50 p-6 rounded-2xl border border-[#D5E2C8]">
-                <div className="w-10 h-10 rounded-xl bg-white text-[#7A915C] flex items-center justify-center font-bold mb-3 shadow-sm">
+              <div className="bg-[#FAF8F5] hover:bg-white p-6 rounded-3xl border border-[#E8E1DE] transition-all duration-300 shadow-sm hover:shadow-md hover:border-[#BC8477]/40 group">
+                <div className="w-11 h-11 rounded-2xl bg-white text-[#BC8477] flex items-center justify-center font-bold mb-4 shadow-sm border border-gray-100 group-hover:scale-105 group-hover:bg-[#BC8477] group-hover:text-white transition-all duration-300">
                   <Eye size={20} />
                 </div>
-                <h3 className="font-bold text-gray-900 text-base mb-1">Our Vision</h3>
-                <p className="text-xs text-gray-600 font-medium leading-relaxed">
+                <div className="flex items-center justify-between mb-1.5">
+                  <h3 className="font-extrabold text-gray-900 text-base tracking-tight">Our Vision</h3>
+                  <span className="text-[10px] font-bold text-[#BC8477] uppercase tracking-wider bg-[#BC8477]/10 px-2 py-0.5 rounded-full">Horizon</span>
+                </div>
+                <p className="text-xs text-gray-500 font-medium leading-relaxed">
                   To be the nation’s benchmark for e-commerce excellence—where every customer purchase is met with absolute delight.
                 </p>
               </div>
             </div>
+
           </div>
 
-          {/* Story Visual */}
-          <div className="lg:col-span-6 w-full relative h-[420px] sm:h-[500px]">
-            <div className="absolute inset-0 bg-[#EAF0E2] rounded-[40px] rotate-3 scale-105"></div>
-            <Image 
-              src="/our-story.png" 
-              alt="Velora Craftsmanship and Story" 
-              fill 
-              className="object-cover rounded-[40px] relative z-10 shadow-lg"
-              priority
-            />
+          {/* Story Visuals Collage with Picture */}
+          <div className="lg:col-span-6 relative mt-8 lg:mt-0">
+            
+            {/* Ambient Background Warm Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[380px] h-[380px] bg-[#BC8477]/15 rounded-full blur-3xl pointer-events-none" />
+
+            {/* Decorative Offset Frame */}
+            <div className="absolute -inset-2 sm:-inset-4 bg-gradient-to-tr from-[#F7F5EE] via-[#FAF8F5] to-[#E8E1DE]/40 rounded-[44px] sm:rounded-[52px] -rotate-1 pointer-events-none border border-[#E8E1DE]/60" />
+
+            {/* Main Picture: Artisan Atelier Studio */}
+            <div className="relative rounded-[36px] sm:rounded-[44px] overflow-hidden shadow-2xl border-4 border-white aspect-[4/3] w-full z-10 bg-gray-100 group">
+              <Image 
+                src="/about-craftsmanship.jpg" 
+                alt="Velora Craftsmanship and Design Studio Atelier" 
+                fill 
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                priority
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+              
+              {/* Badge Overlay */}
+              <div className="absolute bottom-5 left-5 bg-white/95 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-white/60 flex items-center gap-2 z-20">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="text-xs font-bold text-gray-900 tracking-tight">Velora Design Atelier · Dhaka</span>
+              </div>
+            </div>
+
+            {/* Overlapping Secondary Picture: Handcrafted Artisan Detail */}
+            <div className="absolute -bottom-6 -right-3 sm:-bottom-8 sm:-right-5 w-40 sm:w-52 aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white z-20 bg-gray-100 group hover:-translate-y-1 transition-transform duration-300">
+              <Image 
+                src="/about-artisan-detail.jpg" 
+                alt="Handcrafted leather detail by Velora artisans" 
+                fill 
+                sizes="(max-width: 640px) 160px, 208px"
+                className="object-cover group-hover:scale-110 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+              <div className="absolute bottom-3 left-3 right-3 text-center">
+                <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-white drop-shadow">
+                  Handcrafted
+                </span>
+              </div>
+            </div>
+
+            {/* Floating Trust Stamp Badge (Top Left Corner) */}
+            <div className="absolute -top-5 -left-2 sm:-top-7 sm:-left-5 bg-white/95 backdrop-blur-md p-3.5 sm:p-4 rounded-3xl shadow-xl border border-gray-100 z-20 hidden sm:flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-[#BC8477]/10 text-[#BC8477] flex items-center justify-center font-bold">
+                <Award size={20} />
+              </div>
+              <div>
+                <span className="block text-sm font-extrabold text-gray-900 tracking-tight">100% Authentic</span>
+                <span className="block text-[10px] font-bold text-gray-400 uppercase tracking-wider">Verified Craft</span>
+              </div>
+            </div>
+
           </div>
+
         </div>
       </section>
 
