@@ -6,18 +6,35 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { Eye, EyeOff, Loader2, ArrowRight, User, Mail, Lock, Phone } from 'lucide-react';
+import {
+  Eye,
+  EyeOff,
+  Loader2,
+  ArrowRight,
+  User,
+  Mail,
+  Lock,
+  Phone,
+  X,
+  Scale,
+  ShieldCheck,
+  CheckCircle2,
+  ExternalLink,
+  RefreshCw,
+  Truck,
+  CreditCard
+} from 'lucide-react';
 import { registerSchema, type RegisterFormValues } from '@/lib/validators/auth.schema';
 import { authService } from '@/services/auth.service';
-import { useAuthStore } from '@/store/auth.store';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const [isPending, setIsPending] = useState(false);
-  const setAuth = useAuthStore((state) => state.setAuth);
 
   const {
     register,
@@ -48,11 +65,23 @@ export default function RegisterPage() {
 
       toast.success('Registration successful! You can now log in.');
       router.push('/login');
-    } catch (error: any) {
+    } catch (error: unknown) {
       setIsPending(false);
-      const msg = error.response?.data?.message || 'Failed to register.';
+      const msg = (error as { response?: { data?: { message?: string } } })?.response?.data?.message || 'Failed to register.';
       toast.error(msg);
     }
+  };
+
+  const handleAcceptModalTerms = () => {
+    setAcceptedTerms(true);
+    setShowTermsModal(false);
+    toast.success('Terms & Conditions accepted');
+  };
+
+  const handleAcceptModalPrivacy = () => {
+    setAcceptedTerms(true);
+    setShowPrivacyModal(false);
+    toast.success('Privacy Policy accepted');
   };
 
   return (
@@ -67,7 +96,7 @@ export default function RegisterPage() {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        
+
         <div className="relative group">
           <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
             <User size={18} strokeWidth={1.5} />
@@ -75,7 +104,7 @@ export default function RegisterPage() {
           <input
             id="fullName"
             placeholder="Full Name"
-            className="w-full h-14 bg-white rounded-2xl pl-12 pr-4 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#B58A63]/20 focus:border-[#B58A63] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
+            className="w-full h-14 bg-white rounded-2xl pl-12 pr-4 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
             style={{ borderColor: errors.fullName ? '#E46962' : undefined }}
             {...register('fullName')}
           />
@@ -90,7 +119,7 @@ export default function RegisterPage() {
             id="email"
             type="email"
             placeholder="Email Address"
-            className="w-full h-14 bg-white rounded-2xl pl-12 pr-4 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#B58A63]/20 focus:border-[#B58A63] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
+            className="w-full h-14 bg-white rounded-2xl pl-12 pr-4 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
             style={{ borderColor: errors.email ? '#E46962' : undefined }}
             {...register('email')}
           />
@@ -105,7 +134,7 @@ export default function RegisterPage() {
             id="phone"
             type="tel"
             placeholder="Phone Number"
-            className="w-full h-14 bg-white rounded-2xl pl-12 pr-4 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#B58A63]/20 focus:border-[#B58A63] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
+            className="w-full h-14 bg-white rounded-2xl pl-12 pr-4 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
             style={{ borderColor: errors.phone ? '#E46962' : undefined }}
             {...register('phone')}
           />
@@ -121,7 +150,7 @@ export default function RegisterPage() {
               id="password"
               type={showPassword ? 'text' : 'password'}
               placeholder="Password"
-              className="w-full h-14 bg-white rounded-2xl pl-12 pr-12 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#B58A63]/20 focus:border-[#B58A63] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
+              className="w-full h-14 bg-white rounded-2xl pl-12 pr-12 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
               style={{ borderColor: errors.password ? '#E46962' : undefined }}
               {...register('password')}
             />
@@ -145,7 +174,7 @@ export default function RegisterPage() {
               id="confirmPassword"
               type={showConfirmPassword ? 'text' : 'password'}
               placeholder="Confirm Password"
-              className="w-full h-14 bg-white rounded-2xl pl-12 pr-12 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#B58A63]/20 focus:border-[#B58A63] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
+              className="w-full h-14 bg-white rounded-2xl pl-12 pr-12 text-[13px] text-gray-900 border border-[#EBE8E6] transition-all focus:outline-none focus:ring-2 focus:ring-[#BC8477]/20 focus:border-[#BC8477] placeholder:text-gray-400 shadow-[0_2px_10px_rgba(0,0,0,0.01)]"
               style={{ borderColor: errors.confirmPassword ? '#E46962' : undefined }}
               {...register('confirmPassword')}
             />
@@ -160,16 +189,32 @@ export default function RegisterPage() {
           {errors.confirmPassword && <p className="text-xs text-[#E46962] mt-1 absolute -bottom-5">{errors.confirmPassword.message}</p>}
         </div>
 
-        <div className="flex items-center gap-3 pt-4 pb-2">
+        {/* ── Terms & Conditions Checkbox with Interactive Modal Trigger ── */}
+        <div className="flex items-start gap-3 pt-3 pb-1">
           <input
             type="checkbox"
             id="terms"
             checked={acceptedTerms}
             onChange={(e) => setAcceptedTerms(e.target.checked)}
-            className="w-3.5 h-3.5 rounded-sm border-[#D5CFCD] text-[#B58A63] focus:ring-[#B58A63] transition-colors cursor-pointer"
+            className="w-4 h-4 mt-0.5 rounded border-[#D5CFCD] text-[#BC8477] focus:ring-[#BC8477] transition-colors cursor-pointer shrink-0"
           />
-          <label htmlFor="terms" className="text-xs text-[#7A7371] cursor-pointer select-none">
-            I agree to the <Link href="/terms" className="text-[#B58A63] hover:underline">Terms & Conditions</Link>
+          <label htmlFor="terms" className="text-xs text-[#7A7371] leading-relaxed cursor-pointer select-none">
+            I have read and agree to the{' '}
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-[#BC8477] font-bold hover:underline cursor-pointer"
+            >
+              Terms & Conditions
+            </button>
+            {' '}and{' '}
+            <button
+              type="button"
+              onClick={() => setShowPrivacyModal(true)}
+              className="text-[#BC8477] font-bold hover:underline cursor-pointer"
+            >
+              Privacy Policy
+            </button>
           </label>
         </div>
 
@@ -177,7 +222,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full h-14 bg-[#B58A63] text-white text-[15px] font-semibold rounded-2xl hover:bg-[#A37B55] transition-all duration-300 relative flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#B58A63]/20 mt-4 cursor-pointer"
+            className="w-full h-14 bg-[#BC8477] text-white text-[15px] font-semibold rounded-2xl hover:bg-[#A86E61] transition-all duration-300 relative flex items-center justify-center disabled:opacity-70 disabled:pointer-events-none shadow-md shadow-[#BC8477]/20 mt-4 cursor-pointer"
           >
             {isPending ? <Loader2 size={18} className="animate-spin" /> : (
               <>
@@ -193,10 +238,289 @@ export default function RegisterPage() {
 
       <p className="text-center text-xs text-gray-500 mt-8 font-medium">
         Already have an account?{' '}
-        <Link href="/login" className="text-[#B58A63] font-semibold hover:text-[#9A6B60] transition-colors ml-1">
+        <Link href="/login" className="text-[#BC8477] font-semibold hover:text-[#9A6B60] transition-colors ml-1">
           Sign In
         </Link>
       </p>
+
+      {/* ── Professional Terms & Conditions Modal ── */}
+      {showTermsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className="bg-white w-full max-w-xl max-h-[85vh] rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="terms-modal-title"
+          >
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#FAF8F5]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#BC8477]/10 text-[#BC8477] flex items-center justify-center shrink-0">
+                  <Scale size={20} />
+                </div>
+                <div>
+                  <h2 id="terms-modal-title" className="text-base font-extrabold text-gray-900 tracking-tight">
+                    Terms & Conditions
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    Velora Customer Charter & Service Terms (Bangladesh)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowTermsModal(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Content */}
+            <div
+              className="p-6 overflow-y-auto space-y-5 text-xs text-gray-600 leading-relaxed max-h-[55vh]"
+              data-lenis-prevent
+            >
+
+              {/* Trust Badge Strip */}
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E8E1DE]/70 flex items-center justify-between gap-3 text-[11px] font-bold text-gray-800">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-[#BC8477]" />
+                  100% Authentic
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <RefreshCw size={14} className="text-[#BC8477]" />
+                  7-Day Returns
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Truck size={14} className="text-[#BC8477]" />
+                  Express Courier
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className="text-[#BC8477]" />
+                  1. Account Registration & Authenticity
+                </h3>
+                <p>
+                  By creating an account on Velora, you confirm that you are at least 18 years old or operating under parental/guardian consent. You agree to provide accurate registration details. Every piece in our catalog is backed by our 100% Genuine Manufacturer Guarantee.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <CreditCard size={13} className="text-[#BC8477]" />
+                  2. Pricing, Cash on Delivery & MFS Payments
+                </h3>
+                <p>
+                  All catalog prices are listed in Bangladeshi Taka (BDT / ৳) and include applicable statutory taxes. We support Cash on Delivery (COD), bKash, Nagad, and verified debit/credit cards. Velora reserves the right to verify high-value orders prior to dispatch to prevent fraudulent bookings.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <Truck size={13} className="text-[#BC8477]" />
+                  3. Doorstep Delivery & Inspection
+                </h3>
+                <p>
+                  We dispatch nationwide across Bangladesh with estimated delivery of 24–48 hours in Dhaka and 3–5 business days outside Dhaka. You are encouraged to inspect outer packaging and tamper-evident seals upon receiving your parcel from our courier rider.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <RefreshCw size={13} className="text-[#BC8477]" />
+                  4. 7-Day Doorstep Returns & Refunds
+                </h3>
+                <p>
+                  If an item fails to exceed your expectations, request a return within 7 calendar days. Items must be in their original, unwashed, unaltered condition with security tags and warranty cards intact. Approved prepaid refunds are credited within 3–7 business days.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <ShieldCheck size={13} className="text-[#BC8477]" />
+                  5. Privacy & Legal Jurisdiction
+                </h3>
+                <p>
+                  Your credentials and payment data are strictly guarded under 256-bit SSL encryption. All transactions are governed in accordance with the laws of the People&apos;s Republic of Bangladesh.
+                </p>
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row items-center justify-between gap-3">
+              <Link
+                href="/terms"
+                target="_blank"
+                className="text-xs font-bold text-[#BC8477] hover:underline flex items-center gap-1"
+              >
+                <span>Read Full Legal Terms (Standalone Page)</span>
+                <ExternalLink size={12} />
+              </Link>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowTermsModal(false)}
+                  className="w-1/2 sm:w-auto px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAcceptModalTerms}
+                  className="w-1/2 sm:w-auto px-5 py-2.5 rounded-xl bg-[#BC8477] hover:bg-[#A86E61] text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                >
+                  I Agree & Accept
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+      {/* ── Professional Privacy Policy Modal ── */}
+      {showPrivacyModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-200">
+          <div
+            className="bg-white w-full max-w-xl max-h-[85vh] rounded-3xl shadow-2xl border border-gray-100 flex flex-col overflow-hidden animate-in zoom-in-95 duration-200"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="privacy-modal-title"
+          >
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-[#FAF8F5]">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-[#BC8477]/10 text-[#BC8477] flex items-center justify-center shrink-0">
+                  <Lock size={20} />
+                </div>
+                <div>
+                  <h2 id="privacy-modal-title" className="text-base font-extrabold text-gray-900 tracking-tight">
+                    Privacy Policy
+                  </h2>
+                  <p className="text-[11px] text-gray-500 font-medium">
+                    Velora Data Protection & Privacy Charter (Bangladesh)
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPrivacyModal(false)}
+                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-gray-800 flex items-center justify-center transition-colors cursor-pointer"
+                aria-label="Close modal"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Modal Scrollable Content */}
+            <div
+              className="p-6 overflow-y-auto space-y-5 text-xs text-gray-600 leading-relaxed max-h-[55vh]"
+              data-lenis-prevent
+            >
+
+              {/* Trust Badge Strip */}
+              <div className="p-3.5 rounded-2xl bg-[#FAF8F5] border border-[#E8E1DE]/70 flex items-center justify-between gap-3 text-[11px] font-bold text-gray-800">
+                <span className="flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-[#BC8477]" />
+                  256-Bit SSL
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Lock size={14} className="text-[#BC8477]" />
+                  Zero Data Selling
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <CreditCard size={14} className="text-[#BC8477]" />
+                  No Card/PIN Storage
+                </span>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <CheckCircle2 size={13} className="text-[#BC8477]" />
+                  1. Information Collection & Purpose
+                </h3>
+                <p>
+                  We collect essential details full legal name, phone number, email, and shipping address across all 64 districts of Bangladesh strictly to verify, process and deliver your orders and transmit real-time delivery SMS updates.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <CreditCard size={13} className="text-[#BC8477]" />
+                  2. Zero Card & Payment PIN Storage Guarantee
+                </h3>
+                <p>
+                  Velora never captures, logs, or stores your credit/debit card numbers, CVV security codes, bKash PINs, or banking passwords. All online payments are handled directly by certified, PCI-DSS compliant financial gateways.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <Truck size={13} className="text-[#BC8477]" />
+                  3. Order Dispatch & Verified Couriers
+                </h3>
+                <p>
+                  To ensure rapid doorstep fulfillment, only necessary recipient details (name, physical address, and contact number) are disclosed to our verified courier riders (Pathao, Steadfast, RedX) under strict non-disclosure obligations.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <ShieldCheck size={13} className="text-[#BC8477]" />
+                  4. Uncompromising Zero-Sale Commitment
+                </h3>
+                <p>
+                  We operate under an absolute Zero-Sale policy: Velora will never sell, rent, monetize, or trade your personal contact details or purchasing history to third-party telemarketers or external advertising networks.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="font-bold text-gray-900 text-xs uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                  <Lock size={13} className="text-[#BC8477]" />
+                  5. Data Sovereignty & Customer Rights
+                </h3>
+                <p>
+                  You maintain complete ownership of your personal data. You can update your account anytime or request permanent erasure of your profile by emailing privacy@velora.com in full compliance with the Bangladesh ICT Act.
+                </p>
+              </div>
+
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-5 border-t border-gray-100 bg-[#FAF8F5] flex flex-col sm:flex-row items-center justify-between gap-3">
+              <Link
+                href="/privacy"
+                target="_blank"
+                className="text-xs font-bold text-[#BC8477] hover:underline flex items-center gap-1"
+              >
+                <span>Read Full Privacy Policy (Standalone Page)</span>
+                <ExternalLink size={12} />
+              </Link>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <button
+                  type="button"
+                  onClick={() => setShowPrivacyModal(false)}
+                  className="w-1/2 sm:w-auto px-4 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-700 hover:bg-gray-100 transition-colors cursor-pointer"
+                >
+                  Close
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAcceptModalPrivacy}
+                  className="w-1/2 sm:w-auto px-5 py-2.5 rounded-xl bg-[#BC8477] hover:bg-[#A86E61] text-white text-xs font-bold uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
+                >
+                  I Agree & Accept
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
