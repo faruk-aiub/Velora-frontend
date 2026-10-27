@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { ProcessFlowchart } from "@/components/about/ProcessFlowchart";
+import { AboutHeroStats } from "@/components/about/AboutHeroStats";
 import { 
   ShieldCheck, 
   Target, 
@@ -24,12 +25,6 @@ export const metadata = {
 export const revalidate = 300; // Cache static About page for ultra-fast response
 
 export default function AboutPage() {
-  const stats = [
-    { label: "Happy Customers", value: "50,000+", desc: "Across the country" },
-    { label: "On-Time Dispatch", value: "99.8%", desc: "Strict SLA fulfillment" },
-    { label: "Inspected Products", value: "15,000+", desc: "100% verified authentic" },
-    { label: "Satisfaction Rating", value: "4.9 / 5.0", desc: "Based on 12k+ reviews" },
-  ];
 
   const coreValues = [
     {
@@ -86,7 +81,7 @@ export default function AboutPage() {
       <Navbar />
 
       {/* ── Hero Section ── */}
-      <section className="bg-[#F7F5EE] pt-32 pb-20 px-6 lg:px-12 text-center rounded-b-[48px] max-w-[1600px] mx-auto border-b border-[#E8E1DE]">
+      <section className="bg-[#F7F5EE] pt-8 sm:pt-10 md:pt-12 pb-12 sm:pb-16 px-6 lg:px-12 text-center rounded-b-[48px] max-w-[1600px] mx-auto border-b border-[#E8E1DE]">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-[#BC8477] font-bold text-xs uppercase tracking-wider mb-6 border border-gray-200/80 shadow-sm">
           <span>Curated Quality · Everyday Elegance</span>
         </div>
@@ -98,22 +93,8 @@ export default function AboutPage() {
           At Velora, we combine artisanal curation, strict quality gates, and transparent order tracking to elevate your everyday living.
         </p>
 
-        {/* ── Key Numbers Strip ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto mt-12">
-          {stats.map((stat, i) => (
-            <div key={i} className="bg-white/90 backdrop-blur-sm p-5 rounded-2xl border border-gray-200/80 shadow-sm text-center">
-              <span className="block text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">
-                {stat.value}
-              </span>
-              <span className="block text-xs font-bold text-[#BC8477] uppercase tracking-wider mt-1">
-                {stat.label}
-              </span>
-              <span className="block text-[11px] text-gray-400 font-medium mt-0.5">
-                {stat.desc}
-              </span>
-            </div>
-          ))}
-        </div>
+        {/* ── Key Numbers Strip (Animated Counter with Google Outfit Font) ── */}
+        <AboutHeroStats />
       </section>
 
       {/* ── Our Story & Mission/Vision ── */}

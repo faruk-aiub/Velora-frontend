@@ -20,7 +20,7 @@ export default async function CategoriesPage() {
       <Navbar variant="solid" />
 
       {/* Hero Section */}
-      <section className="bg-[#F7F5EE] pt-28 pb-20 px-6 lg:px-12 text-center rounded-b-[48px] max-w-[1600px] mx-auto relative overflow-hidden border-b border-[#E8E1DE]">
+      <section className="bg-[#F7F5EE] pt-8 sm:pt-10 md:pt-12 pb-12 sm:pb-16 px-6 lg:px-12 text-center rounded-b-[48px] max-w-[1600px] mx-auto relative overflow-hidden border-b border-[#E8E1DE]">
         {/* Ambient Glows */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-[#BC8477]/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#7A915C]/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2 pointer-events-none" />

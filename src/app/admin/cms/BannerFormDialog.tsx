@@ -99,9 +99,9 @@ export function BannerFormDialog({ open, onOpenChange, bannerToEdit }: BannerFor
           <div className="space-y-2">
             <Label>Banner Image <span className="text-red-500">*</span></Label>
             <FileUpload
-              onUploadComplete={(url) => setFormData({ ...formData, image_url: url })}
-              currentImageUrl={formData.image_url}
-              folder="cms"
+              onUploadSuccess={(url: string) => setFormData({ ...formData, image_url: url })}
+              value={formData.image_url}
+              onRemove={() => setFormData({ ...formData, image_url: '' })}
             />
           </div>
 

@@ -25,14 +25,27 @@ import {
   Sun,
   MessageSquare,
   Menu,
-  X
+  X,
+  ChevronDown,
+  UserCog,
+  ExternalLink,
+  ShieldCheck
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { VeloraIcon } from '@/components/layout/VeloraLogo';
 import { toast } from 'sonner';
 import { contactService } from '@/services/contact.service';
+import { userService } from '@/services/user.service';
 import { useAuthStore } from '@/store/auth.store';
 import { authService } from '@/services/auth.service';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { AdminProfileDialog } from '@/components/admin/AdminProfileDialog';
 
 const navigationGroups = [
   {
@@ -90,7 +103,8 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [unreadMessages, setUnreadMessages] = React.useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = React.useState(false);
-  const { isAuthenticated, user, logout } = useAuthStore();
+  const [isProfileOpen, setIsProfileOpen] = React.useState(false);
+  const { isAuthenticated, user, logout, setUser } = useAuthStore();
 
   React.useEffect(() => {
     // Parse auth state directly from localStorage to avoid Zustand hydration delays
@@ -115,8 +129,21 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
       contactService.getUnreadCount()
         .then(res => setUnreadMessages(res.count))
         .catch(() => { });
+
+      userService.getProfile()
+        .then(res => {
+          if (res?.data) {
+            setUser(res.data);
+          }
+        })
+        .catch(() => { });
     }
-  }, [pathname, router, isAuthenticated, user]); // Refresh count on navigation
+  }, [pathname, router, isAuthenticated, setUser]); // Refresh count on navigation
+
+  const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') || 'Super Admin';
+  const displayEmail = user?.email || 'admin@velora.com';
+  const initials = [user?.first_name?.[0], user?.last_name?.[0]].filter(Boolean).join('').toUpperCase() ||
+    (user?.email?.[0]?.toUpperCase() || 'SA');
 
 
   const handleLogout = async () => {
@@ -222,15 +249,87 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
             <button className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors">
               <Bell size={17} />
             </button>
-            <div className="flex items-center gap-3 ml-1">
-              <div className="text-right hidden sm:block">
-                <div className="text-sm font-bold text-stone-900 leading-tight">Super Admin</div>
-                <div className="text-[10px] uppercase tracking-wider font-semibold text-stone-400">admin@velora.com</div>
-              </div>
-              <div className="w-9 h-9 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200/70 flex items-center justify-center font-bold text-xs text-[#BC8477]">
-                SA
-              </div>
-            </div>
+            {/* Admin Profile Dropdown Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-3 p-1.5 pl-2.5 rounded-xl hover:bg-stone-100/80 transition-all cursor-pointer outline-hidden group border border-transparent hover:border-stone-200/60">
+                <div className="text-right hidden sm:block">
+                  <div className="text-sm font-bold text-stone-900 leading-tight group-hover:text-[#BC8477] transition-colors">
+                    {displayName}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-stone-400">
+                    {displayEmail}
+                  </div>
+                </div>
+                <div className="relative">
+                  <div className="w-9 h-9 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200/70 flex items-center justify-center font-bold text-xs text-[#BC8477] group-hover:border-[#BC8477]/60 shadow-xs transition-colors">
+                    {user?.avatar_url ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={user.avatar_url} alt={displayName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{initials}</span>
+                    )}
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
+                </div>
+                <ChevronDown size={14} className="text-stone-400 group-hover:text-stone-700 transition-colors hidden sm:block" />
+              </DropdownMenuTrigger>
+
+              <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl bg-white border border-stone-200/80 shadow-2xl">
+                {/* User Header Summary Card */}
+                <div className="p-3 bg-stone-50/90 rounded-xl mb-1.5 border border-stone-100">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-stone-200/70 overflow-hidden shrink-0 border border-stone-300/50 flex items-center justify-center font-bold text-sm text-[#BC8477]">
+                      {user?.avatar_url ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={user.avatar_url} alt={displayName} className="w-full h-full object-cover" />
+                      ) : (
+                        <span>{initials}</span>
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-bold text-stone-900 truncate">{displayName}</div>
+                      <div className="text-[11px] text-stone-400 truncate">{displayEmail}</div>
+                      <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#BC8477]/10 text-[#BC8477]">
+                        <ShieldCheck size={11} />
+                        <span>{user?.role === 'ADMIN' ? 'Super Admin' : user?.role || 'Admin'}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <DropdownMenuItem
+                  onClick={() => setIsProfileOpen(true)}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:text-stone-900 hover:bg-stone-100 cursor-pointer transition-colors"
+                >
+                  <UserCog size={16} className="text-[#BC8477]" />
+                  <div className="flex-1">
+                    <div className="text-stone-800 font-bold">Edit Profile & Avatar</div>
+                    <div className="text-[10px] text-stone-400 font-normal">Change photo, name, and details</div>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuItem
+                  onClick={() => window.open('/', '_blank')}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 hover:text-stone-900 hover:bg-stone-100 cursor-pointer transition-colors"
+                >
+                  <ExternalLink size={16} className="text-stone-500" />
+                  <div className="flex-1">
+                    <div className="text-stone-800 font-bold">Visit Online Store</div>
+                    <div className="text-[10px] text-stone-400 font-normal">Open customer storefront</div>
+                  </div>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator className="my-1.5 bg-stone-100" />
+
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors"
+                >
+                  <LogOut size={16} className="text-red-600" />
+                  <span>Log Out</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 
@@ -240,6 +339,9 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
           </div>
         </div>
       </main>
+
+      {/* Admin Profile & Avatar Dialog */}
+      <AdminProfileDialog open={isProfileOpen} onOpenChange={setIsProfileOpen} />
     </div>
   );
 }

@@ -21,8 +21,17 @@ import {
   LayoutDashboard, Package, MapPin, User as UserIcon, Heart, ShoppingCart,
   LogOut, Trash2, Plus, Star, Bell, HelpCircle, RotateCcw, Shield, CreditCard,
   ChevronRight, ChevronDown, Edit3, Eye, EyeOff, Loader2, Check, X, AlertCircle,
-  Truck, Clock, CheckCircle, XCircle, ArrowRight, Phone, Mail, Camera, Save, MessageCircle, Search
+  Truck, Clock, CheckCircle, XCircle, ArrowRight, Phone, Mail, Camera, Save, MessageCircle, Search, UserCog,
+  ShieldCheck, Lock, Laptop
 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import { UserProfileDialog } from '@/components/account/UserProfileDialog';
 
 type TabType =
   | 'dashboard' | 'profile' | 'orders' | 'tracking' | 'wishlist'
@@ -54,10 +63,10 @@ const NAV_ITEMS = [
   { id: 'security', label: 'Security', icon: Shield },
 ];
 
-const SectionHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => (
-  <div className="mb-4 sm:mb-6">
+const SectionHeader = ({ title, subtitle, className }: { title: string; subtitle?: string; className?: string }) => (
+  <div className={cn("mb-3 sm:mb-4", className)}>
     <h2 className="font-bold text-lg sm:text-xl text-gray-900 leading-tight">{title}</h2>
-    {subtitle && <p className="text-xs sm:text-sm text-gray-500 mt-1">{subtitle}</p>}
+    {subtitle && <p className="text-xs sm:text-sm text-gray-500 mt-0.5">{subtitle}</p>}
   </div>
 );
 
@@ -97,9 +106,32 @@ function AccountPageContent() {
   const [mounted, setMounted] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dashboardSearchQuery, setDashboardSearchQuery] = useState('');
+  const asideRef = useRef<HTMLElement>(null);
   const sidebarNavRef = useRef<HTMLElement>(null);
 
   const { notifications, unreadCount } = useNotifications();
+  const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+
+  // Sync profile from backend on mount
+  useEffect(() => {
+    if (user) {
+      userService.getProfile()
+        .then(res => {
+          if (res?.data) {
+            setUser(res.data);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [setUser]);
+
+  const displayName = [user?.first_name, user?.last_name].filter(Boolean).join(' ') ||
+    ((user as any)?.profile?.first_name ? `${(user as any).profile.first_name} ${(user as any).profile.last_name || ''}`.trim() : '') ||
+    user?.email?.split('@')[0] || 'User';
+  const displayEmail = user?.email || '';
+  const userAvatarUrl = user?.avatar_url || (user as any)?.profile?.avatar_url || '';
+  const userInitials = [user?.first_name?.[0], user?.last_name?.[0]].filter(Boolean).join('').toUpperCase() ||
+    ((user as any)?.profile?.first_name?.[0] ? `${(user as any).profile.first_name[0]}${(user as any).profile.last_name?.[0] || ''}`.toUpperCase() : (user?.email?.[0]?.toUpperCase() || 'U'));
 
   // Mark as read when entering notifications tab
   useEffect(() => {
@@ -110,6 +142,36 @@ function AccountPageContent() {
       });
     }
   }, [activeTab, unreadCount, queryClient]);
+
+  // Prevent whole page / Lenis scrolling when mouse wheels over the sidebar
+  useEffect(() => {
+    if (!mounted || !user) return;
+    const aside = asideRef.current;
+    if (!aside) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Prevent default page scroll and stop propagation so Lenis & window do not scroll
+      e.preventDefault();
+      e.stopPropagation();
+
+      const nav = sidebarNavRef.current;
+      if (!nav) return;
+
+      let delta = e.deltaY;
+      if (e.deltaMode === 1) {
+        delta *= 20;
+      } else if (e.deltaMode === 2) {
+        delta *= nav.clientHeight;
+      }
+
+      nav.scrollTop += delta;
+    };
+
+    aside.addEventListener('wheel', handleWheel, { passive: false, capture: true });
+    return () => {
+      aside.removeEventListener('wheel', handleWheel, { capture: true });
+    };
+  }, [mounted, user, sidebarOpen]);
 
   // Profile edit state
   const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -418,34 +480,36 @@ function AccountPageContent() {
   // ─── TAB CONTENT ─────────────────────────────────────────────────────────
 
   const renderDashboard = () => (
-    <div>
+    <div className="space-y-4 sm:space-y-5">
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
         {[
           { label: 'Total Orders', value: orders.length, icon: Package, color: 'text-[#BC8477]', bg: 'bg-[#BC8477]/10' },
           { label: 'Wishlist Items', value: wishlistItems.length, icon: Heart, color: 'text-gray-900', bg: 'bg-gray-100' },
           { label: 'Cart Items', value: cartItems.reduce((a, i) => a + i.quantity, 0), icon: ShoppingCart, color: 'text-[#BC8477]', bg: 'bg-[#BC8477]/10' },
           { label: 'Addresses', value: addresses.length, icon: MapPin, color: 'text-gray-900', bg: 'bg-gray-100' },
         ].map(stat => (
-          <div key={stat.label} className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm border border-transparent hover:border-gray-100 transition-colors">
-            <div className="flex justify-between items-start mb-3 sm:mb-4">
-              <div className={cn('w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center', stat.bg)}>
-                <stat.icon className={cn('w-5 h-5 sm:w-6 sm:h-6', stat.color)} />
+          <div key={stat.label} className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-transparent hover:border-gray-100 transition-colors">
+            <div className="flex justify-between items-start mb-2 sm:mb-3">
+              <div className={cn('w-10 h-10 rounded-full flex items-center justify-center', stat.bg)}>
+                <stat.icon className={cn('w-5 h-5', stat.color)} />
               </div>
             </div>
-            <p className="text-xs sm:text-sm font-bold text-gray-500 mb-1">{stat.label}</p>
-            <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">{stat.value.toLocaleString()}</p>
+            <p className="text-xs font-bold text-gray-500 mb-0.5">{stat.label}</p>
+            <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">{stat.value.toLocaleString()}</p>
           </div>
         ))}
       </div>
 
-      <div className="flex gap-4 sm:gap-6 mb-6 sm:mb-8 flex-col lg:flex-row">
+      {/* Row 2: Quick Actions & Recent Orders */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
         {/* Quick Actions */}
-        <div className="flex-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900">Quick Actions</h3>
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-gray-100/60 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-bold text-gray-900">Quick Actions</h3>
+            <span className="text-[11px] font-semibold text-gray-400">Shortcuts</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
             {[
               { label: 'View Orders', tab: 'orders' as TabType, icon: Package },
               { label: 'Edit Profile', tab: 'profile' as TabType, icon: Edit3 },
@@ -457,12 +521,12 @@ function AccountPageContent() {
               <button
                 key={action.label}
                 onClick={() => setActiveTab(action.tab)}
-                className="flex flex-col items-center justify-center gap-2.5 sm:gap-3 p-3.5 sm:p-4 bg-[#F9FAFB] rounded-xl sm:rounded-2xl hover:bg-gray-100 transition-colors group"
+                className="flex flex-col items-center justify-center gap-2 p-3 bg-[#F9FAFB] rounded-xl hover:bg-gray-100 transition-colors group cursor-pointer"
               >
-                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center shadow-xs text-gray-500 group-hover:text-[#BC8477] transition-colors">
-                  <action.icon size={17} />
+                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-xs text-gray-500 group-hover:text-[#BC8477] transition-colors">
+                  <action.icon size={16} />
                 </div>
-                <span className="text-[11px] sm:text-xs font-bold text-gray-700 text-center">
+                <span className="text-[11px] font-bold text-gray-700 text-center">
                   {action.label}
                 </span>
               </button>
@@ -471,37 +535,37 @@ function AccountPageContent() {
         </div>
 
         {/* Recent Orders */}
-        <div className="flex-1 bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 shadow-sm">
-          <div className="flex items-center justify-between mb-4 sm:mb-6">
-            <h3 className="text-base sm:text-lg font-bold text-gray-900">Recent Orders</h3>
-            <button onClick={() => setActiveTab('orders')} className="text-xs sm:text-sm font-bold text-[#BC8477] hover:underline">
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-gray-100/60 flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-base font-bold text-gray-900">Recent Orders</h3>
+            <button onClick={() => setActiveTab('orders')} className="text-xs font-bold text-[#BC8477] hover:underline cursor-pointer">
               View All
             </button>
           </div>
           {loadingOrders ? (
-            <div className="flex justify-center py-8"><Loader2 className="animate-spin text-[#BC8477]" /></div>
+            <div className="flex justify-center py-6"><Loader2 className="animate-spin text-[#BC8477]" /></div>
           ) : recentOrders.length === 0 ? (
-            <div className="bg-gray-50 rounded-2xl p-6 sm:p-8 text-center border border-dashed border-gray-200">
-              <p className="text-xs sm:text-sm text-gray-500 mb-2.5">No orders yet.</p>
-              <Link href="/shop" className="text-xs sm:text-sm font-bold text-[#BC8477] hover:underline">
+            <div className="bg-gray-50 rounded-2xl p-5 text-center border border-dashed border-gray-200 my-auto">
+              <p className="text-xs text-gray-500 mb-1.5">No recent orders yet.</p>
+              <Link href="/shop" className="text-xs font-bold text-[#BC8477] hover:underline">
                 Start Shopping
               </Link>
             </div>
           ) : (
-            <div className="space-y-2.5 sm:space-y-3">
+            <div className="space-y-2">
               {recentOrders.map((order, i) => (
-                <div key={order.id || i} className="bg-[#F9FAFB] rounded-xl sm:rounded-2xl p-3 sm:p-4 flex items-center justify-between border border-gray-100 hover:border-gray-200 transition-colors gap-3">
-                  <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
-                      <Package size={17} className="text-gray-400" />
+                <div key={order.id || i} className="bg-[#F9FAFB] rounded-xl p-2.5 sm:p-3 flex items-center justify-between border border-gray-100 hover:border-gray-200 transition-colors gap-3">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-xs shrink-0">
+                      <Package size={15} className="text-gray-400" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs sm:text-sm font-bold text-gray-900 mb-0.5 truncate">{getOrderDisplayName(order)}</p>
-                      <p className="text-[11px] sm:text-xs text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
+                      <p className="text-xs font-bold text-gray-900 truncate">{getOrderDisplayName(order)}</p>
+                      <p className="text-[10px] text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <div className="flex flex-col items-end gap-1 sm:gap-1.5 shrink-0">
-                    <p className="font-extrabold text-xs sm:text-sm text-gray-900">৳{Number(order.total_amount).toFixed(2)}</p>
+                  <div className="flex flex-col items-end gap-1 shrink-0">
+                    <p className="font-extrabold text-xs text-gray-900">৳{Number(order.total_amount).toFixed(2)}</p>
                     <OrderStatusBadge status={order.status} />
                   </div>
                 </div>
@@ -510,114 +574,258 @@ function AccountPageContent() {
           )}
         </div>
       </div>
+
+      {/* Row 3: Wishlist Highlights & Primary Address Snapshot */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+        {/* Wishlist Highlights */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-gray-100/60">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <Heart size={16} className="text-[#BC8477]" />
+              <h3 className="text-base font-bold text-gray-900">Wishlist Highlights</h3>
+            </div>
+            {wishlistItems.length > 0 && (
+              <button onClick={() => setActiveTab('wishlist')} className="text-xs font-bold text-[#BC8477] hover:underline cursor-pointer">
+                View All ({wishlistItems.length})
+              </button>
+            )}
+          </div>
+          {wishlistItems.length === 0 ? (
+            <div className="bg-gray-50 rounded-2xl p-5 text-center border border-dashed border-gray-200">
+              <p className="text-xs text-gray-500 mb-1.5">Your wishlist is currently empty.</p>
+              <Link href="/shop" className="text-xs font-bold text-[#BC8477] hover:underline">
+                Explore Store Catalog
+              </Link>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+              {wishlistItems.slice(0, 3).map((item: any, i: number) => {
+                const prod = item.product;
+                const img = prod?.images?.[0]?.url || '/placeholder.jpg';
+                const price = Number(prod?.variants?.[0]?.price || prod?.price || 0);
+                return (
+                  <div
+                    key={item.id || i}
+                    onClick={() => router.push(`/product/${prod.slug}`)}
+                    className="group bg-[#F9FAFB] rounded-xl p-2 border border-gray-100 hover:border-gray-200 transition-all cursor-pointer flex flex-col justify-between"
+                  >
+                    <div className="aspect-square rounded-lg overflow-hidden bg-white mb-1.5 relative">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={img} alt={prod.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-gray-800 line-clamp-1 group-hover:text-[#BC8477] transition-colors">{prod.title}</p>
+                      <p className="text-[11px] font-extrabold text-[#BC8477] mt-0.5">৳{price.toFixed(2)}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Primary Address & Account Perks */}
+        <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-gray-100/60 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <MapPin size={16} className="text-[#BC8477]" />
+                <h3 className="text-base font-bold text-gray-900">Default Shipping Address</h3>
+              </div>
+              <button onClick={() => setActiveTab('addresses')} className="text-xs font-bold text-[#BC8477] hover:underline cursor-pointer">
+                Manage
+              </button>
+            </div>
+            {addresses.length === 0 ? (
+              <div className="bg-gray-50 rounded-2xl p-4 text-center border border-dashed border-gray-200">
+                <p className="text-xs text-gray-500 mb-1.5">No delivery address saved yet.</p>
+                <button
+                  onClick={() => { setActiveTab('addresses'); setShowAddressForm(true); }}
+                  className="text-xs font-bold text-[#BC8477] hover:underline cursor-pointer"
+                >
+                  + Add Address
+                </button>
+              </div>
+            ) : (
+              <div className="bg-[#F9FAFB] rounded-xl p-3 border border-gray-100 flex items-start justify-between gap-3">
+                <div className="space-y-0.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-gray-900">{user?.first_name} {user?.last_name}</span>
+                    <span className="text-[10px] font-bold px-1.5 py-0.2 bg-emerald-50 text-emerald-700 rounded-full">Default</span>
+                  </div>
+                  <p className="text-xs text-gray-600 leading-snug">{addresses[0].address_line1}</p>
+                  <p className="text-[11px] text-gray-500">{addresses[0].city} - {addresses[0].postal_code}</p>
+                </div>
+                <button
+                  onClick={() => startEditAddress(addresses[0])}
+                  className="text-xs font-bold text-gray-500 hover:text-gray-900 px-2 py-1 rounded-lg bg-white border border-gray-200 shadow-2xs shrink-0 cursor-pointer"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
+          </div>
+
+          {/* Velora Member Perks Bar */}
+          <div className="grid grid-cols-3 gap-2 pt-2.5 mt-2.5 border-t border-gray-100 text-center">
+            <div className="p-1.5 rounded-xl bg-stone-50/80">
+              <div className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Delivery</div>
+              <div className="text-xs font-bold text-gray-800 mt-0.5">Free Express</div>
+            </div>
+            <div className="p-1.5 rounded-xl bg-stone-50/80">
+              <div className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Support</div>
+              <div className="text-xs font-bold text-gray-800 mt-0.5">24/7 Priority</div>
+            </div>
+            <div className="p-1.5 rounded-xl bg-stone-50/80">
+              <div className="text-[9px] font-bold text-gray-400 uppercase tracking-wider">Checkout</div>
+              <div className="text-xs font-bold text-gray-800 mt-0.5">Encrypted</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 
   const renderProfile = () => (
-    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-6 lg:p-8 shadow-sm">
-      <SectionHeader title="My Profile" subtitle="Manage your personal information and account settings" />
+    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-5 lg:p-6 shadow-sm">
+      <SectionHeader title="My Profile" subtitle="Manage your personal information and account settings" className="mb-3" />
 
-      {/* Avatar + Name */}
-      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6 mb-6 sm:mb-8 p-4 sm:p-6 bg-[#F9FAFB] rounded-2xl border border-gray-100">
-        <div className="relative">
-          <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] flex items-center justify-center text-white font-bold text-3xl sm:text-4xl shadow-sm border-4 border-white">
-            {(user?.first_name || (user as any)?.profile?.first_name || 'U').charAt(0)}{(user?.last_name || (user as any)?.profile?.last_name || '').charAt(0)}
+      {/* Avatar + Summary Card */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 p-4 bg-[#F9FAFB] rounded-2xl border border-gray-100">
+        <div className="flex items-center gap-4">
+          <div className="relative group cursor-pointer" onClick={() => setIsProfileDialogOpen(true)} title="Click to change profile picture">
+            <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] flex items-center justify-center text-white font-bold text-2xl sm:text-3xl shadow-xs border-2 border-white overflow-hidden">
+              {userAvatarUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
+              ) : (
+                <span>{userInitials}</span>
+              )}
+            </div>
+            <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white">
+              <Camera size={20} />
+            </div>
           </div>
-        </div>
-        <div className="flex-1 text-center sm:text-left">
-          <h3 className="font-bold text-xl sm:text-2xl text-gray-900">{user?.first_name || (user as any)?.profile?.first_name} {user?.last_name || (user as any)?.profile?.last_name}</h3>
-          <p className="text-xs sm:text-sm text-gray-500 mt-1">{user.email}</p>
-          <p className="text-xs font-bold text-gray-400 mt-2 bg-white px-3 py-1 rounded-full w-fit mx-auto sm:mx-0 border border-gray-100 shadow-sm">
-            Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
-          </p>
+          <div>
+            <div className="flex items-center gap-2.5">
+              <h3 className="font-bold text-lg sm:text-xl text-gray-900 leading-tight">
+                {user?.first_name || (user as any)?.profile?.first_name} {user?.last_name || (user as any)?.profile?.last_name}
+              </h3>
+              <span className="text-xs font-bold text-[#BC8477] bg-[#BC8477]/10 px-2.5 py-0.5 rounded-full">
+                {user?.role || 'Customer'}
+              </span>
+            </div>
+            <p className="text-sm text-gray-500 mt-0.5">{user.email}</p>
+            <p className="text-xs font-medium text-gray-400 mt-1">
+              Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setIsEditingProfile(!isEditingProfile)}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 text-xs sm:text-sm font-bold text-gray-700 bg-white px-4 py-2.5 rounded-full shadow-sm hover:bg-gray-50 transition-colors border border-gray-100"
+          className="w-full sm:w-auto flex items-center justify-center gap-2 text-sm font-bold text-gray-700 bg-white px-4 py-2.5 rounded-xl shadow-xs hover:bg-gray-50 transition-colors border border-gray-200/80"
         >
-          <Edit3 size={15} className="text-gray-400" /> {isEditingProfile ? 'Cancel' : 'Edit Profile'}
+          <Edit3 size={15} className="text-gray-400" /> {isEditingProfile ? 'Cancel Edit' : 'Edit Profile'}
         </button>
       </div>
 
-      {/* Profile Form */}
-      <div className="mb-8 sm:mb-10">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">Personal Information</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-2xl">
+      {/* 2-Column Grid: Personal Info + Change Password */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Personal Information */}
+        <div className="lg:col-span-7 bg-[#F9FAFB]/70 border border-gray-100 rounded-2xl p-5 flex flex-col justify-between">
           <div>
-            <label className="label-style">First Name</label>
-            <input
-              disabled={!isEditingProfile}
-              className={cn('input-style', !isEditingProfile && 'bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]')}
-              value={profileForm.first_name}
-              onChange={e => setProfileForm(f => ({ ...f, first_name: e.target.value }))}
-            />
-          </div>
-          <div>
-            <label className="label-style">Last Name</label>
-            <input
-              disabled={!isEditingProfile}
-              className={cn('input-style', !isEditingProfile && 'bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]')}
-              value={profileForm.last_name}
-              onChange={e => setProfileForm(f => ({ ...f, last_name: e.target.value }))}
-            />
-          </div>
-          <div>
-            <label className="label-style">Email Address</label>
-            <input disabled className="input-style bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]" value={user.email} />
-          </div>
-          <div>
-            <label className="label-style">Phone Number</label>
-            <input
-              disabled={!isEditingProfile}
-              className={cn('input-style', !isEditingProfile && 'bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]')}
-              value={profileForm.phone}
-              onChange={e => setProfileForm(f => ({ ...f, phone: e.target.value }))}
-              placeholder="+880 1234 567890"
-            />
-          </div>
-        </div>
-        {isEditingProfile && (
-          <button
-            onClick={() => updateProfileMutation.mutate(profileForm)}
-            disabled={updateProfileMutation.isPending}
-            className="btn-primary mt-6 w-full sm:w-auto flex items-center justify-center gap-2"
-          >
-            {updateProfileMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
-            Save Changes
-          </button>
-        )}
-      </div>
-
-      {/* Change Password */}
-      <div className="pt-6 sm:pt-8 border-t border-gray-100">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">Change Password</h3>
-        <div className="max-w-md space-y-4">
-          {(['current', 'new', 'confirm'] as const).map((field) => (
-            <div key={field}>
-              <label className="label-style">
-                {field === 'current' ? 'Current Password' : field === 'new' ? 'New Password' : 'Confirm New Password'}
-              </label>
-              <div className="relative">
+            <div className="flex items-center justify-between mb-3.5">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                <UserIcon size={18} className="text-[#BC8477]" /> Personal Information
+              </h3>
+              {isEditingProfile && (
+                <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full">
+                  Editing Mode
+                </span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="label-style">First Name</label>
                 <input
-                  type={showPw[field] ? 'text' : 'password'}
-                  className="input-style pr-10"
-                  value={field === 'current' ? pwForm.currentPassword : field === 'new' ? pwForm.newPassword : pwForm.confirmPassword}
-                  onChange={e => setPwForm(f => ({
-                    ...f,
-                    [field === 'current' ? 'currentPassword' : field === 'new' ? 'newPassword' : 'confirmPassword']: e.target.value,
-                  }))}
-                  placeholder="••••••••"
+                  disabled={!isEditingProfile}
+                  className={cn('input-style', !isEditingProfile && 'bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]')}
+                  value={profileForm.first_name}
+                  onChange={e => setProfileForm(f => ({ ...f, first_name: e.target.value }))}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPw(s => ({ ...s, [field]: !s[field] }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B5AFAD] hover:text-[#7A7371]"
-                >
-                  {showPw[field] ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
+              </div>
+              <div>
+                <label className="label-style">Last Name</label>
+                <input
+                  disabled={!isEditingProfile}
+                  className={cn('input-style', !isEditingProfile && 'bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]')}
+                  value={profileForm.last_name}
+                  onChange={e => setProfileForm(f => ({ ...f, last_name: e.target.value }))}
+                />
+              </div>
+              <div>
+                <label className="label-style">Email Address</label>
+                <input disabled className="input-style bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]" value={user.email} />
+              </div>
+              <div>
+                <label className="label-style">Phone Number</label>
+                <input
+                  disabled={!isEditingProfile}
+                  className={cn('input-style', !isEditingProfile && 'bg-[#F5F2F0] cursor-not-allowed text-[#7A7371]')}
+                  value={profileForm.phone}
+                  onChange={e => setProfileForm(f => ({ ...f, phone: e.target.value }))}
+                  placeholder="+880 1234 567890"
+                />
               </div>
             </div>
-          ))}
+          </div>
+          {isEditingProfile && (
+            <button
+              onClick={() => updateProfileMutation.mutate(profileForm)}
+              disabled={updateProfileMutation.isPending}
+              className="btn-primary mt-4 w-full sm:w-auto self-start flex items-center justify-center gap-2 text-sm font-bold"
+            >
+              {updateProfileMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              Save Changes
+            </button>
+          )}
+        </div>
+
+        {/* Change Password */}
+        <div className="lg:col-span-5 bg-[#F9FAFB]/70 border border-gray-100 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3.5 flex items-center gap-2">
+              <Shield size={18} className="text-[#BC8477]" /> Change Password
+            </h3>
+            <div className="space-y-3">
+              {(['current', 'new', 'confirm'] as const).map((field) => (
+                <div key={field}>
+                  <label className="label-style">
+                    {field === 'current' ? 'Current Password' : field === 'new' ? 'New Password' : 'Confirm New Password'}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showPw[field] ? 'text' : 'password'}
+                      className="input-style pr-10"
+                      value={field === 'current' ? pwForm.currentPassword : field === 'new' ? pwForm.newPassword : pwForm.confirmPassword}
+                      onChange={e => setPwForm(f => ({
+                        ...f,
+                        [field === 'current' ? 'currentPassword' : field === 'new' ? 'newPassword' : 'confirmPassword']: e.target.value,
+                      }))}
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(s => ({ ...s, [field]: !s[field] }))}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#B5AFAD] hover:text-[#7A7371]"
+                    >
+                      {showPw[field] ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
           <button
             onClick={() => {
               if (pwForm.newPassword !== pwForm.confirmPassword) {
@@ -631,7 +839,7 @@ function AccountPageContent() {
               changePasswordMutation.mutate({ currentPassword: pwForm.currentPassword, newPassword: pwForm.newPassword });
             }}
             disabled={changePasswordMutation.isPending}
-            className="btn-primary mt-6 w-full sm:w-auto flex items-center justify-center gap-2"
+            className="btn-primary mt-4 w-full flex items-center justify-center gap-2 text-sm font-bold"
           >
             {changePasswordMutation.isPending ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
             Update Password
@@ -1111,53 +1319,67 @@ function AccountPageContent() {
   );
 
   const renderSupport = () => (
-    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-6 lg:p-8 shadow-sm">
-      <SectionHeader title="Help & Support" subtitle="Get help with your orders and account" />
+    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-5 lg:p-6 shadow-sm">
+      <SectionHeader title="Help & Support" subtitle="Get help with your orders and account" className="mb-3" />
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-6 sm:mb-8">
+      {/* 3 Quick Contact Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-4">
         {[
           { icon: Phone, label: 'Call Us', value: '+880 1234 567890' },
           { icon: Mail, label: 'Email Us', value: 'support@velora.com' },
           { icon: Clock, label: 'Support Hours', value: 'Mon–Sat, 9am–6pm' },
         ].map(c => (
-          <div key={c.label} className="bg-[#F9FAFB] border border-gray-100 rounded-2xl p-4 sm:p-6 text-center shadow-xs">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3 shadow-xs">
+          <div key={c.label} className="bg-[#F9FAFB] border border-gray-100 rounded-xl p-3.5 flex items-center gap-3.5 shadow-2xs">
+            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-2xs border border-gray-100">
               <c.icon size={18} className="text-[#BC8477]" />
             </div>
-            <p className="text-[11px] sm:text-xs font-bold text-gray-500 mb-1">{c.label}</p>
-            <p className="text-xs sm:text-sm font-bold text-gray-900 truncate">{c.value}</p>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{c.label}</p>
+              <p className="text-sm sm:text-base font-bold text-gray-900 truncate">{c.value}</p>
+            </div>
           </div>
         ))}
       </div>
 
-      <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-8 mb-6 sm:mb-8 shadow-xs">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">Submit a Request</h3>
-        <div className="max-w-lg space-y-4">
+      {/* 2-Column Grid: Submit Request + FAQ */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Submit a Request */}
+        <div className="lg:col-span-5 bg-[#F9FAFB]/70 border border-gray-100 rounded-2xl p-5 flex flex-col justify-between">
           <div>
-            <label className="label-style">Subject</label>
-            <select
-              className="input-style"
-              value={supportForm.subject}
-              onChange={e => setSupportForm(f => ({ ...f, subject: e.target.value }))}
-            >
-              <option value="">Select a topic...</option>
-              <option value="order">Order Issue</option>
-              <option value="return">Return/Refund</option>
-              <option value="product">Product Query</option>
-              <option value="account">Account Problem</option>
-              <option value="other">Other</option>
-            </select>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+              <Mail size={18} className="text-[#BC8477]" /> Submit a Request
+            </h3>
+            <p className="text-sm text-gray-500 mb-3.5">Send a message and our support team will respond within 24 hours.</p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="label-style">Subject</label>
+                <select
+                  className="input-style"
+                  value={supportForm.subject}
+                  onChange={e => setSupportForm(f => ({ ...f, subject: e.target.value }))}
+                >
+                  <option value="">Select a topic...</option>
+                  <option value="order">Order Issue</option>
+                  <option value="return">Return/Refund</option>
+                  <option value="product">Product Query</option>
+                  <option value="account">Account Problem</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="label-style">Message</label>
+                <textarea
+                  rows={3}
+                  className="input-style resize-none"
+                  placeholder="Describe your issue in detail..."
+                  value={supportForm.message}
+                  onChange={e => setSupportForm(f => ({ ...f, message: e.target.value }))}
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="label-style">Message</label>
-            <textarea
-              rows={4}
-              className="input-style resize-none"
-              placeholder="Describe your issue in detail..."
-              value={supportForm.message}
-              onChange={e => setSupportForm(f => ({ ...f, message: e.target.value }))}
-            />
-          </div>
+
           <button
             onClick={() => {
               if (!supportForm.subject || !supportForm.message) {
@@ -1167,83 +1389,103 @@ function AccountPageContent() {
               toast.success('Support request submitted! We\'ll respond within 24 hours.');
               setSupportForm({ subject: '', message: '' });
             }}
-            className="btn-primary w-full sm:w-auto"
+            className="btn-primary mt-4 w-full flex items-center justify-center gap-2 text-sm font-bold"
           >
             Submit Request
           </button>
         </div>
-      </div>
 
-      {/* FAQ */}
-      <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-8 shadow-xs">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">Frequently Asked Questions</h3>
-        <div className="space-y-3 sm:space-y-4">
-          {[
-            { q: 'How do I track my order?', a: 'Go to My Account → Order Tracking to see real-time status of your orders.' },
-            { q: 'Can I change my order after placing it?', a: 'Orders can only be modified before they enter the processing stage. Contact support immediately.' },
-            { q: 'What is the return policy?', a: 'We accept returns within 30 days of delivery for unused items in original packaging.' },
-            { q: 'How long does delivery take?', a: 'Standard delivery takes 5–7 business days. Express options are available at checkout.' },
-          ].map((faq, i) => (
-            <details key={i} className="group border border-gray-100 rounded-2xl bg-[#F9FAFB]">
-              <summary className="flex items-center justify-between cursor-pointer p-3.5 sm:p-4 text-xs sm:text-sm font-bold text-gray-900 list-none">
-                <span>{faq.q}</span>
-                <ChevronDown size={16} className="text-gray-400 group-open:rotate-180 transition-transform shrink-0 ml-2" />
-              </summary>
-              <p className="px-3.5 sm:px-4 pb-3.5 sm:pb-4 text-xs sm:text-sm text-gray-600">{faq.a}</p>
-            </details>
-          ))}
+        {/* FAQs */}
+        <div className="lg:col-span-7 bg-[#F9FAFB]/70 border border-gray-100 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+              <HelpCircle size={18} className="text-[#BC8477]" /> Frequently Asked Questions
+            </h3>
+            <p className="text-sm text-gray-500 mb-3.5">Quick answers to common questions about orders, returns, and delivery.</p>
+
+            <div className="space-y-2.5">
+              {[
+                { q: 'How do I track my order?', a: 'Go to My Account → Order Tracking to see real-time status of your orders.' },
+                { q: 'Can I change my order after placing it?', a: 'Orders can only be modified before they enter the processing stage. Contact support immediately.' },
+                { q: 'What is the return policy?', a: 'We accept returns within 30 days of delivery for unused items in original packaging.' },
+                { q: 'How long does delivery take?', a: 'Standard delivery takes 5–7 business days. Express options are available at checkout.' },
+              ].map((faq, i) => (
+                <details key={i} className="group border border-gray-100 rounded-xl bg-white transition-all">
+                  <summary className="flex items-center justify-between cursor-pointer p-3 sm:p-3.5 text-sm font-bold text-gray-900 list-none">
+                    <span>{faq.q}</span>
+                    <ChevronDown size={15} className="text-gray-400 group-open:rotate-180 transition-transform shrink-0 ml-2" />
+                  </summary>
+                  <p className="px-3 sm:px-3.5 pb-3 sm:pb-3.5 text-sm text-gray-600 leading-relaxed border-t border-gray-50 pt-2.5">{faq.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
 
   const renderReturns = () => (
-    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-6 lg:p-8 shadow-sm">
-      <SectionHeader title="Returns & Refunds" subtitle="Request returns and track refund status" />
+    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-5 lg:p-6 shadow-sm">
+      <SectionHeader title="Returns & Refunds" subtitle="Request returns and track refund status" className="mb-3" />
 
-      <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-8 mb-6 sm:mb-8 shadow-xs">
-        <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-4 sm:mb-6">Submit Return Request</h3>
-        <div className="max-w-lg space-y-4">
+      {/* 2-Column Grid: Return Request Form + Return Policy */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Submit Return Request Form */}
+        <div className="lg:col-span-7 bg-[#F9FAFB]/70 border border-gray-100 rounded-2xl p-5 flex flex-col justify-between">
           <div>
-            <label className="label-style">Select Order</label>
-            <select
-              className="input-style"
-              value={returnForm.orderId}
-              onChange={e => setReturnForm(f => ({ ...f, orderId: e.target.value }))}
-            >
-              <option value="">Choose an order...</option>
-              {orders.map((order, i) => (
-                <option key={order.id || i} value={order.id}>
-                  {getOrderDisplayName(order)} — ৳{Number(order.total_amount).toFixed(2)}
-                </option>
-              ))}
-            </select>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+              <RotateCcw size={18} className="text-[#BC8477]" /> Submit Return Request
+            </h3>
+            <p className="text-sm text-gray-500 mb-3.5">Choose the order item and tell us the reason for the return.</p>
+
+            <div className="space-y-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                <div>
+                  <label className="label-style">Select Order</label>
+                  <select
+                    className="input-style"
+                    value={returnForm.orderId}
+                    onChange={e => setReturnForm(f => ({ ...f, orderId: e.target.value }))}
+                  >
+                    <option value="">Choose an order...</option>
+                    {orders.map((order, i) => (
+                      <option key={order.id || i} value={order.id}>
+                        {getOrderDisplayName(order)} — ৳{Number(order.total_amount).toFixed(2)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="label-style">Return Reason</label>
+                  <select
+                    className="input-style"
+                    value={returnForm.reason}
+                    onChange={e => setReturnForm(f => ({ ...f, reason: e.target.value }))}
+                  >
+                    <option value="">Select reason...</option>
+                    <option value="defective">Defective / Damaged Item</option>
+                    <option value="wrong">Wrong Item Received</option>
+                    <option value="notdescribed">Not as Described</option>
+                    <option value="changed_mind">Changed My Mind</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="label-style">Additional Details</label>
+                <textarea
+                  rows={3}
+                  className="input-style resize-none"
+                  placeholder="Please describe the issue in detail..."
+                  value={returnForm.description}
+                  onChange={e => setReturnForm(f => ({ ...f, description: e.target.value }))}
+                />
+              </div>
+            </div>
           </div>
-          <div>
-            <label className="label-style">Return Reason</label>
-            <select
-              className="input-style"
-              value={returnForm.reason}
-              onChange={e => setReturnForm(f => ({ ...f, reason: e.target.value }))}
-            >
-              <option value="">Select reason...</option>
-              <option value="defective">Defective / Damaged Item</option>
-              <option value="wrong">Wrong Item Received</option>
-              <option value="notdescribed">Not as Described</option>
-              <option value="changed_mind">Changed My Mind</option>
-              <option value="other">Other</option>
-            </select>
-          </div>
-          <div>
-            <label className="label-style">Additional Details</label>
-            <textarea
-              rows={4}
-              className="input-style resize-none"
-              placeholder="Please describe the issue in detail..."
-              value={returnForm.description}
-              onChange={e => setReturnForm(f => ({ ...f, description: e.target.value }))}
-            />
-          </div>
+
           <button
             onClick={() => {
               if (!returnForm.orderId || !returnForm.reason) {
@@ -1253,85 +1495,164 @@ function AccountPageContent() {
               toast.success('Return request submitted! We\'ll process it within 3–5 business days.');
               setReturnForm({ orderId: '', reason: '', description: '' });
             }}
-            className="btn-primary w-full sm:w-auto flex items-center justify-center gap-2"
+            className="btn-primary mt-4 w-full sm:w-auto self-start flex items-center justify-center gap-2 text-sm font-bold"
           >
             <RotateCcw size={16} /> Submit Return Request
           </button>
         </div>
-      </div>
 
-      <div className="bg-blue-50 border border-blue-100 rounded-2xl p-4 sm:p-6">
-        <h4 className="text-xs sm:text-sm font-bold text-blue-900 mb-2 sm:mb-3">Return Policy</h4>
-        <ul className="text-xs sm:text-sm text-blue-800 space-y-2">
-          {[
-            '30-day return window from delivery date',
-          ].map(point => (
-            <li key={point} className="flex items-start gap-2">
-              <Check size={14} className="text-[#BC8477] shrink-0 mt-0.5" />
-              {point}
-            </li>
-          ))}
-        </ul>
+        {/* Return & Refund Policy */}
+        <div className="lg:col-span-5 bg-gradient-to-br from-blue-50/70 via-indigo-50/40 to-blue-50/30 border border-blue-100 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+                <ShieldCheck size={18} />
+              </div>
+              <div>
+                <h4 className="text-sm sm:text-base font-bold text-blue-950">Return Policy & Guarantee</h4>
+                <p className="text-xs text-blue-700">100% Hassle-Free Velora Buyer Protection</p>
+              </div>
+            </div>
+
+            <ul className="text-sm text-blue-900 space-y-2.5 mt-3.5">
+              {[
+                '30-day return window from the confirmed delivery date',
+                'Products must be unused with original tags & brand packaging',
+                'Refunds will be processed back to your original payment method',
+                'Replacement or store credit available upon instant request',
+              ].map(point => (
+                <li key={point} className="flex items-start gap-2.5 text-xs sm:text-sm leading-relaxed">
+                  <Check size={15} className="text-blue-600 shrink-0 mt-0.5" />
+                  <span>{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-4 p-3.5 bg-white/85 rounded-xl border border-blue-100 flex items-center justify-between">
+            <div>
+              <p className="text-xs sm:text-sm font-bold text-gray-800">Need help with an item?</p>
+              <p className="text-xs text-gray-500">Contact our 24/7 dedicated support team</p>
+            </div>
+            <button
+              onClick={() => setActiveTab('support')}
+              className="px-3.5 py-2 text-xs font-bold text-[#BC8477] bg-[#BC8477]/10 hover:bg-[#BC8477]/20 rounded-lg transition-colors shrink-0"
+            >
+              Help Desk
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
 
   const renderSecurity = () => (
-    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-6 lg:p-8 shadow-sm">
-      <SectionHeader title="Security" subtitle="Manage your account security and active sessions" />
+    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-5 lg:p-6 shadow-sm">
+      <SectionHeader title="Security" subtitle="Manage your account security and active sessions" className="mb-3" />
 
-      <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 mb-6 shadow-xs">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-gray-700 mb-4">Account Security Status</h3>
-        <div className="space-y-3 max-w-md">
-          {[
-            { label: 'Email Verified', status: user.is_email_verified, action: 'Verify Now' },
-            { label: 'Password Strength', status: true, detail: 'Last changed recently' },
-            { label: 'Two-Factor Authentication', status: false, action: 'Enable 2FA' },
-          ].map(item => (
-            <div key={item.label} className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-gray-100 bg-[#F9FAFB]">
-              <div className="flex items-center gap-3">
-                <div className={cn('w-8 h-8 rounded-full flex items-center justify-center shrink-0',
-                  item.status ? 'bg-green-50' : 'bg-amber-50'
-                )}>
-                  {item.status
-                    ? <Check size={14} className="text-green-600" />
-                    : <AlertCircle size={14} className="text-amber-600" />}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm font-medium text-gray-900 truncate">{item.label}</p>
-                  {item.detail && <p className="text-[11px] text-gray-400">{item.detail}</p>}
-                </div>
-              </div>
-              {item.action && (
-                <button className="text-[10px] font-bold tracking-widest uppercase text-[#BC8477] hover:text-[#9A6B60] shrink-0 ml-2">
-                  {item.action}
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 mb-6 shadow-xs">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-gray-700 mb-4">Active Sessions</h3>
-        <div className="flex items-center justify-between p-3.5 sm:p-4 rounded-xl border border-[#BC8477]/30 bg-[#FDF9F8]">
+      {/* 2-Column Grid: Status Items + Active Sessions & Danger Zone */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        {/* Account Security Status */}
+        <div className="lg:col-span-6 bg-[#F9FAFB]/70 border border-gray-100 rounded-2xl p-5 flex flex-col justify-between">
           <div>
-            <p className="text-xs sm:text-sm font-medium text-gray-900">Current Session</p>
-            <p className="text-[11px] sm:text-xs text-gray-500">Web Browser • Active now</p>
-          </div>
-          <span className="text-[10px] font-bold tracking-widest uppercase text-green-600 bg-green-50 px-2 py-1 rounded-full border border-green-100">Active</span>
-        </div>
-      </div>
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+              <ShieldCheck size={18} className="text-[#BC8477]" /> Account Security Status
+            </h3>
+            <p className="text-sm text-gray-500 mb-3.5">Review your account credentials and safety settings.</p>
 
-      <div className="bg-red-50 border border-red-200 rounded-2xl p-4 sm:p-6">
-        <h3 className="text-xs font-bold tracking-widest uppercase text-red-700 mb-2">Danger Zone</h3>
-        <p className="text-xs sm:text-sm text-red-600 mb-4">Once you logout, you will need to sign in again to access your account.</p>
-        <button
-          onClick={handleLogout}
-          className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 text-white px-5 py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl hover:bg-red-700 transition-colors"
-        >
-          <LogOut size={14} /> Logout from All Sessions
-        </button>
+            <div className="space-y-3">
+              {[
+                { 
+                  label: 'Email Verified', 
+                  status: user.is_email_verified, 
+                  action: user.is_email_verified ? undefined : 'Verify Now',
+                  onAction: () => toast.info('Verification email sent to ' + user.email)
+                },
+                { 
+                  label: 'Password Protection', 
+                  status: true, 
+                  detail: 'Last changed recently', 
+                  action: 'Update',
+                  onAction: () => setActiveTab('profile')
+                },
+                { 
+                  label: 'Two-Factor Authentication', 
+                  status: false, 
+                  action: 'Enable 2FA',
+                  onAction: () => toast.info('Two-Factor Authentication setup will be available in next release.')
+                },
+              ].map(item => (
+                <div key={item.label} className="flex items-center justify-between p-3.5 rounded-xl border border-gray-100 bg-white shadow-2xs">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className={cn('w-8 h-8 rounded-full flex items-center justify-center shrink-0',
+                      item.status ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'
+                    )}>
+                      {item.status ? <Check size={16} /> : <AlertCircle size={16} />}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-sm font-bold text-gray-900 truncate">{item.label}</p>
+                      {item.detail && <p className="text-xs text-gray-500">{item.detail}</p>}
+                    </div>
+                  </div>
+                  {item.action && (
+                    <button 
+                      onClick={item.onAction}
+                      className="text-xs font-bold tracking-wider uppercase text-[#BC8477] hover:text-[#9A6B60] shrink-0 ml-2 px-3 py-1.5 bg-[#BC8477]/10 hover:bg-[#BC8477]/20 rounded-lg transition-colors"
+                    >
+                      {item.action}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100 flex items-center gap-2.5">
+            <Lock size={16} className="text-gray-400 shrink-0" />
+            <p className="text-xs text-gray-500 leading-normal">
+              Keep your credentials private and never share your password or OTP with anyone.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Column: Active Sessions & Danger Zone */}
+        <div className="lg:col-span-6 flex flex-col gap-4">
+          {/* Active Sessions */}
+          <div className="bg-[#F9FAFB]/70 border border-gray-100 rounded-2xl p-5">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-1 flex items-center gap-2">
+              <Laptop size={18} className="text-[#BC8477]" /> Active Sessions
+            </h3>
+            <p className="text-sm text-gray-500 mb-3.5">Devices currently authenticated to your account.</p>
+
+            <div className="flex items-center justify-between p-3.5 rounded-xl border border-[#BC8477]/30 bg-[#FDF9F8]">
+              <div>
+                <p className="text-sm sm:text-base font-bold text-gray-900">Current Session</p>
+                <p className="text-xs text-gray-500 mt-0.5">Web Browser • Active now</p>
+              </div>
+              <span className="text-xs font-bold tracking-wider uppercase text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                Active
+              </span>
+            </div>
+          </div>
+
+          {/* Danger Zone */}
+          <div className="bg-red-50/70 border border-red-200/80 rounded-2xl p-5 flex-1 flex flex-col justify-between">
+            <div>
+              <h3 className="text-sm font-bold tracking-wider uppercase text-red-700 mb-1.5 flex items-center gap-2">
+                <AlertCircle size={16} /> Danger Zone
+              </h3>
+              <p className="text-xs sm:text-sm text-red-600 mb-3.5">
+                Once you logout from all sessions, you will need to sign in again to access your account.
+              </p>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white px-5 py-2.5 text-xs font-bold tracking-wider uppercase rounded-xl transition-colors self-start shadow-xs"
+            >
+              <LogOut size={15} /> Logout from All Sessions
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -1358,9 +1679,9 @@ function AccountPageContent() {
       <style jsx global>{`
         .label-style {
           display: block;
-          font-size: 12px;
+          font-size: 13px;
           font-weight: 600;
-          color: #4B5563;
+          color: #374151;
           margin-bottom: 6px;
         }
         .input-style {
@@ -1422,14 +1743,29 @@ function AccountPageContent() {
           cursor: pointer;
         }
         .btn-ghost:hover { border-color: #BC8477; color: #BC8477; background: #FDF9F8; }
+        .account-scale-container {
+          zoom: 0.9;
+        }
+        body:has(.account-scale-container) {
+          background-color: #F3F4F6 !important;
+        }
+        @supports not (zoom: 0.9) {
+          .account-scale-container {
+            transform: scale(0.9);
+            transform-origin: top center;
+            width: 111.11%;
+            margin-left: -5.55%;
+          }
+        }
       `}</style>
 
-      <main className="w-full min-h-screen py-4 sm:py-8 lg:py-12 bg-[#F3F4F6]">
-        <div className="max-w-[1600px] mx-auto px-3.5 sm:px-6 lg:px-8">
+      <main className="w-full min-h-screen pt-3 sm:pt-4 lg:pt-5 pb-5 sm:pb-6 lg:pb-7 bg-[#F3F4F6] account-scale-container flex flex-col">
+        <div className="max-w-[1600px] mx-auto px-3.5 sm:px-6 lg:px-8 flex-1 flex flex-col w-full">
 
           {/* Mobile & Tablet Backdrop */}
           {sidebarOpen && (
             <div 
+              data-lenis-prevent
               className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs z-40 lg:hidden transition-opacity"
               onClick={() => setSidebarOpen(false)}
             />
@@ -1464,9 +1800,19 @@ function AccountPageContent() {
                     <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                   )}
                 </button>
-                <div className="w-8 h-8 rounded-full bg-[#BC8477] text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  {(user?.first_name || (user as any)?.profile?.first_name || 'U').charAt(0)}
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileDialogOpen(true)}
+                  className="w-8 h-8 rounded-full bg-[#BC8477] text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden cursor-pointer"
+                  title="Edit Profile"
+                >
+                  {userAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{userInitials.charAt(0)}</span>
+                  )}
+                </button>
               </div>
             </div>
 
@@ -1494,16 +1840,13 @@ function AccountPageContent() {
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             {/* Sidebar */}
             <aside 
-              onWheel={(e) => {
-                if (sidebarNavRef.current) {
-                  sidebarNavRef.current.scrollTop += e.deltaY;
-                }
-              }}
+              ref={asideRef}
+              data-lenis-prevent
               className={cn(
                 'w-64 lg:w-72 shrink-0 flex flex-col bg-white shadow-sm overflow-hidden transition-all duration-300',
                 sidebarOpen 
                   ? 'fixed inset-y-0 left-0 z-50 w-72 sm:w-80 max-w-[85vw] h-full rounded-r-3xl p-4 sm:p-5 shadow-2xl flex' 
-                  : 'hidden lg:flex rounded-[32px] p-4 h-fit lg:h-[calc(100vh-6rem)] lg:max-h-[calc(100vh-6rem)] sticky top-12'
+                  : 'hidden lg:flex rounded-[32px] p-4 h-fit lg:h-[calc(100vh-3.2rem)] lg:max-h-[calc(100vh-3.2rem)] sticky top-5'
               )}
             >
               {sidebarOpen && (
@@ -1520,8 +1863,17 @@ function AccountPageContent() {
 
               {/* Logo / Header Area */}
               <div className="flex items-center gap-3 px-3 py-3 mb-2 shrink-0 border-b border-gray-100">
-                <div className="w-10 h-10 rounded-full bg-[#BC8477] text-white flex items-center justify-center font-bold text-lg shrink-0">
-                  {(user?.first_name || (user as any)?.profile?.first_name || 'U').charAt(0)}{(user?.last_name || (user as any)?.profile?.last_name || '').charAt(0)}
+                <div 
+                  onClick={() => setIsProfileDialogOpen(true)}
+                  className="w-10 h-10 rounded-full bg-[#BC8477] text-white flex items-center justify-center font-bold text-lg shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#BC8477]/40 transition-all"
+                  title="Click to edit profile"
+                >
+                  {userAvatarUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                  ) : (
+                    <span>{userInitials}</span>
+                  )}
                 </div>
                 <div className="min-w-0">
                   <p className="text-sm sm:text-base font-bold text-gray-900 truncate">{user?.first_name || (user as any)?.profile?.first_name} {user?.last_name || (user as any)?.profile?.last_name}</p>
@@ -1532,7 +1884,8 @@ function AccountPageContent() {
               {/* Scrollable Navigation List */}
               <nav 
                 ref={sidebarNavRef}
-                className="flex-1 overflow-y-auto overscroll-contain pr-1 space-y-1 focus:outline-none"
+                data-lenis-prevent
+                className="flex-1 overflow-y-auto overscroll-contain pr-1 space-y-1 focus:outline-none [scrollbar-width:thin] [scrollbar-color:#E5E7EB_transparent] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-gray-200 hover:[&::-webkit-scrollbar-thumb]:bg-gray-300 [&::-webkit-scrollbar-track]:bg-transparent"
                 style={{ overscrollBehavior: 'contain' }}
               >
                 {NAV_ITEMS.map((item, i) => (
@@ -1582,7 +1935,7 @@ function AccountPageContent() {
             {/* Main Content */}
             <div className="flex-1 min-w-0">
               {/* Top Navigation Row */}
-              <div className="hidden lg:flex items-center justify-between mb-8 bg-white rounded-full p-2 pr-4 shadow-sm">
+              <div className="hidden lg:flex items-center justify-between mb-5 bg-white rounded-full p-2 pr-4 shadow-sm">
                 <h1 className="font-bold text-2xl text-gray-900 pl-6 py-2">
                   {NAV_ITEMS.find(n => n.id === activeTab)?.label}
                 </h1>
@@ -1613,9 +1966,110 @@ function AccountPageContent() {
                       <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full" />
                     )}
                   </button>
-                  <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden shrink-0 border border-gray-200">
-                    <Image src="/placeholder.jpg" alt="Profile" width={40} height={40} className="object-cover" />
-                  </div>
+                  {/* User Profile Dropdown Menu */}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger className="flex items-center gap-2.5 p-1 pl-2.5 rounded-full hover:bg-gray-100 transition-all cursor-pointer outline-hidden group border border-transparent hover:border-gray-200/80">
+                      <div className="text-right hidden xl:block max-w-[130px]">
+                        <div className="text-xs font-bold text-gray-900 leading-tight truncate group-hover:text-[#BC8477] transition-colors">
+                          {displayName}
+                        </div>
+                        <div className="text-[10px] font-semibold text-gray-400 truncate">
+                          {displayEmail}
+                        </div>
+                      </div>
+                      <div className="relative">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] overflow-hidden shrink-0 border-2 border-white shadow-xs flex items-center justify-center font-bold text-sm text-white group-hover:ring-2 group-hover:ring-[#BC8477]/40 transition-all">
+                          {userAvatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                          ) : (
+                            <span>{userInitials}</span>
+                          )}
+                        </div>
+                        <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white" />
+                      </div>
+                      <ChevronDown size={14} className="text-gray-400 group-hover:text-gray-700 transition-colors mr-1 hidden sm:block" />
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl bg-white border border-gray-100 shadow-2xl" style={{ zoom: 0.9 }}>
+                      {/* User Header Summary Card */}
+                      <div className="p-3 bg-gray-50/90 rounded-xl mb-1.5 border border-gray-100">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] overflow-hidden shrink-0 border-2 border-white shadow-xs flex items-center justify-center font-bold text-sm text-white">
+                            {userAvatarUrl ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                            ) : (
+                              <span>{userInitials}</span>
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-bold text-gray-900 truncate">{displayName}</div>
+                            <div className="text-[11px] text-gray-400 truncate">{displayEmail}</div>
+                            <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#BC8477]/10 text-[#BC8477]">
+                              <span>{user?.role === 'ADMIN' ? 'Administrator' : 'Customer Account'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <DropdownMenuItem
+                        onClick={() => setIsProfileDialogOpen(true)}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <UserCog size={16} className="text-[#BC8477]" />
+                        <div className="flex-1">
+                          <div className="text-gray-800 font-bold">Edit Profile & Avatar</div>
+                          <div className="text-[10px] text-gray-400 font-normal">Change photo, name, and details</div>
+                        </div>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => setActiveTab('orders')}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <Package size={16} className="text-gray-500" />
+                        <div className="flex-1">
+                          <div className="text-gray-800 font-bold">My Orders</div>
+                          <div className="text-[10px] text-gray-400 font-normal">Track & view purchases</div>
+                        </div>
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => setActiveTab('wishlist')}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-100 cursor-pointer transition-colors"
+                      >
+                        <Heart size={16} className="text-gray-500" />
+                        <div className="flex-1">
+                          <div className="text-gray-800 font-bold">My Wishlist</div>
+                          <div className="text-[10px] text-gray-400 font-normal">Saved products and favorites</div>
+                        </div>
+                      </DropdownMenuItem>
+
+                      {user?.role === 'ADMIN' && (
+                        <DropdownMenuItem
+                          onClick={() => router.push('/admin/dashboard')}
+                          className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-purple-700 hover:text-purple-800 hover:bg-purple-50 cursor-pointer transition-colors"
+                        >
+                          <Shield size={16} className="text-purple-600" />
+                          <div className="flex-1">
+                            <div className="font-bold">Admin Panel</div>
+                            <div className="text-[10px] text-purple-400 font-normal">Switch to Administration</div>
+                          </div>
+                        </DropdownMenuItem>
+                      )}
+
+                      <DropdownMenuSeparator className="my-1.5 bg-gray-100" />
+
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:text-red-700 hover:bg-red-50 cursor-pointer transition-colors"
+                      >
+                        <LogOut size={16} className="text-red-600" />
+                        <span>Log Out</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 
@@ -1623,6 +2077,9 @@ function AccountPageContent() {
             </div>
           </div>
         </div>
+
+        {/* User Profile & Avatar Dialog */}
+        <UserProfileDialog open={isProfileDialogOpen} onOpenChange={setIsProfileDialogOpen} />
       </main>
     </>
   );
