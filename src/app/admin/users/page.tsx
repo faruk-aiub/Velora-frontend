@@ -48,14 +48,14 @@ export default function UsersPage() {
 
  return (
  <div className="space-y-6">
- <div className="flex items-center justify-between">
- <div>
- <h1 className="text-2xl font-bold text-gray-900">Users</h1>
- <p className="text-sm text-gray-500 mt-1">
- View and manage customer accounts.
- </p>
- </div>
- </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Users</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+          View and manage customer accounts.
+        </p>
+      </div>
+    </div>
 
  <div>
  <DataTable

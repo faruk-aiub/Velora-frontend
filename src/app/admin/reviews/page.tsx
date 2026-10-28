@@ -64,14 +64,14 @@ export default function ReviewsPage() {
 
  return (
  <div className="space-y-6">
- <div className="flex items-center justify-between">
- <div>
- <h1 className="text-2xl font-bold text-gray-900">Reviews</h1>
- <p className="text-sm text-gray-500 mt-1">
- Moderate product reviews and customer feedback.
- </p>
- </div>
- </div>
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Reviews</h1>
+        <p className="text-xs sm:text-sm text-gray-500 mt-0.5">
+          Moderate product reviews and customer feedback.
+        </p>
+      </div>
+    </div>
 
  <div>
  <DataTable

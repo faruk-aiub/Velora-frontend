@@ -74,13 +74,13 @@ export function MessageThreadDialog({ msg, refreshData }: { msg: { id: string; s
           View
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[700px] max-h-[85vh] flex flex-col p-0 overflow-hidden bg-gray-50 border-none rounded-3xl">
-        <DialogHeader className="px-6 py-4 bg-white border-b border-gray-100 flex-row items-center justify-between">
+      <DialogContent className="w-[calc(100vw-24px)] sm:max-w-[700px] max-h-[88vh] flex flex-col p-0 overflow-hidden bg-gray-50 border-none rounded-2xl sm:rounded-3xl">
+        <DialogHeader className="px-4 sm:px-6 py-3 sm:py-4 bg-white border-b border-gray-100 flex-row items-center justify-between">
           <div>
-            <DialogTitle className="text-lg font-bold text-gray-900">
+            <DialogTitle className="text-base sm:text-lg font-bold text-gray-900">
               {msg.subject || 'Support Ticket'}
             </DialogTitle>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5 truncate max-w-[220px] sm:max-w-md">
               From: {msg.first_name} {msg.last_name} &lt;{msg.email}&gt;
             </p>
           </div>

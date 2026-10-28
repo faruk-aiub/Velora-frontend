@@ -18,22 +18,22 @@ export default function AuditLogsPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Audit Logs</h1>
-          <p className="text-gray-500">Track admin actions and system events.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">Audit Logs</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Track admin actions and system events.</p>
         </div>
-        <div className="flex items-center gap-2 bg-[#F9F0E6] text-[#B58A63] px-4 py-2 rounded-2xl font-bold">
-          <ShieldAlert size={18} />
+        <div className="flex items-center gap-2 bg-[#F9F0E6] text-[#B58A63] px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl font-bold text-xs sm:text-sm w-fit">
+          <ShieldAlert size={16} />
           {logs.length} Records
         </div>
       </div>
 
-      <Card className="rounded-[32px] border-none shadow-sm">
-        <CardHeader>
-          <CardTitle>System Log</CardTitle>
+      <Card className="rounded-2xl sm:rounded-[32px] border-none shadow-sm">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl font-bold">System Log</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
           <DataTable
             columns={columns}
             data={logs}

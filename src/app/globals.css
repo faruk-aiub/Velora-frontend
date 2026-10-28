@@ -78,3 +78,29 @@ html.lenis, html.lenis body {
 .lenis.lenis-scrolling iframe {
   pointer-events: none;
 }
+
+/* ── Admin Panel Responsive & Desktop Scaling ── */
+@media (min-width: 1024px) {
+  html.admin-html {
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  body.admin-body {
+    zoom: 0.9 !important;
+    width: calc(100vw / 0.9) !important;
+    height: calc(100vh / 0.9) !important;
+    max-width: calc(100vw / 0.9) !important;
+    max-height: calc(100vh / 0.9) !important;
+    overflow: hidden !important;
+  }
+}
+
+@media (max-width: 1023px) {
+  html.admin-html,
+  body.admin-body {
+    zoom: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+}

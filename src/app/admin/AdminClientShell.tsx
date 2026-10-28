@@ -168,23 +168,32 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
     .find(item => pathname.startsWith(item.href));
 
   return (
-    <div className="flex h-full w-full bg-[#F4F5F7] text-[#2D2826] font-sans selection:bg-[#BC8477] selection:text-white p-3.5 gap-4 overflow-hidden box-border">
-      {/* Mobile Sidebar Overlay */}
+    <div suppressHydrationWarning className="flex h-screen lg:h-full w-full bg-[#F4F5F7] text-[#2D2826] font-sans selection:bg-[#BC8477] selection:text-white p-2 sm:p-3 lg:p-3.5 gap-2.5 sm:gap-4 overflow-hidden box-border">
+      {/* Mobile & Tablet Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/40 z-40 md:hidden backdrop-blur-xs"
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden backdrop-blur-xs transition-opacity duration-200"
           onClick={() => setIsMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
       {/* Sidebar */}
-      <aside className={`w-72 lg:w-[300px] bg-white rounded-2xl flex flex-col shadow-xs border border-stone-200/70 z-50 h-full shrink-0 fixed top-3.5 left-3.5 md:relative md:top-auto md:left-auto transition-transform duration-100 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-[150%] md:translate-x-0'}`}>
-        <div className="flex h-16 items-center justify-between px-6 border-b border-stone-100 shrink-0">
+      <aside 
+        className={`fixed inset-y-0 left-0 z-50 w-72 sm:w-80 max-w-[85vw] bg-white rounded-r-3xl lg:rounded-2xl lg:relative lg:inset-auto lg:z-auto lg:h-full lg:w-64 xl:w-72 flex flex-col shadow-2xl lg:shadow-xs border border-stone-200/70 shrink-0 transition-transform duration-200 ease-out ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        }`}
+      >
+        <div className="flex h-16 items-center justify-between px-5 sm:px-6 border-b border-stone-100 shrink-0">
           <Link href="/admin/dashboard" className="flex items-center gap-3 font-bold text-lg tracking-wide text-stone-900" onClick={() => setIsMobileMenuOpen(false)}>
             <VeloraIcon size={32} />
             <span className="font-extrabold tracking-tight text-lg">Velora Admin</span>
           </Link>
-          <button className="md:hidden text-stone-400 hover:text-stone-900" onClick={() => setIsMobileMenuOpen(false)}>
+          <button 
+            className="lg:hidden p-1.5 rounded-xl text-stone-400 hover:text-stone-900 hover:bg-stone-100 transition-colors" 
+            onClick={() => setIsMobileMenuOpen(false)}
+            aria-label="Close sidebar"
+          >
             <X size={20} />
           </button>
         </div>
@@ -236,32 +245,39 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden relative h-full">
         {/* Top Header Row */}
-        <header className="h-16 bg-white rounded-2xl flex items-center justify-between px-6 shrink-0 shadow-xs border border-stone-200/70 mb-4">
-          <div className="flex items-center gap-3">
-            <button className="md:hidden text-stone-600 hover:text-stone-900" onClick={() => setIsMobileMenuOpen(true)}>
+        <header className="h-14 sm:h-16 bg-white rounded-xl sm:rounded-2xl flex items-center justify-between px-3.5 sm:px-6 shrink-0 shadow-xs border border-stone-200/70 mb-2.5 sm:mb-4">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+            <button 
+              className="lg:hidden p-2 -ml-1 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer shrink-0" 
+              onClick={() => setIsMobileMenuOpen(true)}
+              aria-label="Open navigation menu"
+            >
               <Menu size={22} />
             </button>
-            <div className="font-extrabold text-lg sm:text-xl tracking-tight text-stone-900 truncate max-w-[200px] sm:max-w-none">
+            <div className="font-extrabold text-base sm:text-lg lg:text-xl tracking-tight text-stone-900 truncate">
               {currentItem?.name || 'Dashboard'}
             </div>
           </div>
-          <div className="flex items-center gap-3.5">
-            <button className="w-9 h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors">
-              <Bell size={17} />
+          <div className="flex items-center gap-2 sm:gap-3.5 shrink-0">
+            <button 
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-stone-100 flex items-center justify-center text-stone-600 hover:bg-stone-200 transition-colors"
+              aria-label="Notifications"
+            >
+              <Bell size={16} />
             </button>
             {/* Admin Profile Dropdown Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center gap-3 p-1.5 pl-2.5 rounded-xl hover:bg-stone-100/80 transition-all cursor-pointer outline-hidden group border border-transparent hover:border-stone-200/60">
-                <div className="text-right hidden sm:block">
-                  <div className="text-sm font-bold text-stone-900 leading-tight group-hover:text-[#BC8477] transition-colors">
+                <div className="text-right hidden sm:block" suppressHydrationWarning>
+                  <div className="text-sm font-bold text-stone-900 leading-tight group-hover:text-[#BC8477] transition-colors" suppressHydrationWarning>
                     {displayName}
                   </div>
-                  <div className="text-[10px] uppercase tracking-wider font-semibold text-stone-400">
+                  <div className="text-[10px] uppercase tracking-wider font-semibold text-stone-400" suppressHydrationWarning>
                     {displayEmail}
                   </div>
                 </div>
                 <div className="relative">
-                  <div className="w-9 h-9 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200/70 flex items-center justify-center font-bold text-xs text-[#BC8477] group-hover:border-[#BC8477]/60 shadow-xs transition-colors">
+                  <div className="w-9 h-9 rounded-full bg-stone-100 overflow-hidden shrink-0 border border-stone-200/70 flex items-center justify-center font-bold text-xs text-[#BC8477] group-hover:border-[#BC8477]/60 shadow-xs transition-colors" suppressHydrationWarning>
                     {user?.avatar_url ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={user.avatar_url} alt={displayName} className="w-full h-full object-cover" />
@@ -278,7 +294,7 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
                 {/* User Header Summary Card */}
                 <div className="p-3 bg-stone-50/90 rounded-xl mb-1.5 border border-stone-100">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-stone-200/70 overflow-hidden shrink-0 border border-stone-300/50 flex items-center justify-center font-bold text-sm text-[#BC8477]">
+                    <div className="w-10 h-10 rounded-full bg-stone-200/70 overflow-hidden shrink-0 border border-stone-300/50 flex items-center justify-center font-bold text-sm text-[#BC8477]" suppressHydrationWarning>
                       {user?.avatar_url ? (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={user.avatar_url} alt={displayName} className="w-full h-full object-cover" />
@@ -286,10 +302,10 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
                         <span>{initials}</span>
                       )}
                     </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="text-sm font-bold text-stone-900 truncate">{displayName}</div>
-                      <div className="text-[11px] text-stone-400 truncate">{displayEmail}</div>
-                      <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#BC8477]/10 text-[#BC8477]">
+                    <div className="min-w-0 flex-1" suppressHydrationWarning>
+                      <div className="text-sm font-bold text-stone-900 truncate" suppressHydrationWarning>{displayName}</div>
+                      <div className="text-[11px] text-stone-400 truncate" suppressHydrationWarning>{displayEmail}</div>
+                      <div className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#BC8477]/10 text-[#BC8477]" suppressHydrationWarning>
                         <ShieldCheck size={11} />
                         <span>{user?.role === 'ADMIN' ? 'Super Admin' : user?.role || 'Admin'}</span>
                       </div>
@@ -333,8 +349,8 @@ export function AdminClientShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto pr-1">
-          <div className="max-w-7xl mx-auto pb-6">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden pr-0 sm:pr-1 pb-4">
+          <div className="max-w-7xl mx-auto pb-6 px-0.5 sm:px-1">
             {children}
           </div>
         </div>

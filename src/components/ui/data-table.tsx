@@ -155,23 +155,28 @@ export function DataTable<TData, TValue>({
   const endRow = Math.min((pagination.pageIndex + 1) * pagination.pageSize, totalRows);
 
   return (
-    <div className="bg-white rounded-[32px] p-4 lg:p-8 shadow-sm overflow-hidden">
-      <div className="flex items-center pb-6 justify-between flex-wrap gap-4">
+    <div className="bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-5 lg:p-6 shadow-xs overflow-hidden">
+      <div className="flex flex-col sm:flex-row sm:items-center pb-4 sm:pb-6 justify-between gap-3 sm:gap-4">
         {searchKey && (
-          <Input
-            placeholder={`Filter ${searchKey}...`}
-            value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
-            onChange={(event) =>
-              table.getColumn(searchKey)?.setFilterValue(event.target.value)
-            }
-            className="max-w-sm rounded-xl bg-gray-50 border-gray-100 focus:bg-white transition-colors h-11"
-          />
+          <div className="w-full sm:max-w-sm">
+            <Input
+              placeholder={`Filter by ${searchKey}...`}
+              value={(table.getColumn(searchKey)?.getFilterValue() as string) ?? ''}
+              onChange={(event) =>
+                table.getColumn(searchKey)?.setFilterValue(event.target.value)
+              }
+              className="w-full rounded-xl bg-gray-50 border-gray-200 focus:bg-white transition-colors h-10 sm:h-11 text-xs sm:text-sm"
+            />
+          </div>
         )}
-        <div className="ml-auto">
+        <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2 ml-auto">
+          <span className="text-[11px] text-gray-400 font-medium lg:hidden select-none">
+            Swipe table horizontally →
+          </span>
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-full text-sm font-bold transition-colors hover:bg-gray-50 h-11 px-6 py-2 border border-gray-200 bg-white shadow-sm text-gray-700 cursor-pointer">
+            <DropdownMenuTrigger className="inline-flex items-center justify-center rounded-xl sm:rounded-full text-xs sm:text-sm font-bold transition-colors hover:bg-gray-50 h-9 sm:h-11 px-4 sm:px-6 py-2 border border-gray-200 bg-white shadow-xs text-gray-700 cursor-pointer">
               Columns
-              <ChevronDown className="ml-2 h-4 w-4" />
+              <ChevronDown className="ml-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent
               align="end"
@@ -183,7 +188,7 @@ export function DataTable<TData, TValue>({
                 Visible Columns
               </div>
               <div className="h-px bg-gray-100 my-1 -mx-1" />
-              <div className="space-y-0.5">
+              <div className="space-y-0.5 max-h-64 overflow-y-auto">
                 {table
                   .getAllColumns()
                   .filter(
@@ -198,7 +203,7 @@ export function DataTable<TData, TValue>({
                         key={column.id}
                         checked={column.getIsVisible()}
                         onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                        className="rounded-xl px-3 py-2 text-sm font-medium hover:bg-gray-50 cursor-pointer transition-colors"
+                        className="rounded-xl px-3 py-2 text-xs sm:text-sm font-medium hover:bg-gray-50 cursor-pointer transition-colors"
                       >
                         {getColumnLabel(column)}
                       </DropdownMenuCheckboxItem>
@@ -209,14 +214,15 @@ export function DataTable<TData, TValue>({
           </DropdownMenu>
         </div>
       </div>
-      <div className="rounded-2xl border border-gray-100 overflow-hidden shadow-sm bg-white">
+
+      <div className="rounded-xl sm:rounded-2xl border border-gray-100 overflow-x-auto shadow-xs bg-white overscroll-x-contain">
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead key={header.id} className="text-xs sm:text-sm px-2.5 sm:px-3">
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -234,7 +240,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-zinc-500"
+                  className="h-24 text-center text-xs sm:text-sm text-zinc-500"
                 >
                   Loading data...
                 </TableCell>
@@ -246,7 +252,7 @@ export function DataTable<TData, TValue>({
                   data-state={row.getIsSelected() && 'selected'}
                 >
                   {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
+                    <TableCell key={cell.id} className="text-xs sm:text-sm px-2.5 sm:px-3 py-2.5 sm:py-3">
                       {flexRender(
                         cell.column.columnDef.cell,
                         cell.getContext()
@@ -259,7 +265,7 @@ export function DataTable<TData, TValue>({
               <TableRow>
                 <TableCell
                   colSpan={columns.length}
-                  className="h-24 text-center text-zinc-500"
+                  className="h-24 text-center text-xs sm:text-sm text-zinc-500"
                 >
                   No results found.
                 </TableCell>
@@ -270,30 +276,30 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination & Summary Controls */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6">
-        <div className="flex items-center gap-4 text-sm text-gray-500">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 pt-4 sm:pt-6">
+        <div className="flex items-center justify-between w-full sm:w-auto gap-3 text-xs sm:text-sm text-gray-500">
           <div>
             Showing <span className="font-semibold text-gray-900">{startRow}</span> to{' '}
             <span className="font-semibold text-gray-900">{endRow}</span> of{' '}
             <span className="font-semibold text-gray-900">{totalRows}</span> {totalRows === 1 ? 'item' : 'items'}
           </div>
           {table.getFilteredSelectedRowModel().rows.length > 0 && (
-            <span className="text-xs bg-gray-100 px-2.5 py-1 rounded-full text-gray-700">
+            <span className="text-[11px] bg-gray-100 px-2 py-0.5 rounded-full text-gray-700 font-semibold">
               {table.getFilteredSelectedRowModel().rows.length} selected
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-500 font-medium">Rows per page</span>
+        <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2.5 sm:gap-5 flex-wrap">
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-[11px] sm:text-xs text-gray-500 font-medium whitespace-nowrap">Rows</span>
             <Select
               value={`${pagination.pageSize}`}
               onValueChange={(value) => {
                 table.setPageSize(Number(value));
               }}
             >
-              <SelectTrigger className="h-9 w-[74px] rounded-xl bg-gray-50 border-gray-200 text-xs font-semibold">
+              <SelectTrigger className="h-8 sm:h-9 w-[68px] sm:w-[74px] rounded-xl bg-gray-50 border-gray-200 text-xs font-semibold">
                 <SelectValue placeholder={pagination.pageSize} />
               </SelectTrigger>
               <SelectContent side="top">
@@ -306,50 +312,50 @@ export function DataTable<TData, TValue>({
             </Select>
           </div>
 
-          <div className="flex items-center gap-2 text-xs font-semibold text-gray-700">
+          <div className="text-[11px] sm:text-xs font-semibold text-gray-700 whitespace-nowrap">
             Page {pagination.pageIndex + 1} of {Math.max(1, table.getPageCount())}
           </div>
 
-          <div className="flex items-center space-x-1">
+          <div className="flex items-center space-x-1 shrink-0">
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.setPageIndex(0)}
               disabled={!table.getCanPreviousPage()}
-              className="h-9 w-9 p-0 rounded-xl border-gray-200"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-xl border-gray-200"
               title="First page"
             >
-              <ChevronsLeft className="h-4 w-4" />
+              <ChevronsLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.previousPage()}
               disabled={!table.getCanPreviousPage()}
-              className="h-9 w-9 p-0 rounded-xl border-gray-200"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-xl border-gray-200"
               title="Previous page"
             >
-              <ChevronLeft className="h-4 w-4" />
+              <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.nextPage()}
               disabled={!table.getCanNextPage()}
-              className="h-9 w-9 p-0 rounded-xl border-gray-200"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-xl border-gray-200"
               title="Next page"
             >
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => table.setPageIndex(table.getPageCount() - 1)}
               disabled={!table.getCanNextPage()}
-              className="h-9 w-9 p-0 rounded-xl border-gray-200"
+              className="h-8 w-8 sm:h-9 sm:w-9 p-0 rounded-xl border-gray-200"
               title="Last page"
             >
-              <ChevronsRight className="h-4 w-4" />
+              <ChevronsRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             </Button>
           </div>
         </div>

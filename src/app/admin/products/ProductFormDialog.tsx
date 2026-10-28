@@ -213,16 +213,16 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[760px] max-h-[90vh] overflow-hidden flex flex-col p-6 rounded-3xl bg-white border border-gray-100 shadow-2xl">
+      <DialogContent className="w-[calc(100vw-24px)] sm:max-w-[760px] max-h-[92vh] overflow-hidden flex flex-col p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white border border-gray-100 shadow-2xl">
         <DialogHeader>
-          <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
-            <Package className="w-4 h-4 text-gray-700" />
+          <div className="flex items-center gap-2 text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider mb-0.5 sm:mb-1">
+            <Package className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-gray-700" />
             Catalog & Inventory Product
           </div>
-          <DialogTitle className="text-xl font-bold text-gray-900 leading-snug">
+          <DialogTitle className="text-lg sm:text-xl font-bold text-gray-900 leading-snug">
             {productToEdit ? `Edit: ${productToEdit.title}` : 'Add New Product'}
           </DialogTitle>
-          <DialogDescription className="text-xs text-gray-500 mt-1">
+          <DialogDescription className="text-xs text-gray-500 mt-0.5 sm:mt-1">
             {productToEdit
               ? 'Update catalog specifications, retail pricing, discounts, and visual media.'
               : 'Register a new store product with category, brand, and media gallery.'}
@@ -230,23 +230,23 @@ export function ProductFormDialog({ open, onOpenChange, productToEdit }: Product
         </DialogHeader>
 
         {/* Live Snapshot Card */}
-        <div className="grid grid-cols-3 gap-3 p-3.5 rounded-2xl bg-gray-50 border border-gray-100 mt-2 shrink-0">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 p-2.5 sm:p-3.5 rounded-2xl bg-gray-50 border border-gray-100 mt-2 shrink-0">
           <div>
-            <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+            <div className="text-[9px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">
               Effective Price
             </div>
-            <div className="flex items-baseline gap-1.5 mt-1">
-              <span className="font-bold text-base text-gray-900">৳{finalPrice.toFixed(2)}</span>
+            <div className="flex flex-wrap items-baseline gap-1 mt-0.5 sm:mt-1">
+              <span className="font-bold text-xs sm:text-base text-gray-900">৳{finalPrice.toFixed(2)}</span>
               {discountWatch > 0 && (
-                <span className="text-xs text-gray-400 line-through">৳{priceWatch.toFixed(2)}</span>
+                <span className="text-[10px] sm:text-xs text-gray-400 line-through">৳{priceWatch.toFixed(2)}</span>
               )}
             </div>
           </div>
           <div className="text-center border-x border-gray-200">
-            <div className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
-              Store Visibility
+            <div className="text-[9px] sm:text-[11px] font-semibold text-gray-400 uppercase tracking-wider truncate">
+              Visibility
             </div>
-            <div className="mt-1">
+            <div className="mt-0.5 sm:mt-1">
               {isActiveWatch ? (
                 <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
                   <CheckCircle2 className="w-3 h-3 text-emerald-600" />

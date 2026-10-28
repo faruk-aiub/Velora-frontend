@@ -91,7 +91,7 @@ export function BannerFormDialog({ open, onOpenChange, bannerToEdit }: BannerFor
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="w-[calc(100vw-24px)] sm:max-w-[500px] p-4 sm:p-6 rounded-2xl sm:rounded-3xl">
         <DialogHeader>
           <DialogTitle>{bannerToEdit ? 'Edit Banner' : 'Create Banner'}</DialogTitle>
         </DialogHeader>

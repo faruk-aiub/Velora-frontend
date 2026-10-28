@@ -83,60 +83,60 @@ export default function AdminsPage() {
 
   return (
     <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-75">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-3 sm:gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900">Admins Management</h1>
-          <p className="text-sm text-gray-500 mt-1">Real-time view of users with administrative privileges.</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-gray-900">Admins Management</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-1">Real-time view of users with administrative privileges.</p>
         </div>
         
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-3 px-4 py-2 bg-white rounded-full shadow-sm border border-gray-100 hidden md:flex">
-            <div className="relative flex h-3 w-3">
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3 px-3.5 sm:px-4 py-1.5 sm:py-2 bg-white rounded-full shadow-sm border border-gray-100 text-xs sm:text-sm">
+            <div className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3 bg-emerald-500"></span>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">Live Updates</span>
+            <div className="flex items-center gap-1.5 sm:gap-2">
+              <span className="font-medium text-gray-700">Live Updates</span>
               {isFetching && <RefreshCw className="h-3 w-3 animate-spin text-gray-400" />}
             </div>
             {lastUpdated && (
-              <span className="text-xs text-gray-400 ml-2 border-l pl-3">
-                Updated: {lastUpdated.toLocaleTimeString()}
+              <span className="text-[10px] sm:text-xs text-gray-400 ml-1.5 sm:ml-2 border-l pl-2 sm:pl-3">
+                {lastUpdated.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
           </div>
 
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-full shadow-sm px-6 font-bold">
-                <Plus className="mr-2 h-4 w-4" /> Add Admin
+              <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-full shadow-sm px-4 sm:px-6 h-9 sm:h-10 text-xs sm:text-sm font-bold">
+                <Plus className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" /> Add Admin
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
+            <DialogContent className="max-w-[calc(100vw-32px)] sm:max-w-[425px] rounded-2xl p-4 sm:p-6">
               <DialogHeader>
-                <DialogTitle>Create New Admin</DialogTitle>
+                <DialogTitle className="text-lg font-bold">Create New Admin</DialogTitle>
               </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="first_name">First Name</Label>
-                    <Input id="first_name" placeholder="John" value={formData.first_name} onChange={e => setFormData({...formData, first_name: e.target.value})} required />
+              <form onSubmit={handleSubmit} className="space-y-4 pt-3">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1.5">
+                    <Label htmlFor="first_name" className="text-xs font-semibold">First Name</Label>
+                    <Input id="first_name" placeholder="John" value={formData.first_name} onChange={e => setFormData({...formData, first_name: e.target.value})} required className="rounded-xl text-sm" />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="last_name">Last Name</Label>
-                    <Input id="last_name" placeholder="Doe" value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} required />
+                  <div className="space-y-1.5">
+                    <Label htmlFor="last_name" className="text-xs font-semibold">Last Name</Label>
+                    <Input id="last_name" placeholder="Doe" value={formData.last_name} onChange={e => setFormData({...formData, last_name: e.target.value})} required className="rounded-xl text-sm" />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="admin@example.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required />
+                <div className="space-y-1.5">
+                  <Label htmlFor="email" className="text-xs font-semibold">Email</Label>
+                  <Input id="email" type="email" placeholder="admin@example.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} required className="rounded-xl text-sm" />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required />
+                <div className="space-y-1.5">
+                  <Label htmlFor="password" className="text-xs font-semibold">Password</Label>
+                  <Input id="password" type="password" value={formData.password} onChange={e => setFormData({...formData, password: e.target.value})} required className="rounded-xl text-sm" />
                 </div>
                 <div className="pt-2">
-                  <Button type="submit" className="w-full bg-[#BC8477] hover:bg-[#A67165]" disabled={createMutation.isPending}>
+                  <Button type="submit" className="w-full bg-[#BC8477] hover:bg-[#A67165] rounded-xl font-bold h-10 text-sm" disabled={createMutation.isPending}>
                     {createMutation.isPending ? 'Creating...' : 'Create Admin'}
                   </Button>
                 </div>
@@ -146,51 +146,47 @@ export default function AdminsPage() {
         </div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0 hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-gray-500">Total Admins</CardTitle>
-            <div className="p-2 bg-blue-50 rounded-2xl">
-              <Shield className="h-5 w-5 text-blue-500" />
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
+        <Card className="rounded-2xl sm:rounded-3xl border-0 bg-white shadow-sm ring-0 hover:shadow-md transition-shadow p-3.5 sm:p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider truncate">Total Admins</span>
+            <div className="p-1.5 sm:p-2 bg-blue-50 rounded-xl sm:rounded-2xl shrink-0">
+              <Shield className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-gray-900">{totalAdmins}</div>
-            <p className="text-xs text-gray-400 mt-2 font-medium">Registered admin accounts</p>
-          </CardContent>
+          </div>
+          <div className="text-xl sm:text-3xl font-black text-gray-900 mt-2 sm:mt-3 truncate">{totalAdmins}</div>
+          <p className="text-[11px] sm:text-xs text-gray-400 mt-0.5 sm:mt-1 truncate">Admin accounts</p>
         </Card>
 
-        <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0 hover:shadow-md transition-shadow">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-bold text-gray-500">Active Admins</CardTitle>
-            <div className="p-2 bg-emerald-50 rounded-2xl">
-              <ShieldCheck className="h-5 w-5 text-emerald-500" />
+        <Card className="rounded-2xl sm:rounded-3xl border-0 bg-white shadow-sm ring-0 hover:shadow-md transition-shadow p-3.5 sm:p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] sm:text-xs font-semibold text-emerald-700 uppercase tracking-wider truncate">Active Admins</span>
+            <div className="p-1.5 sm:p-2 bg-emerald-50 rounded-xl sm:rounded-2xl shrink-0">
+              <ShieldCheck className="h-4 w-4 sm:h-5 sm:w-5 text-emerald-500" />
             </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-4xl font-bold text-gray-900">{activeAdmins}</div>
-            <p className="text-xs text-emerald-500 mt-2 font-bold flex items-center">
-              <UserCheck className="w-4 h-4 mr-1"/> Accounts active
-            </p>
-          </CardContent>
+          </div>
+          <div className="text-xl sm:text-3xl font-black text-gray-900 mt-2 sm:mt-3 truncate">{activeAdmins}</div>
+          <p className="text-[11px] sm:text-xs text-emerald-600 mt-0.5 sm:mt-1 truncate flex items-center">
+            <UserCheck className="w-3.5 h-3.5 mr-1 shrink-0"/> Active
+          </p>
         </Card>
       </div>
 
-      <Card className="rounded-3xl border-0 bg-white shadow-sm ring-0">
-        <CardHeader>
-          <CardTitle className="text-xl font-bold text-gray-900">Admin Users</CardTitle>
+      <Card className="rounded-2xl sm:rounded-3xl border-0 bg-white shadow-sm ring-0">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl font-bold text-gray-900">Admin Users</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="border border-gray-100 rounded-2xl overflow-hidden">
+        <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
+          <div className="border border-gray-100 rounded-2xl overflow-x-auto overscroll-x-contain">
             <Table>
               <TableHeader className="bg-gray-50/50">
                 <TableRow className="border-gray-100">
-                  <TableHead className="font-semibold text-gray-600">Name</TableHead>
-                  <TableHead className="font-semibold text-gray-600">Email</TableHead>
-                  <TableHead className="font-semibold text-gray-600">Role</TableHead>
-                  <TableHead className="font-semibold text-gray-600">Status</TableHead>
-                  <TableHead className="font-semibold text-gray-600 text-right">Joined</TableHead>
-                  <TableHead className="font-semibold text-gray-600 text-center w-12">Actions</TableHead>
+                  <TableHead className="font-semibold text-gray-600 whitespace-nowrap">Name</TableHead>
+                  <TableHead className="font-semibold text-gray-600 whitespace-nowrap">Email</TableHead>
+                  <TableHead className="font-semibold text-gray-600 whitespace-nowrap">Role</TableHead>
+                  <TableHead className="font-semibold text-gray-600 whitespace-nowrap">Status</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-right whitespace-nowrap">Joined</TableHead>
+                  <TableHead className="font-semibold text-gray-600 text-center w-12 whitespace-nowrap">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -208,26 +204,26 @@ export default function AdminsPage() {
                 ) : (
                   admins.map((admin: any) => (
                     <TableRow key={admin.id} className="border-gray-50 transition-colors hover:bg-gray-50/50">
-                      <TableCell className="font-bold text-gray-900">
+                      <TableCell className="font-bold text-gray-900 whitespace-nowrap text-xs sm:text-sm">
                         {admin.profile ? `${admin.profile.first_name} ${admin.profile.last_name}` : 'N/A'}
                       </TableCell>
-                      <TableCell className="text-gray-600">{admin.email}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase bg-blue-100 text-blue-800">
+                      <TableCell className="text-gray-600 whitespace-nowrap text-xs sm:text-sm">{admin.email}</TableCell>
+                      <TableCell className="whitespace-nowrap">
+                        <span className="inline-flex px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wide uppercase bg-blue-100 text-blue-800">
                           {admin.role}
                         </span>
                       </TableCell>
-                      <TableCell>
-                        <span className={`inline-flex px-3 py-1 rounded-full text-[11px] font-bold tracking-wide uppercase ${admin.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                      <TableCell className="whitespace-nowrap">
+                        <span className={`inline-flex px-2.5 py-0.5 rounded-full text-[10px] sm:text-[11px] font-bold tracking-wide uppercase ${admin.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
                           {admin.is_active ? 'Active' : 'Inactive'}
                         </span>
                       </TableCell>
-                      <TableCell className="text-right text-sm text-gray-500">
+                      <TableCell className="text-right text-xs sm:text-sm text-gray-500 whitespace-nowrap">
                         {new Date(admin.created_at).toLocaleDateString(undefined, {
                           year: 'numeric', month: 'short', day: 'numeric'
                         })}
                       </TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="text-center whitespace-nowrap">
                         <DropdownMenu>
                           <DropdownMenuTrigger className="h-8 w-8 p-0 inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors hover:bg-zinc-100">
                               <span className="sr-only">Open menu</span>

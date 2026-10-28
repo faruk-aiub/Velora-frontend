@@ -34,22 +34,22 @@ export default function MessagesPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Contact Messages</h1>
-          <p className="text-gray-500">View and manage customer inquiries.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">Contact Messages</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">View and manage customer inquiries.</p>
         </div>
-        <div className="flex items-center gap-2 bg-[#EAF0E2] text-[#7A915C] px-4 py-2 rounded-2xl font-bold">
-          <Mail size={18} />
+        <div className="flex items-center gap-2 bg-[#EAF0E2] text-[#7A915C] px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl font-bold text-xs sm:text-sm w-fit">
+          <Mail size={16} />
           {unreadCount} Unread
         </div>
       </div>
 
-      <Card className="rounded-[32px] border-none shadow-sm">
-        <CardHeader>
-          <CardTitle>Inbox</CardTitle>
+      <Card className="rounded-2xl sm:rounded-[32px] border-none shadow-sm">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl font-bold">Inbox</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
           <DataTable
             columns={columns}
             data={messages}

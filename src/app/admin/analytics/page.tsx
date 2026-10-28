@@ -108,76 +108,76 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Overview Stats */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-3.5 sm:p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500">Total Revenue</span>
-            <div className="w-8 h-8 rounded-xl bg-[#BC8477]/10 flex items-center justify-center">
-              <Banknote className="h-4 w-4 text-[#BC8477]" />
+            <span className="text-[11px] sm:text-xs font-semibold text-stone-500">Total Revenue</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-[#BC8477]/10 flex items-center justify-center shrink-0">
+              <Banknote className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-[#BC8477]" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">৳{(dashboardStats.totalSales || 0).toLocaleString()}</div>
-            <p className="text-xs font-semibold text-emerald-600 flex items-center mt-1">
-              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +12.5% <span className="text-stone-400 font-normal ml-1">vs last month</span>
+          <div className="mt-2.5 sm:mt-3">
+            <div className="text-lg sm:text-2xl font-extrabold text-stone-900 tracking-tight truncate">৳{(dashboardStats.totalSales || 0).toLocaleString()}</div>
+            <p className="text-[11px] sm:text-xs font-semibold text-emerald-600 flex items-center mt-1 truncate">
+              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5 shrink-0" /> +12.5% <span className="text-stone-400 font-normal ml-1 hidden xs:inline">vs last month</span>
             </p>
           </div>
         </Card>
         
-        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-3.5 sm:p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500">Active Customers</span>
-            <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center">
-              <Users className="h-4 w-4 text-blue-500" />
+            <span className="text-[11px] sm:text-xs font-semibold text-stone-500">Customers</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-50 flex items-center justify-center shrink-0">
+              <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-blue-500" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">{userStats.total}</div>
-            <p className="text-xs font-semibold text-emerald-600 flex items-center mt-1">
-              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +{userStats.newThisMonth} <span className="text-stone-400 font-normal ml-1">new this month</span>
+          <div className="mt-2.5 sm:mt-3">
+            <div className="text-lg sm:text-2xl font-extrabold text-stone-900 tracking-tight truncate">{userStats.total}</div>
+            <p className="text-[11px] sm:text-xs font-semibold text-emerald-600 flex items-center mt-1 truncate">
+              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5 shrink-0" /> +{userStats.newThisMonth} <span className="text-stone-400 font-normal ml-1 hidden xs:inline">new</span>
             </p>
           </div>
         </Card>
         
-        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-3.5 sm:p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500">Total Orders</span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-50 flex items-center justify-center">
-              <CreditCard className="h-4 w-4 text-emerald-500" />
+            <span className="text-[11px] sm:text-xs font-semibold text-stone-500">Total Orders</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-50 flex items-center justify-center shrink-0">
+              <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-emerald-500" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">{dashboardStats.totalOrders}</div>
-            <p className="text-xs font-semibold text-emerald-600 flex items-center mt-1">
-              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" /> +8.2% <span className="text-stone-400 font-normal ml-1">vs last month</span>
+          <div className="mt-2.5 sm:mt-3">
+            <div className="text-lg sm:text-2xl font-extrabold text-stone-900 tracking-tight truncate">{dashboardStats.totalOrders}</div>
+            <p className="text-[11px] sm:text-xs font-semibold text-emerald-600 flex items-center mt-1 truncate">
+              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5 shrink-0" /> +8.2% <span className="text-stone-400 font-normal ml-1 hidden xs:inline">vs last month</span>
             </p>
           </div>
         </Card>
         
-        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+        <Card className="rounded-2xl border border-stone-200/70 bg-white shadow-xs p-3.5 sm:p-5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-stone-500">Active Products</span>
-            <div className="w-8 h-8 rounded-xl bg-purple-50 flex items-center justify-center">
-              <Package className="h-4 w-4 text-purple-500" />
+            <span className="text-[11px] sm:text-xs font-semibold text-stone-500">Products</span>
+            <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-purple-50 flex items-center justify-center shrink-0">
+              <Package className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-purple-500" />
             </div>
           </div>
-          <div className="mt-3">
-            <div className="text-2xl font-extrabold text-stone-900 tracking-tight">{dashboardStats.totalProducts}</div>
-            <p className="text-xs font-semibold text-purple-600 flex items-center mt-1">
-              <Activity className="w-3.5 h-3.5 mr-0.5" /> Stable inventory
+          <div className="mt-2.5 sm:mt-3">
+            <div className="text-lg sm:text-2xl font-extrabold text-stone-900 tracking-tight truncate">{dashboardStats.totalProducts}</div>
+            <p className="text-[11px] sm:text-xs font-semibold text-purple-600 flex items-center mt-1 truncate">
+              <Activity className="w-3.5 h-3.5 mr-0.5 shrink-0" /> Stable inventory
             </p>
           </div>
         </Card>
       </div>
 
       {/* Charts Section */}
-      <div className="grid gap-4 md:grid-cols-7">
-        <Card className="md:col-span-4 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+        <Card className="lg:col-span-4 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-3.5 sm:p-5 min-w-0">
           <div className="mb-3">
             <h3 className="text-sm sm:text-base font-bold text-stone-900">Revenue Growth</h3>
             <p className="text-xs text-stone-400">Monthly revenue distribution</p>
           </div>
-          <div className="h-[250px] w-full">
+          <div className="h-[210px] sm:h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />
@@ -194,12 +194,12 @@ export default function AnalyticsPage() {
           </div>
         </Card>
 
-        <Card className="md:col-span-3 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-4 sm:p-5">
+        <Card className="lg:col-span-3 rounded-2xl border border-stone-200/70 bg-white shadow-xs p-3.5 sm:p-5 min-w-0">
           <div className="mb-3">
             <h3 className="text-sm sm:text-base font-bold text-stone-900">Sales Trend</h3>
             <p className="text-xs text-stone-400">Past performance momentum</p>
           </div>
-          <div className="h-[250px] w-full">
+          <div className="h-[210px] sm:h-[250px] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={salesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" opacity={0.6} />

@@ -154,7 +154,7 @@ export function AdminProfileDialog({ open, onOpenChange }: AdminProfileDialogPro
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] p-6 rounded-3xl bg-white border border-stone-200/80 shadow-2xl">
+      <DialogContent className="w-[calc(100vw-24px)] sm:max-w-[520px] p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white border border-stone-200/80 shadow-2xl">
         <DialogHeader className="pb-1">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#BC8477] uppercase tracking-wider mb-1">
             <UserCog className="w-4 h-4" />

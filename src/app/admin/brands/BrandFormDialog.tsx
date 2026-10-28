@@ -112,7 +112,7 @@ export function BrandFormDialog({ open, onOpenChange, brandToEdit }: BrandFormDi
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[480px] p-6 rounded-3xl bg-white border border-gray-100 shadow-2xl">
+      <DialogContent className="w-[calc(100vw-24px)] sm:max-w-[480px] p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white border border-gray-100 shadow-2xl">
         <DialogHeader>
           <div className="flex items-center gap-2 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">
             <Award className="w-4 h-4 text-gray-700" />

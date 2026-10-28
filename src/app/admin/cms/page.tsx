@@ -53,27 +53,27 @@ export default function CMSPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">CMS & Banners</h1>
-          <p className="text-gray-500">Manage your homepage banners and content.</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-gray-900">CMS & Banners</h1>
+          <p className="text-xs sm:text-sm text-gray-500 mt-0.5">Manage your homepage banners and content.</p>
         </div>
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-[#F9F0E6] text-[#B58A63] px-4 py-2 rounded-2xl font-bold">
-            <Layout size={18} />
+        <div className="flex flex-wrap items-center gap-2.5 sm:gap-4 w-full sm:w-auto">
+          <div className="flex items-center gap-2 bg-[#F9F0E6] text-[#B58A63] px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-2xl font-bold text-xs sm:text-sm">
+            <Layout size={16} />
             {banners.length} Banners
           </div>
-          <Button onClick={handleCreate} className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6">
-            <Plus className="mr-2 h-4 w-4" /> Add Banner
+          <Button onClick={handleCreate} className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-4 sm:px-6 h-9 sm:h-10 text-xs sm:text-sm font-bold flex-1 sm:flex-none justify-center shadow-sm">
+            <Plus className="mr-1.5 sm:mr-2 h-3.5 w-3.5 sm:h-4 sm:w-4" /> Add Banner
           </Button>
         </div>
       </div>
 
-      <Card className="rounded-[32px] border-none shadow-sm">
-        <CardHeader>
-          <CardTitle>Homepage Banners</CardTitle>
+      <Card className="rounded-2xl sm:rounded-[32px] border-none shadow-sm">
+        <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+          <CardTitle className="text-lg sm:text-xl font-bold">Homepage Banners</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-3 sm:p-6 pt-0 sm:pt-0">
           <DataTable
             columns={columns}
             data={banners}

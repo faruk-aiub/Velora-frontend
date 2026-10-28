@@ -25,20 +25,13 @@ export default function AdminRootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning className="h-full overflow-hidden">
+    <html lang="en" suppressHydrationWarning className="admin-html h-full">
       <body
         suppressHydrationWarning
-        className={`${inter.className} antialiased bg-[#F4F5F7] h-full overflow-hidden`}
-        style={{
-          zoom: 0.8,
-          width: 'calc(100vw / 0.8)',
-          height: 'calc(100vh / 0.8)',
-          maxWidth: 'calc(100vw / 0.8)',
-          maxHeight: 'calc(100vh / 0.8)',
-        }}
+        className={`${inter.className} admin-body antialiased bg-[#F4F5F7] h-full min-h-screen lg:min-h-0 text-[#2D2826] overflow-x-hidden`}
       >
         <Providers>
-          <div className="w-full h-full overflow-hidden">
+          <div className="w-full h-full min-h-screen lg:min-h-0 flex flex-col overflow-hidden">
             <AdminClientShell>{children}</AdminClientShell>
           </div>
         </Providers>
