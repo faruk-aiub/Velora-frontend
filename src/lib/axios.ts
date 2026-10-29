@@ -1,11 +1,19 @@
 import axios from 'axios';
 
-const baseURL = typeof window === 'undefined'
-  ? (process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api/v1')
-  : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1');
+const getBaseURL = () => {
+  if (typeof window === 'undefined') {
+    return process.env.INTERNAL_API_URL || process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3000/api/v1';
+  }
+  const hostname = window.location.hostname;
+  if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1') {
+    return `http://${hostname}:3000/api/v1`;
+  }
+  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+};
 
 const apiClient = axios.create({
-  baseURL,
+  baseURL: getBaseURL(),
+  timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -17,6 +25,12 @@ const apiClient = axios.create({
 // ========================
 apiClient.interceptors.request.use(
   (config) => {
+    if (typeof window !== 'undefined') {
+      const hostname = window.location.hostname;
+      if (hostname && hostname !== 'localhost' && hostname !== '127.0.0.1' && config.baseURL?.includes('localhost')) {
+        config.baseURL = config.baseURL.replace('localhost', hostname);
+      }
+    }
     // Access token is stored in Zustand / memory — retrieve it here
     if (typeof window !== 'undefined') {
       const authStorage = localStorage.getItem('velora-auth');

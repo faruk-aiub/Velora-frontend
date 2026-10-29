@@ -92,46 +92,46 @@ export function MessagesTab() {
 
   if (!selectedThread) {
     return (
-      <div className="bg-white rounded-[32px] p-6 lg:p-8 shadow-sm min-h-[500px]">
-        <div className="flex items-center justify-between mb-6">
+      <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] p-4 sm:p-6 lg:p-8 shadow-sm min-h-[480px]">
+        <div className="flex items-center justify-between mb-4 sm:mb-6">
           <div>
-            <h2 className="font-bold text-xl text-gray-900">Support Inbox</h2>
-            <p className="text-sm text-gray-500 mt-1">View your conversations with our support team</p>
+            <h2 className="font-bold text-lg sm:text-xl text-gray-900">Support Inbox</h2>
+            <p className="text-xs sm:text-sm text-gray-500 mt-0.5">View your conversations with our support team</p>
           </div>
         </div>
 
         {threads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
-            <div className="w-16 h-16 bg-[#F5F2F0] rounded-full flex items-center justify-center mb-4">
-              <MessageCircle size={28} className="text-[#B5AFAD]" />
+            <div className="w-14 h-14 sm:w-16 sm:h-16 bg-[#F5F2F0] rounded-full flex items-center justify-center mb-4">
+              <MessageCircle size={26} className="text-[#B5AFAD]" />
             </div>
-            <p className="text-[#7A7371] mb-4">You have no support tickets yet.</p>
+            <p className="text-sm text-[#7A7371] mb-4">You have no support tickets yet.</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {threads.map((thread: { id: string; subject: string; message: string; created_at: string; status: string; _count: { replies: number } }) => (
               <div 
                 key={thread.id} 
                 onClick={() => handleSelectThread(thread.id)}
-                className="group border border-gray-100 rounded-2xl p-5 hover:border-[#BC8477]/30 hover:bg-orange-50/30 transition-all cursor-pointer flex gap-4 items-start"
+                className="group border border-gray-100 rounded-xl sm:rounded-2xl p-3.5 sm:p-5 hover:border-[#BC8477]/30 hover:bg-orange-50/30 transition-all cursor-pointer flex gap-3 sm:gap-4 items-start"
               >
-                <div className="w-10 h-10 bg-[#F5F2F0] rounded-full flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-[#BC8477]">
-                  <MessageCircle size={20} />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#F5F2F0] rounded-full flex items-center justify-center shrink-0 group-hover:bg-white group-hover:text-[#BC8477]">
+                  <MessageCircle size={18} className="sm:w-5 sm:h-5" />
                 </div>
-                <div className="flex-1">
-                  <div className="flex justify-between items-start mb-1">
-                    <h3 className="font-bold text-gray-900 text-sm line-clamp-1">
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between items-start mb-1 gap-2">
+                    <h3 className="font-bold text-gray-900 text-xs sm:text-sm truncate">
                       {thread.subject || 'Support Ticket'}
                     </h3>
-                    <span className="text-xs text-gray-400 shrink-0 whitespace-nowrap ml-4">
+                    <span className="text-[10px] sm:text-xs text-gray-400 shrink-0 whitespace-nowrap">
                       {new Date(thread.created_at).toLocaleDateString()}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-500 line-clamp-1 mb-3">{thread.message}</p>
+                  <p className="text-xs sm:text-sm text-gray-500 truncate mb-2.5">{thread.message}</p>
                   
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2 sm:gap-3">
                     <span className={cn(
-                      "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
+                      "text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider",
                       thread.status === 'OPEN' ? "bg-amber-100 text-amber-700" :
                       thread.status === 'PENDING' ? "bg-blue-100 text-blue-700" :
                       thread.status === 'RESOLVED' ? "bg-green-100 text-green-700" :
@@ -141,7 +141,7 @@ export function MessagesTab() {
                     </span>
                     
                     {thread._count?.replies > 0 && (
-                      <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      <span className="bg-red-500 text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full">
                         {thread._count.replies} new
                       </span>
                     )}
@@ -161,20 +161,20 @@ export function MessagesTab() {
   }
 
   return (
-    <div className="bg-white rounded-[32px] overflow-hidden shadow-sm flex flex-col h-[650px]">
+    <div className="bg-white rounded-2xl sm:rounded-[28px] lg:rounded-[32px] overflow-hidden shadow-sm flex flex-col h-[calc(100dvh-200px)] min-h-[480px] lg:h-[650px]">
       {/* Header */}
-      <div className="border-b border-gray-100 px-6 py-4 flex items-center gap-4 bg-[#F9FAFB]">
+      <div className="border-b border-gray-100 px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 bg-[#F9FAFB]">
         <button 
           onClick={() => handleSelectThread(null)}
-          className="w-8 h-8 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors"
+          className="w-8 h-8 rounded-full hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
         >
           <ArrowLeft size={18} />
         </button>
-        <div>
-          <h2 className="font-bold text-gray-900 text-lg">{threadData?.subject || 'Support Ticket'}</h2>
+        <div className="min-w-0">
+          <h2 className="font-bold text-gray-900 text-sm sm:text-lg truncate">{threadData?.subject || 'Support Ticket'}</h2>
           <div className="flex items-center gap-2 mt-0.5">
             <span className={cn(
-              "text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider inline-block",
+              "text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider inline-block",
               threadData?.status === 'OPEN' ? "bg-amber-100 text-amber-700" :
               threadData?.status === 'PENDING' ? "bg-blue-100 text-blue-700" :
               threadData?.status === 'RESOLVED' ? "bg-green-100 text-green-700" :
@@ -182,21 +182,21 @@ export function MessagesTab() {
             )}>
               {threadData?.status}
             </span>
-            <span className="text-xs text-gray-500">Ticket #{threadData?.id.split('-')[0].toUpperCase()}</span>
+            <span className="text-[10px] sm:text-xs text-gray-500">Ticket #{threadData?.id.split('-')[0].toUpperCase()}</span>
           </div>
         </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gray-50/50">
+      <div className="flex-1 overflow-y-auto p-3.5 sm:p-6 space-y-4 sm:space-y-6 bg-gray-50/50">
         {/* Original Message */}
-        <div className="flex gap-4">
-          <div className="w-8 h-8 bg-[#BC8477] rounded-full flex items-center justify-center text-white shrink-0 text-xs font-bold uppercase">
+        <div className="flex gap-2.5 sm:gap-4">
+          <div className="w-7 h-7 sm:w-8 sm:h-8 bg-[#BC8477] rounded-full flex items-center justify-center text-white shrink-0 text-xs font-bold uppercase">
             {user?.first_name?.charAt(0)}{user?.last_name?.charAt(0)}
           </div>
           <div>
-            <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-5 py-3.5 shadow-sm">
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{threadData?.message}</p>
+            <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none px-3.5 sm:px-5 py-2.5 sm:py-3.5 shadow-sm">
+              <p className="text-xs sm:text-sm text-gray-700 whitespace-pre-wrap">{threadData?.message}</p>
             </div>
             <p className="text-[10px] text-gray-400 mt-1 ml-1 font-medium">{new Date(threadData?.created_at).toLocaleString()}</p>
           </div>
@@ -206,20 +206,20 @@ export function MessagesTab() {
         {threadData?.replies?.map((reply: { id: string; message: string; created_at: string; sender?: { role: string } }) => {
           const isAdmin = reply.sender?.role === 'ADMIN';
           return (
-            <div key={reply.id} className={cn("flex gap-4", isAdmin ? "flex-row-reverse" : "")}>
-              <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white shrink-0 text-xs font-bold uppercase", 
+            <div key={reply.id} className={cn("flex gap-2.5 sm:gap-4", isAdmin ? "flex-row-reverse" : "")}>
+              <div className={cn("w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-white shrink-0 text-xs font-bold uppercase", 
                 isAdmin ? "bg-gray-900" : "bg-[#BC8477]"
               )}>
                 {isAdmin ? 'V' : `${user?.first_name?.charAt(0)}${user?.last_name?.charAt(0)}`}
               </div>
               <div className={cn("flex flex-col", isAdmin ? "items-end" : "items-start")}>
                 <div className={cn(
-                  "px-5 py-3.5 shadow-sm max-w-[85%]",
+                  "px-3.5 sm:px-5 py-2.5 sm:py-3.5 shadow-sm max-w-[88%] sm:max-w-[85%]",
                   isAdmin 
                     ? "bg-gray-900 text-white rounded-2xl rounded-tr-none" 
                     : "bg-white border border-gray-100 text-gray-700 rounded-2xl rounded-tl-none"
                 )}>
-                  <p className="text-sm whitespace-pre-wrap">{reply.message}</p>
+                  <p className="text-xs sm:text-sm whitespace-pre-wrap">{reply.message}</p>
                 </div>
                 <p className={cn("text-[10px] text-gray-400 mt-1 font-medium", isAdmin ? "mr-1" : "ml-1")}>
                   {isAdmin ? 'Velora Support' : 'You'} • {new Date(reply.created_at).toLocaleString()}

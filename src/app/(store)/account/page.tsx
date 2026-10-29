@@ -20,7 +20,7 @@ import Image from 'next/image';
 import {
   LayoutDashboard, Package, MapPin, User as UserIcon, Heart, ShoppingCart,
   LogOut, Trash2, Plus, Star, Bell, HelpCircle, RotateCcw, Shield, CreditCard,
-  ChevronRight, ChevronDown, Edit3, Eye, EyeOff, Loader2, Check, X, AlertCircle,
+  ChevronRight, ChevronLeft, ChevronDown, Edit3, Eye, EyeOff, Loader2, Check, X, AlertCircle,
   Truck, Clock, CheckCircle, XCircle, ArrowRight, Phone, Mail, Camera, Save, MessageCircle, Search, UserCog,
   ShieldCheck, Lock, Laptop
 } from 'lucide-react';
@@ -108,9 +108,114 @@ function AccountPageContent() {
   const [dashboardSearchQuery, setDashboardSearchQuery] = useState('');
   const asideRef = useRef<HTMLElement>(null);
   const sidebarNavRef = useRef<HTMLElement>(null);
+  const mobileNavScrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(true);
+  const isDraggingMobileNavRef = useRef(false);
+  const startXMobileNavRef = useRef(0);
+  const scrollLeftMobileNavRef = useRef(0);
+  const hasDraggedMobileNavRef = useRef(false);
+
+  const checkMobileNavScroll = () => {
+    const el = mobileNavScrollRef.current;
+    if (el) {
+      setCanScrollLeft(el.scrollLeft > 6);
+      setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 6);
+    }
+  };
+
+  const scrollMobileNav = (direction: 'left' | 'right') => {
+    const el = mobileNavScrollRef.current;
+    if (el) {
+      const scrollAmount = direction === 'left' ? -220 : 220;
+      el.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      setTimeout(checkMobileNavScroll, 320);
+    }
+  };
+
+  // Convert vertical mouse wheel to horizontal scroll on mobile pills container
+  useEffect(() => {
+    const el = mobileNavScrollRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+        checkMobileNavScroll();
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    checkMobileNavScroll();
+    window.addEventListener('resize', checkMobileNavScroll);
+
+    return () => {
+      el.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('resize', checkMobileNavScroll);
+    };
+  }, []);
+
+  // Auto-scroll active tab into view
+  useEffect(() => {
+    const el = mobileNavScrollRef.current;
+    if (!el) return;
+    const activeBtn = el.querySelector(`[data-tab-id="${activeTab}"]`) as HTMLElement | null;
+    if (activeBtn) {
+      activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+    setTimeout(checkMobileNavScroll, 300);
+  }, [activeTab]);
+
+  const handleMobileNavMouseDown = (e: React.MouseEvent) => {
+    const el = mobileNavScrollRef.current;
+    if (!el) return;
+    isDraggingMobileNavRef.current = true;
+    hasDraggedMobileNavRef.current = false;
+    startXMobileNavRef.current = e.pageX - el.offsetLeft;
+    scrollLeftMobileNavRef.current = el.scrollLeft;
+  };
+
+  const handleMobileNavMouseMove = (e: React.MouseEvent) => {
+    if (!isDraggingMobileNavRef.current) return;
+    const el = mobileNavScrollRef.current;
+    if (!el) return;
+    const x = e.pageX - el.offsetLeft;
+    const walk = (x - startXMobileNavRef.current) * 1.5;
+    if (Math.abs(walk) > 4) {
+      hasDraggedMobileNavRef.current = true;
+    }
+    el.scrollLeft = scrollLeftMobileNavRef.current - walk;
+    checkMobileNavScroll();
+  };
+
+  const handleMobileNavMouseUp = () => {
+    isDraggingMobileNavRef.current = false;
+  };
 
   const { notifications, unreadCount } = useNotifications();
   const [isProfileDialogOpen, setIsProfileDialogOpen] = useState(false);
+
+  // Lock body scroll when mobile sidebar is open
+  useEffect(() => {
+    if (sidebarOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [sidebarOpen]);
+
+  // Close sidebar on ESC key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Sync profile from backend on mount
   useEffect(() => {
@@ -236,12 +341,17 @@ function AccountPageContent() {
       if (authStorage) token = JSON.parse(authStorage)?.state?.accessToken || '';
     } catch (e) { }
 
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+    if (!token) return;
+
+    let baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api/v1';
+    if (typeof window !== 'undefined' && window.location.hostname && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+      baseUrl = `http://${window.location.hostname}:3000/api/v1`;
+    }
     const sseUrl = `${baseUrl}/orders/stream?token=${token}`;
 
     const eventSource = new EventSource(sseUrl);
 
-    eventSource.onmessage = (event) => {
+    eventSource.onmessage = () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
     };
 
@@ -256,11 +366,12 @@ function AccountPageContent() {
   }, [user, queryClient]);
 
   // ─── Queries ─────────────────────────────────────────────────────────────
-  const { data: ordersData, isLoading: loadingOrders } = useQuery({
+  const { data: ordersData, isLoading: loadingOrders, isError: ordersError } = useQuery({
     queryKey: ['orders'],
     queryFn: () => orderService.getAll(1, 50),
     enabled: !!user,
-    refetchInterval: 5000,
+    staleTime: 30000,
+    retry: 1,
   });
 
   const { data: addressesData, isLoading: loadingAddresses } = useQuery({
@@ -482,34 +593,34 @@ function AccountPageContent() {
   const renderDashboard = () => (
     <div className="space-y-4 sm:space-y-5">
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
         {[
           { label: 'Total Orders', value: orders.length, icon: Package, color: 'text-[#BC8477]', bg: 'bg-[#BC8477]/10' },
           { label: 'Wishlist Items', value: wishlistItems.length, icon: Heart, color: 'text-gray-900', bg: 'bg-gray-100' },
           { label: 'Cart Items', value: cartItems.reduce((a, i) => a + i.quantity, 0), icon: ShoppingCart, color: 'text-[#BC8477]', bg: 'bg-[#BC8477]/10' },
           { label: 'Addresses', value: addresses.length, icon: MapPin, color: 'text-gray-900', bg: 'bg-gray-100' },
         ].map(stat => (
-          <div key={stat.label} className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-transparent hover:border-gray-100 transition-colors">
+          <div key={stat.label} className="bg-white rounded-2xl sm:rounded-3xl p-3.5 sm:p-4 lg:p-5 shadow-xs border border-transparent hover:border-gray-100 transition-colors">
             <div className="flex justify-between items-start mb-2 sm:mb-3">
-              <div className={cn('w-10 h-10 rounded-full flex items-center justify-center', stat.bg)}>
-                <stat.icon className={cn('w-5 h-5', stat.color)} />
+              <div className={cn('w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center', stat.bg)}>
+                <stat.icon className={cn('w-4 h-4 sm:w-5 sm:h-5', stat.color)} />
               </div>
             </div>
-            <p className="text-xs font-bold text-gray-500 mb-0.5">{stat.label}</p>
-            <p className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">{stat.value.toLocaleString()}</p>
+            <p className="text-[11px] sm:text-xs font-bold text-gray-500 mb-0.5">{stat.label}</p>
+            <p className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-gray-900 tracking-tight">{stat.value.toLocaleString()}</p>
           </div>
         ))}
       </div>
 
       {/* Row 2: Quick Actions & Recent Orders */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         {/* Quick Actions */}
         <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-gray-100/60 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-3">
             <h3 className="text-base font-bold text-gray-900">Quick Actions</h3>
             <span className="text-[11px] font-semibold text-gray-400">Shortcuts</span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+          <div className="grid grid-cols-3 sm:grid-cols-3 gap-2 sm:gap-2.5">
             {[
               { label: 'View Orders', tab: 'orders' as TabType, icon: Package },
               { label: 'Edit Profile', tab: 'profile' as TabType, icon: Edit3 },
@@ -521,12 +632,12 @@ function AccountPageContent() {
               <button
                 key={action.label}
                 onClick={() => setActiveTab(action.tab)}
-                className="flex flex-col items-center justify-center gap-2 p-3 bg-[#F9FAFB] rounded-xl hover:bg-gray-100 transition-colors group cursor-pointer"
+                className="flex flex-col items-center justify-center gap-1.5 sm:gap-2 p-2 sm:p-3 bg-[#F9FAFB] rounded-xl hover:bg-gray-100 transition-colors group cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-xs text-gray-500 group-hover:text-[#BC8477] transition-colors">
-                  <action.icon size={16} />
+                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white flex items-center justify-center shadow-xs text-gray-500 group-hover:text-[#BC8477] transition-colors">
+                  <action.icon size={15} />
                 </div>
-                <span className="text-[11px] font-bold text-gray-700 text-center">
+                <span className="text-[10px] sm:text-[11px] font-bold text-gray-700 text-center line-clamp-1">
                   {action.label}
                 </span>
               </button>
@@ -543,7 +654,38 @@ function AccountPageContent() {
             </button>
           </div>
           {loadingOrders ? (
-            <div className="flex justify-center py-6"><Loader2 className="animate-spin text-[#BC8477]" /></div>
+            <div className="space-y-2 py-1">
+              <div className="bg-[#F9FAFB] rounded-xl p-3 flex items-center justify-between border border-gray-100 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="w-28 h-3 bg-gray-200 rounded" />
+                    <div className="w-16 h-2 bg-gray-100 rounded" />
+                  </div>
+                </div>
+                <div className="w-14 h-4 bg-gray-200 rounded shrink-0" />
+              </div>
+              <div className="bg-[#F9FAFB] rounded-xl p-3 flex items-center justify-between border border-gray-100 animate-pulse">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="w-24 h-3 bg-gray-200 rounded" />
+                    <div className="w-14 h-2 bg-gray-100 rounded" />
+                  </div>
+                </div>
+                <div className="w-14 h-4 bg-gray-200 rounded shrink-0" />
+              </div>
+            </div>
+          ) : ordersError ? (
+            <div className="bg-gray-50 rounded-2xl p-5 text-center border border-dashed border-gray-200 my-auto">
+              <p className="text-xs text-gray-500 mb-1.5">Could not load recent orders.</p>
+              <button
+                onClick={() => queryClient.invalidateQueries({ queryKey: ['orders'] })}
+                className="text-xs font-bold text-[#BC8477] hover:underline cursor-pointer"
+              >
+                Try again
+              </button>
+            </div>
           ) : recentOrders.length === 0 ? (
             <div className="bg-gray-50 rounded-2xl p-5 text-center border border-dashed border-gray-200 my-auto">
               <p className="text-xs text-gray-500 mb-1.5">No recent orders yet.</p>
@@ -576,7 +718,7 @@ function AccountPageContent() {
       </div>
 
       {/* Row 3: Wishlist Highlights & Primary Address Snapshot */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         {/* Wishlist Highlights */}
         <div className="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-xs border border-gray-100/60">
           <div className="flex items-center justify-between mb-3">
@@ -598,7 +740,7 @@ function AccountPageContent() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+            <div className="grid grid-cols-3 gap-2 sm:gap-2.5">
               {wishlistItems.slice(0, 3).map((item: any, i: number) => {
                 const prod = item.product;
                 const img = prod?.images?.[0]?.url || '/placeholder.jpg';
@@ -854,6 +996,16 @@ function AccountPageContent() {
       <SectionHeader title="My Orders" subtitle="Track and manage all your orders" />
       {loadingOrders ? (
         <div className="flex justify-center py-16"><Loader2 className="animate-spin text-[#BC8477] w-8 h-8" /></div>
+      ) : ordersError ? (
+        <div className="flex flex-col items-center justify-center py-16 text-center">
+          <p className="text-gray-500 mb-3">Unable to load your orders right now.</p>
+          <button
+            onClick={() => queryClient.invalidateQueries({ queryKey: ['orders'] })}
+            className="btn-primary"
+          >
+            Try Again
+          </button>
+        </div>
       ) : orders.length === 0 ? (
         <EmptyState
           icon={Package}
@@ -927,13 +1079,13 @@ function AccountPageContent() {
           }
         />
       ) : (
-        <div className="space-y-6 mt-6">
+        <div className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
           {pendingOrders.map((order, i) => {
             const steps = ['PENDING', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
             const currentStep = steps.indexOf(order.status);
             return (
-              <div key={order.id || i} className="bg-white border border-gray-100 rounded-2xl p-4 sm:p-6 shadow-sm">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between items-start mb-6 sm:mb-8 gap-3">
+              <div key={order.id || i} className="bg-white border border-gray-100 rounded-xl sm:rounded-2xl p-3.5 sm:p-6 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between items-start mb-5 sm:mb-8 gap-2.5 sm:gap-3">
                   <div>
                     <p className="text-sm sm:text-base font-bold text-gray-900 mb-0.5">{getOrderDisplayName(order)}</p>
                     <p className="text-xs sm:text-sm text-gray-500">{new Date(order.created_at).toLocaleDateString()}</p>
@@ -941,10 +1093,10 @@ function AccountPageContent() {
                   <OrderStatusBadge status={order.status} />
                 </div>
                 {/* Progress Bar */}
-                <div className="relative">
+                <div className="relative py-1">
                   <div className="flex justify-between mb-3">
                     {steps.map((step, idx) => (
-                      <div key={step} className="flex flex-col items-center gap-1.5 sm:gap-2 flex-1 relative z-10">
+                      <div key={step} className="flex flex-col items-center gap-1 sm:gap-2 flex-1 relative z-10 px-1">
                         <div className={cn(
                           'w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 flex items-center justify-center text-[10px] sm:text-xs font-bold transition-all bg-white shadow-xs',
                           idx <= currentStep
@@ -954,7 +1106,7 @@ function AccountPageContent() {
                           {idx < currentStep ? <Check size={12} className="sm:w-3.5 sm:h-3.5" /> : idx + 1}
                         </div>
                         <span className={cn(
-                          'text-[10px] sm:text-xs font-bold text-center tracking-tight',
+                          'text-[9px] sm:text-xs font-bold text-center tracking-tight truncate max-w-[70px] sm:max-w-none',
                           idx <= currentStep ? 'text-gray-900' : 'text-gray-400'
                         )}>
                           {step}
@@ -962,7 +1114,7 @@ function AccountPageContent() {
                       </div>
                     ))}
                   </div>
-                  <div className="absolute top-3.5 sm:top-4 left-[10%] right-[10%] h-1 -z-0 rounded-full overflow-hidden">
+                  <div className="absolute top-4 sm:top-5 left-[12%] right-[12%] h-1 z-0 rounded-full overflow-hidden">
                     <div className="h-full bg-gray-100" />
                     <div
                       className="absolute top-0 left-0 h-full bg-[#BC8477] transition-all duration-500 rounded-full"
@@ -970,8 +1122,8 @@ function AccountPageContent() {
                     />
                   </div>
                 </div>
-                <div className="mt-6 sm:mt-8 bg-blue-50 rounded-xl p-3.5 sm:p-4 border border-blue-100 flex items-center gap-3">
-                  <Truck className="text-blue-500 shrink-0" size={18} />
+                <div className="mt-5 sm:mt-8 bg-blue-50 rounded-xl p-3 sm:p-4 border border-blue-100 flex items-center gap-2.5 sm:gap-3">
+                  <Truck className="text-blue-500 shrink-0" size={17} />
                   <p className="text-xs sm:text-sm text-blue-900">
                     <span className="font-bold">Estimated Delivery:</span>{' '}
                     {new Date(new Date(order.created_at).getTime() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { dateStyle: 'long' })}
@@ -997,10 +1149,10 @@ function AccountPageContent() {
           action={<Link href="/shop" className="btn-primary w-full sm:w-auto">Discover Products</Link>}
         />
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-6 mt-4 sm:mt-6">
           {wishlistItems.map((item, i) => (
-            <div key={item.id || i} className="bg-white border border-gray-100 rounded-2xl group overflow-hidden shadow-xs hover:shadow-md transition-shadow">
-              <Link href={`/product/${item.product.slug}`} className="block relative aspect-[4/5] bg-gray-50 overflow-hidden">
+            <div key={item.id || i} className="bg-white border border-gray-100 rounded-xl sm:rounded-2xl group overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between">
+              <Link href={`/product/${item.product.slug}`} className="block relative aspect-square sm:aspect-[4/5] bg-gray-50 overflow-hidden">
                 <Image
                   src={item.product.images?.[0]?.url || '/placeholder.jpg'}
                   alt={item.product.title}
@@ -1008,17 +1160,19 @@ function AccountPageContent() {
                   className="object-cover group-hover:scale-105 transition-transform duration-500"
                 />
               </Link>
-              <div className="p-4 sm:p-5">
-                <p className="text-[11px] sm:text-xs font-bold text-gray-500 mb-1">{item.product.brand?.name}</p>
-                <Link href={`/product/${item.product.slug}`}>
-                  <p className="text-xs sm:text-sm font-bold text-gray-900 hover:text-[#BC8477] transition-colors line-clamp-1">
-                    {item.product.title}
+              <div className="p-2.5 sm:p-4 lg:p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <p className="text-[10px] sm:text-xs font-bold text-gray-500 mb-0.5 sm:mb-1 truncate">{item.product.brand?.name}</p>
+                  <Link href={`/product/${item.product.slug}`}>
+                    <p className="text-xs sm:text-sm font-bold text-gray-900 hover:text-[#BC8477] transition-colors line-clamp-1">
+                      {item.product.title}
+                    </p>
+                  </Link>
+                  <p className="text-xs sm:text-base text-[#BC8477] font-bold mt-0.5 sm:mt-1">
+                    ৳{Number(item.product.variants?.[0]?.price || 0).toFixed(2)}
                   </p>
-                </Link>
-                <p className="text-sm sm:text-base text-[#BC8477] font-bold mt-1">
-                  ৳{Number(item.product.variants?.[0]?.price || 0).toFixed(2)}
-                </p>
-                <div className="flex gap-2 mt-4">
+                </div>
+                <div className="flex gap-1.5 sm:gap-2 mt-2.5 sm:mt-4">
                   <button
                     onClick={() => {
                       if (item.product.variants?.[0]) {
@@ -1027,15 +1181,15 @@ function AccountPageContent() {
                         toast.success('Added to cart!');
                       }
                     }}
-                    className="flex-1 text-xs font-bold bg-gray-900 rounded-xl text-white py-2.5 hover:bg-[#BC8477] transition-colors"
+                    className="flex-1 text-[11px] sm:text-xs font-bold bg-gray-900 rounded-lg sm:rounded-xl text-white py-1.5 sm:py-2.5 hover:bg-[#BC8477] transition-colors"
                   >
                     Add to Cart
                   </button>
                   <button
                     onClick={() => removeWishlistMutation.mutate(item.product.id)}
-                    className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition-colors shrink-0"
+                    className="w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl border border-gray-200 flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-500 hover:bg-red-50 transition-colors shrink-0"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={14} className="sm:w-4 sm:h-4" />
                   </button>
                 </div>
               </div>
@@ -1056,10 +1210,10 @@ function AccountPageContent() {
           action={<Link href="/shop" className="btn-primary w-full sm:w-auto">Continue Shopping</Link>}
         />
       ) : (
-        <div className="space-y-4 mt-6">
+        <div className="space-y-3 sm:space-y-4 mt-4 sm:mt-6">
           {cartItems.map((item, i) => (
-            <div key={item.id || i} className="bg-white border border-gray-100 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row gap-3 sm:gap-4 items-center shadow-xs">
-              <div className="relative w-16 h-20 sm:w-20 sm:h-24 min-w-[64px] sm:min-w-[80px] rounded-xl bg-gray-50 overflow-hidden shrink-0">
+            <div key={item.id || i} className="bg-white border border-gray-100 rounded-xl sm:rounded-2xl p-3 sm:p-4 flex gap-3 sm:gap-4 items-center shadow-xs">
+              <div className="relative w-16 h-16 sm:w-20 sm:h-24 min-w-[64px] sm:min-w-[80px] rounded-xl bg-gray-50 overflow-hidden shrink-0">
                 <Image
                   src={item.product.images?.[0]?.url || '/placeholder.jpg'}
                   alt={item.product.title}
@@ -1067,43 +1221,43 @@ function AccountPageContent() {
                   className="object-cover"
                 />
               </div>
-              <div className="flex-1 min-w-0 text-center sm:text-left w-full">
-                <p className="text-[11px] sm:text-xs font-bold text-gray-500 mb-0.5">{item.product.brand?.name}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] sm:text-xs font-bold text-gray-500 mb-0.5 truncate">{item.product.brand?.name}</p>
                 <Link href={`/product/${item.product.slug}`}>
                   <p className="text-xs sm:text-sm font-bold text-gray-900 hover:text-[#BC8477] transition-colors line-clamp-1">
                     {item.product.title}
                   </p>
                 </Link>
-                <p className="text-xs sm:text-sm font-bold text-[#BC8477] mt-1">৳{Number(item.variant.price).toFixed(2)}</p>
+                <p className="text-xs sm:text-sm font-bold text-[#BC8477] mt-0.5">৳{Number(item.variant.price).toFixed(2)}</p>
               </div>
-              <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end pt-2 sm:pt-0 border-t sm:border-t-0 border-gray-100">
-                <div className="flex items-center bg-gray-100 rounded-full p-1">
+              <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 sm:gap-4 shrink-0">
+                <div className="flex items-center bg-gray-100 rounded-full p-0.5 sm:p-1">
                   <button
                     onClick={() => cartStore.updateQuantity(item.id, item.quantity - 1)}
-                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:bg-white rounded-full transition-colors text-sm font-bold"
+                    className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:bg-white rounded-full transition-colors text-xs sm:text-sm font-bold"
                   >−</button>
-                  <span className="w-7 sm:w-8 flex items-center justify-center text-xs sm:text-sm font-bold text-gray-900">{item.quantity}</span>
+                  <span className="w-6 sm:w-8 flex items-center justify-center text-xs sm:text-sm font-bold text-gray-900">{item.quantity}</span>
                   <button
                     onClick={() => cartStore.updateQuantity(item.id, item.quantity + 1)}
-                    className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:bg-white rounded-full transition-colors text-sm font-bold"
+                    className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center text-gray-600 hover:bg-white rounded-full transition-colors text-xs sm:text-sm font-bold"
                   >+</button>
                 </div>
-                <div className="flex items-center gap-3 sm:gap-4">
-                  <p className="text-sm sm:text-base font-bold text-gray-900 min-w-[70px] text-right">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <p className="text-xs sm:text-base font-bold text-gray-900 min-w-[55px] sm:min-w-[70px] text-right">
                     ৳{(Number(item.variant.price) * item.quantity).toFixed(2)}
                   </p>
                   <button
                     onClick={() => cartStore.removeItem(item.id)}
-                    className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    className="w-7 h-7 sm:w-9 sm:h-9 flex items-center justify-center rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors"
                   >
-                    <Trash2 size={16} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               </div>
             </div>
           ))}
 
-          <div className="bg-[#F9FAFB] rounded-2xl border border-gray-100 p-4 sm:p-6 mt-6">
+          <div className="bg-[#F9FAFB] rounded-2xl border border-gray-100 p-4 sm:p-6 mt-4 sm:mt-6">
             <div className="flex justify-between items-center text-xs sm:text-sm mb-3">
               <span className="text-gray-600 font-bold">Subtotal</span>
               <span className="text-gray-900 font-bold">৳{cartStore.getTotalPrice().toFixed(2)}</span>
@@ -1118,7 +1272,7 @@ function AccountPageContent() {
               <span className="text-sm sm:text-base text-gray-900">Total</span>
               <span className="text-xl sm:text-2xl text-gray-900">৳{cartStore.getFinalPrice().toFixed(2)}</span>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-6">
               <button onClick={() => { cartStore.clearCart(); toast.success('Cart cleared'); }} className="btn-ghost w-full sm:flex-1">
                 Clear Cart
               </button>
@@ -1323,19 +1477,19 @@ function AccountPageContent() {
       <SectionHeader title="Help & Support" subtitle="Get help with your orders and account" className="mb-3" />
 
       {/* 3 Quick Contact Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 mb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3.5 mb-4">
         {[
           { icon: Phone, label: 'Call Us', value: '+880 1234 567890' },
           { icon: Mail, label: 'Email Us', value: 'support@velora.com' },
           { icon: Clock, label: 'Support Hours', value: 'Mon–Sat, 9am–6pm' },
         ].map(c => (
-          <div key={c.label} className="bg-[#F9FAFB] border border-gray-100 rounded-xl p-3.5 flex items-center gap-3.5 shadow-2xs">
-            <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-2xs border border-gray-100">
-              <c.icon size={18} className="text-[#BC8477]" />
+          <div key={c.label} className="bg-[#F9FAFB] border border-gray-100 rounded-xl p-3 sm:p-3.5 flex items-center gap-3 shadow-2xs">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 bg-white rounded-full flex items-center justify-center shrink-0 shadow-2xs border border-gray-100">
+              <c.icon size={16} className="text-[#BC8477]" />
             </div>
             <div className="min-w-0">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{c.label}</p>
-              <p className="text-sm sm:text-base font-bold text-gray-900 truncate">{c.value}</p>
+              <p className="text-[10px] sm:text-xs font-semibold text-gray-500 uppercase tracking-wider">{c.label}</p>
+              <p className="text-xs sm:text-sm lg:text-base font-bold text-gray-900 truncate">{c.value}</p>
             </div>
           </div>
         ))}
@@ -1743,97 +1897,251 @@ function AccountPageContent() {
           cursor: pointer;
         }
         .btn-ghost:hover { border-color: #BC8477; color: #BC8477; background: #FDF9F8; }
-        .account-scale-container {
-          zoom: 0.9;
+        @media (min-width: 1024px) {
+          .account-scale-container {
+            zoom: 0.9;
+          }
+          @supports not (zoom: 0.9) {
+            .account-scale-container {
+              transform: scale(0.9);
+              transform-origin: top center;
+              width: 111.11%;
+              margin-left: -5.55%;
+            }
+          }
+        }
+        @media (max-width: 1023px) {
+          .account-scale-container {
+            zoom: 1 !important;
+            transform: none !important;
+            width: 100% !important;
+            margin-left: 0 !important;
+          }
         }
         body:has(.account-scale-container) {
           background-color: #F3F4F6 !important;
         }
-        @supports not (zoom: 0.9) {
-          .account-scale-container {
-            transform: scale(0.9);
-            transform-origin: top center;
-            width: 111.11%;
-            margin-left: -5.55%;
-          }
-        }
       `}</style>
 
-      <main className="w-full min-h-screen pt-3 sm:pt-4 lg:pt-5 pb-5 sm:pb-6 lg:pb-7 bg-[#F3F4F6] account-scale-container flex flex-col">
-        <div className="max-w-[1600px] mx-auto px-3.5 sm:px-6 lg:px-8 flex-1 flex flex-col w-full">
+      <main className="w-full min-h-screen pt-3 sm:pt-4 lg:pt-5 pb-20 sm:pb-14 lg:pb-7 bg-[#F3F4F6] account-scale-container flex flex-col">
+        <div className="max-w-[1600px] mx-auto px-3 sm:px-5 lg:px-8 flex-1 flex flex-col w-full">
 
           {/* Mobile & Tablet Backdrop */}
           {sidebarOpen && (
             <div 
               data-lenis-prevent
-              className="fixed inset-0 bg-stone-950/50 backdrop-blur-xs z-40 lg:hidden transition-opacity"
+              className="fixed inset-0 bg-stone-950/60 backdrop-blur-xs z-50 lg:hidden transition-opacity"
               onClick={() => setSidebarOpen(false)}
             />
           )}
 
           {/* Mobile & Tablet Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 sm:mb-6 lg:hidden bg-white rounded-2xl p-3 sm:p-4 shadow-xs border border-gray-100">
-            <div className="flex items-center justify-between w-full sm:w-auto">
-              <div className="flex items-center gap-2">
+          <div className="flex flex-col gap-2.5 sm:gap-3 mb-3 sm:mb-4 lg:hidden bg-white rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-xs border border-gray-100">
+            {/* Top Row: Menu Toggle, Active Tab Title, Bell & Avatar */}
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                 <button
                   onClick={() => setSidebarOpen(true)}
-                  className="flex items-center gap-2 bg-[#F3F4F6] hover:bg-stone-200 text-stone-800 rounded-xl px-3 py-2 text-xs font-bold transition-colors"
+                  className="flex items-center gap-1.5 sm:gap-2 bg-[#F3F4F6] hover:bg-stone-200 text-stone-800 rounded-xl px-2.5 sm:px-3 py-1.5 sm:py-2 text-xs font-bold transition-colors cursor-pointer shrink-0"
                   aria-label="Open menu"
                 >
                   <LayoutDashboard size={15} className="text-[#BC8477]" />
                   <span>Menu</span>
                 </button>
-                <div className="h-4 w-px bg-gray-200 mx-1" />
+                <div className="h-4 w-px bg-gray-200 shrink-0" />
                 <h1 className="font-bold text-sm sm:text-base text-gray-900 truncate">
                   {NAV_ITEMS.find(n => n.id === activeTab)?.label}
                 </h1>
               </div>
 
-              {/* Notification icon & avatar on mobile */}
-              <div className="flex items-center gap-2 sm:hidden">
+              {/* Notification & Avatar for both Mobile & Tablet */}
+              <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => router.push('/shop')}
+                  className="hidden sm:inline-flex bg-gray-900 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold hover:bg-gray-800 transition-colors shrink-0"
+                >
+                  Shop
+                </button>
                 <button
                   onClick={() => setActiveTab('notifications')}
-                  className="relative w-8 h-8 rounded-full bg-[#F3F4F6] flex items-center justify-center text-gray-600"
+                  className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#F3F4F6] hover:bg-gray-200 flex items-center justify-center text-gray-600 transition-colors cursor-pointer"
+                  aria-label="Notifications"
                 >
-                  <Bell size={15} />
+                  <Bell size={16} />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
                   )}
                 </button>
-                <button
-                  type="button"
-                  onClick={() => setIsProfileDialogOpen(true)}
-                  className="w-8 h-8 rounded-full bg-[#BC8477] text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden cursor-pointer"
-                  title="Edit Profile"
-                >
-                  {userAvatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
-                  ) : (
-                    <span>{userInitials.charAt(0)}</span>
-                  )}
-                </button>
+                {/* User Dropdown for Mobile & Tablet */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="relative w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] text-white flex items-center justify-center font-bold text-xs shrink-0 overflow-hidden cursor-pointer hover:ring-2 hover:ring-[#BC8477]/40 transition-all border border-white shadow-2xs outline-none">
+                    {userAvatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                    ) : (
+                      <span>{userInitials.charAt(0)}</span>
+                    )}
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-64 p-2 rounded-2xl bg-white border border-gray-100 shadow-2xl">
+                    <div className="p-3 bg-gray-50/90 rounded-xl mb-1.5 border border-gray-100">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#BC8477] to-[#9A6B60] overflow-hidden shrink-0 flex items-center justify-center font-bold text-xs text-white">
+                          {userAvatarUrl ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={userAvatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                          ) : (
+                            <span>{userInitials}</span>
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-xs font-bold text-gray-900 truncate">{displayName}</div>
+                          <div className="text-[10px] text-gray-400 truncate">{displayEmail}</div>
+                          <div className="inline-flex items-center gap-1 mt-0.5 px-2 py-0.2 rounded-full text-[9px] font-bold bg-[#BC8477]/10 text-[#BC8477]">
+                            <span>{user?.role === 'ADMIN' ? 'Administrator' : 'Customer Account'}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <DropdownMenuItem
+                      onClick={() => setIsProfileDialogOpen(true)}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <UserCog size={15} className="text-[#BC8477]" />
+                      <span>Edit Profile & Avatar</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setActiveTab('orders')}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <Package size={15} className="text-gray-500" />
+                      <span>My Orders</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setActiveTab('wishlist')}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-gray-700 hover:text-gray-900 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <Heart size={15} className="text-gray-500" />
+                      <span>My Wishlist</span>
+                    </DropdownMenuItem>
+                    {user?.role === 'ADMIN' && (
+                      <DropdownMenuItem
+                        onClick={() => router.push('/admin/dashboard')}
+                        className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-purple-700 hover:bg-purple-50 cursor-pointer"
+                      >
+                        <Shield size={15} className="text-purple-600" />
+                        <span>Admin Panel</span>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator className="my-1 bg-gray-100" />
+                    <DropdownMenuItem
+                      onClick={handleLogout}
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50 cursor-pointer"
+                    >
+                      <LogOut size={15} className="text-red-600" />
+                      <span>Log Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
-            {/* Mobile / Tablet search & explore */}
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <div className="relative flex-1 sm:w-64">
-                <input
-                  type="text"
-                  placeholder="Search account..."
-                  className="w-full pl-8 pr-3 py-1.5 sm:py-2 bg-[#F3F4F6] rounded-xl text-xs sm:text-sm outline-none focus:ring-2 ring-[#BC8477]/20"
-                  value={dashboardSearchQuery}
-                  onChange={(e) => setDashboardSearchQuery(e.target.value)}
-                />
-                <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
-              </div>
+            {/* Bottom Row: Search Input */}
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search orders, addresses, wishlist..."
+                className="w-full pl-8 pr-8 py-2 bg-[#F3F4F6] rounded-xl text-xs sm:text-sm outline-none focus:ring-2 ring-[#BC8477]/20 border border-transparent focus:border-[#BC8477]/30 transition-all"
+                value={dashboardSearchQuery}
+                onChange={(e) => setDashboardSearchQuery(e.target.value)}
+              />
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
+              {dashboardSearchQuery && (
+                <button
+                  onClick={() => setDashboardSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
+                >
+                  <X size={13} />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Mobile & Tablet Quick Navigation Pills with Full Scroll Options */}
+          <div className="lg:hidden relative mb-3 sm:mb-4">
+            {/* Left Scroll Navigation Button */}
+            {canScrollLeft && (
               <button
-                onClick={() => router.push('/shop')}
-                className="hidden sm:inline-flex bg-gray-900 text-white px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-800 transition-colors shrink-0"
+                type="button"
+                onClick={() => scrollMobileNav('left')}
+                className="absolute left-0 top-[17px] -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 text-gray-700 shadow-md border border-gray-200/90 flex items-center justify-center hover:bg-white hover:text-gray-900 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                aria-label="Scroll left"
               >
-                Shop
+                <ChevronLeft size={16} />
               </button>
+            )}
+
+            {/* Left Gradient Fade Indicator */}
+            {canScrollLeft && (
+              <div className="absolute left-0 top-0 bottom-2.5 w-8 bg-gradient-to-r from-[#F3F4F6] via-[#F3F4F6]/80 to-transparent z-10 pointer-events-none" />
+            )}
+
+            {/* Right Scroll Navigation Button */}
+            {canScrollRight && (
+              <button
+                type="button"
+                onClick={() => scrollMobileNav('right')}
+                className="absolute right-0 top-[17px] -translate-y-1/2 z-20 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/95 text-gray-700 shadow-md border border-gray-200/90 flex items-center justify-center hover:bg-white hover:text-gray-900 hover:scale-105 active:scale-95 transition-all cursor-pointer"
+                aria-label="Scroll right"
+              >
+                <ChevronRight size={16} />
+              </button>
+            )}
+
+            {/* Right Gradient Fade Indicator */}
+            {canScrollRight && (
+              <div className="absolute right-0 top-0 bottom-2.5 w-8 bg-gradient-to-l from-[#F3F4F6] via-[#F3F4F6]/80 to-transparent z-10 pointer-events-none" />
+            )}
+
+            {/* Scrollable Container with Smooth Scroll, Touch Drag, Mouse Drag, Wheel & Visible Scrollbar */}
+            <div
+              ref={mobileNavScrollRef}
+              data-lenis-prevent
+              onScroll={checkMobileNavScroll}
+              onMouseDown={handleMobileNavMouseDown}
+              onMouseMove={handleMobileNavMouseMove}
+              onMouseUp={handleMobileNavMouseUp}
+              onMouseLeave={handleMobileNavMouseUp}
+              className={cn(
+                "flex items-center gap-1.5 overflow-x-auto pb-2.5 -mx-3 px-3 sm:-mx-5 sm:px-5 touch-pan-x [overscroll-behavior-x:contain] select-none",
+                // Visible, sleek, beautiful scrollbar so user has a clear visual cue and scrollbar handle
+                "[scrollbar-width:thin] [scrollbar-color:#D1D5DB_transparent]",
+                "[&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-gray-200/50 [&::-webkit-scrollbar-track]:rounded-full",
+                "[&::-webkit-scrollbar-thumb]:bg-stone-400/80 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-stone-500 active:[&::-webkit-scrollbar-thumb]:bg-stone-600",
+                "cursor-grab active:cursor-grabbing"
+              )}
+            >
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  data-tab-id={item.id}
+                  onClick={() => {
+                    if (hasDraggedMobileNavRef.current) return;
+                    setActiveTab(item.id as TabType);
+                  }}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-xl text-xs font-bold shrink-0 transition-all cursor-pointer",
+                    activeTab === item.id
+                      ? "bg-gray-900 text-white shadow-xs ring-1 ring-gray-900"
+                      : "bg-white text-gray-600 hover:bg-gray-100 border border-gray-100/80 hover:text-gray-900"
+                  )}
+                >
+                  <item.icon size={13} className={activeTab === item.id ? "text-[#BC8477]" : "text-gray-400"} />
+                  <span>{item.label}</span>
+                  {item.id === 'notifications' && unreadCount > 0 && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 ml-0.5" />
+                  )}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -1845,18 +2153,18 @@ function AccountPageContent() {
               className={cn(
                 'w-64 lg:w-72 shrink-0 flex flex-col bg-white shadow-sm overflow-hidden transition-all duration-300',
                 sidebarOpen 
-                  ? 'fixed inset-y-0 left-0 z-50 w-72 sm:w-80 max-w-[85vw] h-full rounded-r-3xl p-4 sm:p-5 shadow-2xl flex' 
+                  ? 'fixed inset-y-0 left-0 z-50 w-72 sm:w-80 max-w-[85vw] h-full rounded-r-3xl p-4 sm:p-5 shadow-2xl flex pb-[calc(1.5rem+env(safe-area-inset-bottom))]' 
                   : 'hidden lg:flex rounded-[32px] p-4 h-fit lg:h-[calc(100vh-3.2rem)] lg:max-h-[calc(100vh-3.2rem)] sticky top-5'
               )}
             >
               {sidebarOpen && (
                 <div className="flex items-center justify-between pb-3 mb-2 border-b border-gray-100 lg:hidden">
-                  <span className="font-bold text-base text-gray-900">Account Menu</span>
+                  <span className="font-bold text-sm sm:text-base text-gray-900">Account Menu</span>
                   <button
                     onClick={() => setSidebarOpen(false)}
-                    className="w-8 h-8 flex items-center justify-center text-gray-500 bg-gray-100 rounded-full hover:bg-gray-200"
+                    className="w-8 h-8 flex items-center justify-center text-gray-500 bg-gray-100 rounded-full hover:bg-gray-200 transition-colors cursor-pointer"
                   >
-                    <X size={18} />
+                    <X size={16} />
                   </button>
                 </div>
               )}
@@ -1909,7 +2217,7 @@ function AccountPageContent() {
               </nav>
 
               {/* Bottom Section */}
-              <div className="shrink-0 pt-3 border-t border-gray-100 mt-2 space-y-1">
+              <div className="shrink-0 pt-3 border-t border-gray-100 mt-2 space-y-1 pb-6 sm:pb-2">
                 {/* Admin Panel Link */}
                 {user.role === 'ADMIN' && (
                   <Link

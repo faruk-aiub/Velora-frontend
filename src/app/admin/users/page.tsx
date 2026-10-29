@@ -71,7 +71,7 @@ export default function UsersPage() {
  onClose={() => setUserToDelete(null)}
  onConfirm={() => userToDelete && deleteMutation.mutate(userToDelete.id)}
  title="Delete User"
- description={`Are you sure you want to delete"${userToDelete?.email}"? Their account will be deactivated and anonymized.`}
+ description={`Are you sure you want to delete "${userToDelete?.email}"? Their account and data will be permanently removed from the database.`}
  isLoading={deleteMutation.isPending}
  />
  </div>

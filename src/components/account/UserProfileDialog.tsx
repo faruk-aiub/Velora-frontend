@@ -154,7 +154,7 @@ export function UserProfileDialog({ open, onOpenChange }: UserProfileDialogProps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[520px] p-6 rounded-3xl bg-white border border-stone-200/80 shadow-2xl" style={{ zoom: 0.9 }}>
+      <DialogContent className="w-[94vw] sm:max-w-[520px] max-h-[90vh] overflow-y-auto p-4 sm:p-6 rounded-2xl sm:rounded-3xl bg-white border border-stone-200/80 shadow-2xl">
         <DialogHeader className="pb-1">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#BC8477] uppercase tracking-wider mb-1">
             <UserCog className="w-4 h-4" />
